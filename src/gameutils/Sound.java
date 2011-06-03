@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -15,20 +14,11 @@ import javax.sound.sampled.FloatControl;
  * @author Roi Atalla
  */
 public class Sound {
-	private static Sound sound = new Sound();
 	private Map<String,Clip> clips;
 	private volatile boolean on = true;
 	
-	private Sound() {
+	Sound() {
 		clips = Collections.synchronizedMap(new HashMap<String,Clip>());
-	}
-	
-	/**
-	 * Returns the unique instance of Sound.
-	 * @return The unique instance of Sound.
-	 */
-	public static Sound getSound() {
-		return sound;
 	}
 	
 	/**
@@ -192,20 +182,18 @@ public class Sound {
 	 * Pauses all currently playing Clips.
 	 */
 	public void pause() {
-		Set<String> set = clips.keySet();
-		for(String s : set)
-			clips.get(s).stop();
+		for(Clip c : clips.values())
+			c.stop();
 	}
 	
 	/**
 	 * Plays all currently paused Clips.
 	 */
 	public void resume() {
-		Set<String> set = clips.keySet();
-		for(String s : set) {
-			if(on && clips.get(s).getMicrosecondPosition() != clips.get(s).getMicrosecondLength() &&
-					clips.get(s).getMicrosecondPosition() != 0) {
-				clips.get(s).start();
+		for(Clip c : clips.values()) {
+			if(on && c.getMicrosecondPosition() != c.getMicrosecondLength() &&
+					c.getMicrosecondPosition() != 0) {
+				c.start();
 			}
 		}
 	}
@@ -234,9 +222,8 @@ public class Sound {
 	public void setOn(boolean isOn) {
 		on = isOn;
 		
-		Set<String> set = clips.keySet();
-		for(String s : set) {
-			FloatControl volume = (FloatControl)clips.get(s).getControl(FloatControl.Type.MASTER_GAIN);
+		for(Clip c : clips.values()) {
+			FloatControl volume = (FloatControl)c.getControl(FloatControl.Type.MASTER_GAIN);
 			if(on)
 				volume.setValue(0);
 			else
@@ -256,7 +243,7 @@ public class Sound {
 	 * A convenience class that buffers Clips and loads them all at once.
 	 * @author Roi Atalla
 	 */
-	public static class Loader implements Runnable {
+	public class Loader implements Runnable {
 		private Map<String,String> files = Collections.synchronizedMap(new HashMap<String,String>());
 		private int status;
 		
@@ -322,10 +309,9 @@ public class Sound {
 		 * Adds all Clips to the Sound instance.
 		 */
 		public synchronized void run() {
-			Set<String> set = files.keySet();
-			for(String s : set) {
+			for(String s : files.keySet()) {
 				try{
-					getSound().add(getClass().getResource(files.get(s)),s);
+					add(getClass().getResource(files.get(s)),s);
 					status++;
 				}
 				catch(Exception exc) {

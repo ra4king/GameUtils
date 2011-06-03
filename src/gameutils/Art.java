@@ -9,7 +9,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -18,21 +17,10 @@ import javax.imageio.ImageIO;
  * @author Roi Atalla
  */
 public class Art {
-	private static Art art;
 	private Map<String,Image> images;
 	
-	private Art() {
+	Art() {
 		images = Collections.synchronizedMap(new HashMap<String,Image>());
-	}
-	
-	/**
-	 * Returns the unique instance of Art.
-	 * @return The unique instance of Art.
-	 */
-	public static Art getArt() {
-		if(art == null)
-			art = new Art();
-		return art;
 	}
 	
 	/**
@@ -134,9 +122,8 @@ public class Art {
 	 * @return The name of the associated image. If it is not found, <code>null</code> is returned.
 	 */
 	public synchronized String getName(Image image) {
-		Set<String> set = images.keySet();
-		for(String s : set) {
-			if(images.get(s) == image)
+		for(String s : images.keySet()) {
+			if(images.get(s) == image || images.get(s).equals(image))
 				return s;
 		}
 		
@@ -277,7 +264,7 @@ public class Art {
 	 * A convenience class that buffers images and loads them all at once.
 	 * @author Roi Atalla
 	 */
-	public static class Loader implements Runnable {
+	public class Loader implements Runnable {
 		private Map<String,String> files = Collections.synchronizedMap(new HashMap<String,String>());
 		private int status;
 		
@@ -344,10 +331,9 @@ public class Art {
 		 * Adds all images to the Art instance.
 		 */
 		public void run() {
-			Set<String> set = files.keySet();
-			for(String s : set) {
+			for(String s : files.keySet()) {
 				try{
-					getArt().add(files.get(s),s);
+					add(files.get(s),s);
 					status++;
 				}
 				catch(Exception exc) {

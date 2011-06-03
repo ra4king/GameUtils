@@ -13,7 +13,7 @@ import java.util.List;
  * A GameWorld is a container of GameComponents. It has a z-buffer where 0 is backmost.
  * @author Roi Atalla
  */
-public class GameWorld {
+public class GameWorld implements Screen {
 	private Game parent;
 	private List<List<GameComponent>> components;
 	private List<GameComponent> allComponents;
@@ -140,7 +140,7 @@ public class GameWorld {
 	 * Calls each GameComponent's <code>update(long)</code> method in z-index order.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
-	public synchronized void updateComponents(long deltaTime) {
+	public synchronized void update(long deltaTime) {
 		for(List<GameComponent> list : components)
 			for(GameComponent comp : list)
 				if(comp != null)
@@ -152,6 +152,14 @@ public class GameWorld {
 	private synchronized void flush() {
 		for(List<GameComponent> list : components)
 			while(list.remove(null)) {}
+	}
+	
+	public void show() {
+		
+	}
+	
+	public void hide() {
+		
 	}
 	
 	/**
@@ -195,7 +203,7 @@ public class GameWorld {
 	 */
 	public Image getBackgroundImage() {
 		if(bg == null)
-			return Art.getArt().get(bgImage);
+			return parent.getArt().get(bgImage);
 		return bg;
 	}
 	
@@ -238,7 +246,7 @@ public class GameWorld {
 	 * @param g The Graphics context to draw to the screen.
 	 */
 	public synchronized void draw(Graphics2D g) {
-		Image bg = (this.bg == null ? Art.getArt().get(bgImage) : this.bg);
+		Image bg = (this.bg == null ? parent.getArt().get(bgImage) : this.bg);
 		
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);

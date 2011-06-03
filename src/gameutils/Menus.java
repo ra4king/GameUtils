@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * Menus is a container of MenuPages.
  * @author Roi Atalla
  */
-public class Menus {
+public class Menus implements Screen {
 	private Game parent;
 	private ArrayList<MenuPage> menuPages;
 	private Image bg;
@@ -31,7 +31,7 @@ public class Menus {
 		setBackground(Color.lightGray);
 		
 		MenuListener ml = new MenuListener();
-		parent.addInputListener(Game.MENUS,ml);
+		parent.addInputListener(this,ml);
 	}
 	
 	/**
@@ -133,18 +133,18 @@ public class Menus {
 				setPageShown(a);
 	}
 	
-	/**
-	 * Activates/deactivates this object. Calls <code>setActive(boolean)</code> on the current page displayed.
-	 * @param isActive If true, this Menus is active, else is it not active.
-	 */
-	public void setActive(boolean isActive) {
+	public void show() {
 		if(pageShown == -1)
 			return;
 		
-		if(isActive)
-			menuPages.get(pageShown).setActive(true);
-		else
-			menuPages.get(pageShown).setActive(false);
+		menuPages.get(pageShown).setActive(true);
+	}
+	
+	public void hide() {
+		if(pageShown == -1)
+			return;
+		
+		menuPages.get(pageShown).setActive(false);
 	}
 	
 	/**
@@ -221,6 +221,10 @@ public class Menus {
 		return parent.getHeight();
 	}
 	
+	public void update(long deltaTime) {
+		
+	}
+	
 	/**
 	 * Draws the background then current MenuPage displayed.
 	 * @param g The Graphics context to draw to the screen.
@@ -228,7 +232,7 @@ public class Menus {
 	public void draw(Graphics2D g) {
 		Graphics2D g2 = (Graphics2D)g.create();
 		
-		Image bg = (this.bg == null ? Art.getArt().get(bgImage) : this.bg);
+		Image bg = (this.bg == null ? parent.getArt().get(bgImage) : this.bg);
 		
 		if(bg != null)
 			g2.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
