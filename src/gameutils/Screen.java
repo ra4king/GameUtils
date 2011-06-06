@@ -8,6 +8,11 @@ import java.awt.Graphics2D;
  */
 public interface Screen {
 	/**
+	 * Called when this screen is added to a Game.
+	 */
+	public void init();
+	
+	/**
 	 * Called when this screen is shown.
 	 */
 	public void show();

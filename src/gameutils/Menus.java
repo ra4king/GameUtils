@@ -48,6 +48,10 @@ public class Menus implements Screen {
 		}
 	}
 	
+	public void init() {
+		
+	}
+	
 	/**
 	 * Returns the parent of this object.
 	 * @return The parent of this object.

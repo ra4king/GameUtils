@@ -6,8 +6,7 @@ import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -20,7 +19,7 @@ public class Art {
 	private Map<String,Image> images;
 	
 	Art() {
-		images = Collections.synchronizedMap(new HashMap<String,Image>());
+		images = new Hashtable<String,Image>();
 	}
 	
 	/**
@@ -265,7 +264,7 @@ public class Art {
 	 * @author Roi Atalla
 	 */
 	public class Loader implements Runnable {
-		private Map<String,String> files = Collections.synchronizedMap(new HashMap<String,String>());
+		private Map<String,String> files = new Hashtable<String,String>();
 		private int status;
 		
 		/**

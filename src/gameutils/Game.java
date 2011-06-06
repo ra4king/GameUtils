@@ -18,16 +18,18 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
 
+//TODO: Fix up interactions between Game and Screens :D
+
 /**
- * The main class that should be extended by the user. It handles the game loop and certain other functions.
+ * The main class that should be extended by the user.
+ * It handles the game loop and certain other functions.
  * @author Roi Atalla
  */
 public abstract class Game extends JApplet implements Runnable {
@@ -51,6 +53,7 @@ public abstract class Game extends JApplet implements Runnable {
 		
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
+				isActive = false;
 				setSoundOn(false);
 				stop();
 			}
@@ -77,18 +80,15 @@ public abstract class Game extends JApplet implements Runnable {
 	private boolean showFPS;
 	private boolean standardKeysEnabled = true;
 	private boolean isApplet = true;
+	private volatile boolean isActive;
 	
 	/**
 	 * Default constructor, sets the FPS to 60, version to 1.0, anti-aliasing is turned on, and the showFPS and gameOver properties are set to true.
 	 */
 	public Game() {
-		//menusListeners = new ArrayList<InputListener>();
-		//gwListeners = new ArrayList<InputListener>();
-		//pauseMenusListeners = new ArrayList<InputListener>();
-		
 		art = new Art();
 		sound = new Sound();
-		screens = Collections.synchronizedMap(new HashMap<String,ScreenInfo>());
+		screens = new Hashtable<String,ScreenInfo>();
 		
 		canvas = new Canvas();
 		input = new Input(canvas);
@@ -147,9 +147,7 @@ public abstract class Game extends JApplet implements Runnable {
 	 * @return Returns true if this game is currently active.
 	 */
 	public boolean isActive() {
-		if(isApplet())
-			return super.isActive();
-		return true;
+		return isActive;
 	}
 	
 	/**
@@ -185,11 +183,9 @@ public abstract class Game extends JApplet implements Runnable {
 	public final void init() {
 		setIgnoreRepaint(true);
 		
+		add(canvas);
+		canvas.setIgnoreRepaint(true);
 		canvas.createBufferStrategy(2);
-		
-		//gameWorld = new GameWorld(this);
-		//menus = new Menus(this);
-		//pauseMenus = new Menus(this);
 	}
 	
 	/**
@@ -237,6 +233,8 @@ public abstract class Game extends JApplet implements Runnable {
 		int frames = 0;
 		long time = System.nanoTime();
 		long lastTime = System.nanoTime();
+		
+		isActive = true;
 		
 		while(isActive()) {
 			long now = System.nanoTime();
@@ -299,11 +297,9 @@ public abstract class Game extends JApplet implements Runnable {
 					long prevTime = System.nanoTime();
 					while(System.nanoTime()-prevTime <= sleepTime) {
 						Thread.yield();
-						Thread.sleep(1);
+						Thread.sleep(0);
 					}
 				}
-				else
-					Thread.yield();
 			}
 			catch(Exception exc) {}
 		}
@@ -353,6 +349,8 @@ public abstract class Game extends JApplet implements Runnable {
 	}
 	
 	private synchronized void setScreen(ScreenInfo screenInfo) {
+		if(screenInfo == null)
+			throw new IllegalArgumentException("Screen hasn't been added yet.");
 		this.screenInfo.screen.hide();
 		this.screenInfo = screenInfo;
 		this.screenInfo.screen.show();
@@ -367,7 +365,7 @@ public abstract class Game extends JApplet implements Runnable {
 	
 	/**
 	 * Adds an input listener on the specified screen.
-	 * @param option The screen to add the InputListener. The current options are GAMEWORLD, MENUS, PAUSEMENUS, and GLOBAL.
+	 * @param option The screen to add the InputListener.
 	 * @param listener The InputListener to be notified of input events.
 	 */
 	public synchronized void addInputListener(Screen screen, InputListener listener) {
@@ -384,7 +382,7 @@ public abstract class Game extends JApplet implements Runnable {
 	
 	/**
 	 * Removes the input listener from the specified screen.
-	 * @param option The screen to remove the InputListener from. The current options are GAMEWORLD, MENUS, PAUSEMENUS, and GLOBAL.
+	 * @param option The screen to remove the InputListener from.
 	 * @param listener The InputListener reference to remove.
 	 */
 	public synchronized void removeInputListener(Screen screen, InputListener listener) {

@@ -33,6 +33,10 @@ public class GameWorld implements Screen {
 		setBackground(Color.lightGray);
 	}
 	
+	public void init() {
+		
+	}
+	
 	/**
 	 * @return The parent of this object.
 	 */

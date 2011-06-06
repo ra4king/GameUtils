@@ -1,8 +1,7 @@
 package gameutils;
 
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 
 import javax.sound.sampled.AudioSystem;
@@ -18,7 +17,7 @@ public class Sound {
 	private volatile boolean on = true;
 	
 	Sound() {
-		clips = Collections.synchronizedMap(new HashMap<String,Clip>());
+		clips = new Hashtable<String,Clip>();
 	}
 	
 	/**
@@ -244,7 +243,7 @@ public class Sound {
 	 * @author Roi Atalla
 	 */
 	public class Loader implements Runnable {
-		private Map<String,String> files = Collections.synchronizedMap(new HashMap<String,String>());
+		private Map<String,String> files = new Hashtable<String,String>();
 		private int status;
 		
 		/**
