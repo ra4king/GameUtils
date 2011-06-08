@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -96,6 +98,8 @@ public class Game extends JApplet implements Runnable {
 	private boolean standardKeysEnabled = true;
 	private boolean isApplet = true;
 	private volatile boolean isActive;
+	private volatile boolean isPaused;
+	private volatile boolean focusLost;
 	
 	/**
 	 * Default constructor, sets the FPS to 60, version to 1.0, anti-aliasing is turned on, and the showFPS and gameOver properties are set to true.
@@ -185,24 +189,28 @@ public class Game extends JApplet implements Runnable {
 	}
 	
 	/**
-	 * Pauses the game loop.
+	 * Manually pauses the game loop. paused() will be called
 	 */
 	public void pause() {
-		isActive = false;
+		isPaused = true;
+		paused();
 	}
 	
 	/**
-	 * Resumes the game loop.
+	 * Returns true if the game loop is paused.
+	 * @return True if the game loop is paused, false otherwise.
+	 */
+	public boolean isPaused() {
+		return isPaused;
+	}
+	
+	/**
+	 * Manually resumes the game loop. resumed() will be called right before the game loop resumes.
 	 */
 	public void resume() {
-		if(!isActive) {
-			while(gameLoop.isAlive()) {
-				try{
-					Thread.sleep(100);
-				}
-				catch(Exception exc) {}
-			}
-			start();
+		if(isActive && isPaused) {
+			isPaused = false;
+			resumed();
 		}
 	}
 	
@@ -242,6 +250,22 @@ public class Game extends JApplet implements Runnable {
 		add(canvas);
 		canvas.setIgnoreRepaint(true);
 		canvas.createBufferStrategy(2);
+		
+		canvas.addFocusListener(new FocusListener() {
+			public void focusGained(FocusEvent fe) {
+				if(focusLost) {
+					focusLost = false;
+					resume();
+				}
+			}
+			
+			public void focusLost(FocusEvent fe) {
+				if(!isPaused()) {
+					focusLost = true;
+					pause();
+				}
+			}
+		});
 	}
 	
 	/**
@@ -250,7 +274,17 @@ public class Game extends JApplet implements Runnable {
 	protected void initGame() {}
 	
 	/**
-	 * Automatically called if this game is an applet, else it has to be manually called.
+	 * Called when this game loses focus.
+	 */
+	protected void paused() {}
+	
+	/**
+	 * Called when this game regains focus.
+	 */
+	protected void resumed() {}
+	
+	/**
+	 * Automatically called if this game is an applet, otherwise it has to be manually called.
 	 */
 	public void start() {
 		if(gameLoop == null)
@@ -296,6 +330,15 @@ public class Game extends JApplet implements Runnable {
 		isActive = true;
 		
 		while(isActive()) {
+			while(isPaused()) {
+				try {
+					Thread.sleep(100);
+				}
+				catch(Exception exc) {}
+				
+				lastTime = System.nanoTime();
+			}
+			
 			long now = System.nanoTime();
 			
 			long diffTime = now-lastTime;
