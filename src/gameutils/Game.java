@@ -36,14 +36,8 @@ import javax.swing.UIManager;
  * It handles the game loop and certain other functions.
  * @author Roi Atalla
  */
-public class Game extends JApplet implements Runnable {
+public abstract class Game extends JApplet implements Runnable {
 	private static final long serialVersionUID = -1870725768768871166L;
-	
-	public static void main(String args[]) {
-		Game game = new Game();
-		game.setupFrame("Game", 800, 600, true);
-		game.start();
-	}
 	
 	/**
 	 * Initializes and displays the window, then calls init().
