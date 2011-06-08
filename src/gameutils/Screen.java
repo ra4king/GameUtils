@@ -9,8 +9,9 @@ import java.awt.Graphics2D;
 public interface Screen {
 	/**
 	 * Called when this screen is added to a Game.
+	 * @param game The parent game of this screen.
 	 */
-	public void init();
+	public void init(Game game);
 	
 	/**
 	 * Called when this screen is shown.

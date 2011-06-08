@@ -1,6 +1,7 @@
 package gameutils;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 import javax.swing.JApplet;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 //TODO: Fix up interactions between Game and Screens :D
@@ -32,8 +34,14 @@ import javax.swing.UIManager;
  * It handles the game loop and certain other functions.
  * @author Roi Atalla
  */
-public abstract class Game extends JApplet implements Runnable {
+public class Game extends JApplet implements Runnable {
 	private static final long serialVersionUID = -1870725768768871166L;
+	
+	public static void main(String args[]) {
+		Game game = new Game();
+		game.setupFrame("Game", 800, 600, true);
+		game.start();
+	}
 	
 	/**
 	 * Initializes and displays the window, then calls init().
@@ -53,8 +61,7 @@ public abstract class Game extends JApplet implements Runnable {
 		
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
-				isActive = false;
-				setSoundOn(false);
+				sound.setOn(false);
 				stop();
 			}
 		});
@@ -65,8 +72,15 @@ public abstract class Game extends JApplet implements Runnable {
 		
 		init();
 		
+		((JPanel)frame.getContentPane()).revalidate();
+		
 		return frame;
 	}
+	
+	/**
+	 * Used to notify the game loop thread to update and render as fast as possible.
+	 */
+	public static final int MAX_FPS = 0;
 	
 	private final Art art;
 	private final Sound sound;
@@ -74,6 +88,7 @@ public abstract class Game extends JApplet implements Runnable {
 	private ScreenInfo screenInfo;
 	private final Canvas canvas;
 	private final Input input;
+	private Thread gameLoop;
 	private Object quality;
 	private int FPS;
 	private double version;
@@ -86,15 +101,36 @@ public abstract class Game extends JApplet implements Runnable {
 	 * Default constructor, sets the FPS to 60, version to 1.0, anti-aliasing is turned on, and the showFPS and gameOver properties are set to true.
 	 */
 	public Game() {
+		this(60,1.0);
+	}
+	
+	/**
+	 * Sets the FPS and version.
+	 * @param FPS The FPS to achieve.
+	 * @param version The version of this game.
+	 */
+	public Game(int FPS, double version) {
 		art = new Art();
 		sound = new Sound();
+		
 		screens = new Hashtable<String,ScreenInfo>();
+		
+		screenInfo = new ScreenInfo(new Screen() {
+			public void init(Game game) {}
+			public void show() {}
+			public void hide() {}
+			public void update(long deltaTime) {}
+			public void draw(Graphics2D g) {
+				g.setColor(Color.lightGray);
+				g.fillRect(0, 0, getWidth(), getHeight());
+			}
+		});
 		
 		canvas = new Canvas();
 		input = new Input(canvas);
 		
-		this.FPS = 60;
-		this.version = 1.0;
+		this.FPS = FPS;
+		this.version = version;
 		showFPS = true;
 		
 		quality = RenderingHints.VALUE_ANTIALIAS_ON;
@@ -121,8 +157,6 @@ public abstract class Game extends JApplet implements Runnable {
 	 * Returns the canvas's Graphics object.
 	 */
 	public Graphics getGraphics() {
-		if(canvas == null)
-			return super.getGraphics();
 		return canvas.getGraphics();
 	}
 	
@@ -148,6 +182,28 @@ public abstract class Game extends JApplet implements Runnable {
 	 */
 	public boolean isActive() {
 		return isActive;
+	}
+	
+	/**
+	 * Pauses the game loop.
+	 */
+	public void pause() {
+		isActive = false;
+	}
+	
+	/**
+	 * Resumes the game loop.
+	 */
+	public void resume() {
+		if(!isActive) {
+			while(gameLoop.isAlive()) {
+				try{
+					Thread.sleep(100);
+				}
+				catch(Exception exc) {}
+			}
+			start();
+		}
 	}
 	
 	/**
@@ -197,13 +253,16 @@ public abstract class Game extends JApplet implements Runnable {
 	 * Automatically called if this game is an applet, else it has to be manually called.
 	 */
 	public void start() {
-		new Thread(this).start();
+		if(gameLoop == null)
+			gameLoop = new Thread(this);
+		gameLoop.start();
 	}
 	
 	/**
 	 * Called when this game is stopped. Also called when the JFrame is closed.
 	 */
 	public void stop() {
+		isActive = false;
 	}
 	
 	private int currentFPS;
@@ -242,12 +301,21 @@ public abstract class Game extends JApplet implements Runnable {
 			long diffTime = now-lastTime;
 			
 			while(diffTime > 0) {
-				long rem = diffTime%(1000000000/FPS);
+				long deltaTime;
 				
-				long deltaTime = rem == 0 ? 1000000000/FPS : rem;
+				if(FPS > 0) {
+					long rem = diffTime%(1000000000/FPS);
+					
+					deltaTime = rem == 0 ? 1000000000/FPS : rem;
+				}
+				else
+					deltaTime = diffTime;
 				
-				synchronized(this) {
+				try{
 					update(deltaTime);
+				}
+				catch(Exception exc) {
+					exc.printStackTrace();
 				}
 				
 				diffTime -= deltaTime;
@@ -270,9 +338,7 @@ public abstract class Game extends JApplet implements Runnable {
 						g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,quality);
 						
 						try{
-							synchronized(this) {
-								paint(g);
-							}
+							paint(g);
 						}
 						catch(Exception exc) {
 							exc.printStackTrace();
@@ -295,13 +361,13 @@ public abstract class Game extends JApplet implements Runnable {
 						continue;
 					
 					long prevTime = System.nanoTime();
-					while(System.nanoTime()-prevTime <= sleepTime) {
+					while(System.nanoTime()-prevTime <= sleepTime)
 						Thread.yield();
-						Thread.sleep(0);
-					}
 				}
 			}
-			catch(Exception exc) {}
+			catch(Exception exc) {
+				exc.printStackTrace();
+			}
 		}
 	}
 	
@@ -309,7 +375,7 @@ public abstract class Game extends JApplet implements Runnable {
 	 * Called FPS times a second. This method calls updateMenus or updateGameWorld according to the gameOver property.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
-	public void update(long deltaTime) {
+	public synchronized void update(long deltaTime) {
 		screenInfo.screen.update(deltaTime);
 	}
 	
@@ -317,7 +383,7 @@ public abstract class Game extends JApplet implements Runnable {
 	 * Called FPS times a second. Draws the Menus, the GameWorld, paused Menus, and/or the FPS according to the appropriate gameOver, isPaused, and showFPS properties.
 	 * @param g The Graphics context to be used to draw to the canvas.
 	 */
-	public void paint(Graphics2D g) {
+	public synchronized void paint(Graphics2D g) {
 		Graphics2D g2 = (Graphics2D)g.create();
 		
 		if(screenInfo != null)
@@ -332,92 +398,141 @@ public abstract class Game extends JApplet implements Runnable {
 		}
 	}
 	
-	public synchronized void addScreen(Screen screen, String name) {
+	public void addScreen(Screen screen, String name) {
+		if(screen == null)
+			throw new IllegalArgumentException("Screen cannot be null.");
+		if(name == null)
+			throw new IllegalArgumentException("Name cannot be null.");
+		
 		screens.put(name,new ScreenInfo(screen));
+		screen.init(this);
 	}
 	
-	public synchronized Screen getScreen() {
+	/**
+	 * Returns the current screen being shown.
+	 * @return The current screen being shown.
+	 */
+	public Screen getScreen() {
 		return screenInfo.screen;
 	}
 	
-	public synchronized void setScreen(String name) {
-		setScreen(screens.get(name.intern()));
-	}
-	
-	public synchronized void setScreen(Screen screen) {
+	/**
+	 * Sets the current screen to the specified one.
+	 * @param screen The Screen reference to switch to.
+	 * @throws IllegalArgumentException If the specified screen has not already been added.
+	 */
+	public void setScreen(Screen screen) {
 		setScreen(getScreenInfo(screen));
 	}
 	
-	private synchronized void setScreen(ScreenInfo screenInfo) {
-		if(screenInfo == null)
-			throw new IllegalArgumentException("Screen hasn't been added yet.");
+	/**
+	 * Sets the current screen to the specified one.
+	 * @param name The name of the screen to switch to.
+	 * @throws IllegalArgumentException If the specified name does not exist.
+	 */
+	public void setScreen(String name) {
+		ScreenInfo info = screens.get(name);
+		if(info == null)
+			throw new IllegalArgumentException(name + " does not exist.");
+		
+		setScreen(info);
+	}
+	
+	private void setScreen(ScreenInfo screenInfo) {
+		if(screenInfo == null || !screens.containsValue(screenInfo))
+			throw new IllegalArgumentException("Screen has not been added.");
+		
 		this.screenInfo.screen.hide();
 		this.screenInfo = screenInfo;
 		this.screenInfo.screen.show();
 	}
 	
-	private synchronized ScreenInfo getScreenInfo(Screen screen) {
+	private ScreenInfo getScreenInfo(Screen screen) {
+		if(screen == null)
+			return null;
+		
 		for(ScreenInfo s : screens.values())
 			if(s.screen == screen)
 				return s;
+		
 		return null;
 	}
 	
 	/**
 	 * Adds an input listener on the specified screen.
-	 * @param option The screen to add the InputListener.
-	 * @param listener The InputListener to be notified of input events.
+	 * @param screen The Screen to add the listener to.
+	 * @param listener The InputListener to be notified of input events on this screen.
 	 */
-	public synchronized void addInputListener(Screen screen, InputListener listener) {
+	public void addInputListener(Screen screen, InputListener listener) {
+		if(screen == null)
+			throw new IllegalArgumentException("Screen cannot be null.");
+		
 		addInputListener(getScreenInfo(screen),listener);
 	}
 	
-	public synchronized void addInputListener(String name, InputListener listener) {
+	/**
+	 * Adds an input listener on the specified screen.
+	 * @param name The name of the screen to add the listener to.
+	 * @param listener The InputListener to be notified of input events on this screen.
+	 */
+	public void addInputListener(String name, InputListener listener) {
+		ScreenInfo info = screens.get(name);
+		if(info == null)
+			throw new IllegalArgumentException(name + " does not exist.");
+		
 		addInputListener(screens.get(name),listener);
 	}
 	
 	private synchronized void addInputListener(ScreenInfo screenInfo, InputListener listener) {
+		if(screenInfo == null || !screens.containsValue(screenInfo))
+			throw new IllegalArgumentException("Screen has not been added.");
+		
+		if(listener == null)
+			throw new IllegalArgumentException("InputListener cannot be null.");
+		
 		screenInfo.listeners.add(listener);
 	}
 	
 	/**
 	 * Removes the input listener from the specified screen.
-	 * @param option The screen to remove the InputListener from.
+	 * @param screen The Screen to remove the listener from.
 	 * @param listener The InputListener reference to remove.
 	 */
-	public synchronized void removeInputListener(Screen screen, InputListener listener) {
+	public void removeInputListener(Screen screen, InputListener listener) {
+		if(screen == null)
+			throw new IllegalArgumentException("Screen cannot be null.");
+		
 		removeInputListener(getScreenInfo(screen),listener);
 	}
 	
-	public synchronized void removeInputListener(String name, InputListener listener) {
+	/**
+	 * Removes the input listener from the specified screen.
+	 * @param name The name of the screen to remove the listener from.
+	 * @param listener The InputListneer reference to remove.
+	 */
+	public void removeInputListener(String name, InputListener listener) {
+		ScreenInfo info = screens.get(name);
+		if(info == null)
+			throw new IllegalArgumentException(name + " does not exist.");
+		
 		removeInputListener(screens.get(name),listener);
 	}
 	
 	private synchronized void removeInputListener(ScreenInfo screenInfo, InputListener listener) {
+		if(screenInfo == null || !screens.containsValue(screenInfo))
+			throw new IllegalArgumentException("Screen has not been added.");
+		
+		if(listener == null)
+			throw new IllegalArgumentException("InputListener cannot be null.");
+		
 		screenInfo.listeners.remove(listener);
-	}
-	
-	/**
-	 * Turns audio on/off.
-	 * @param isSoundOn If true, audio is on, else audio is off.
-	 */
-	public synchronized void setSoundOn(boolean isSoundOn) {
-		sound.setOn(isSoundOn);
-	}
-	
-	/**
-	 * Returns the current state of the isSoundOn property.
-	 * @return If true, audio is on, else audio is off.
-	 */
-	public boolean isSoundOn() {
-		return sound.isOn();
 	}
 	
 	/**
 	 * Sets the version of the game.
 	 * @param version The current version of the game.
 	 */
-	public synchronized void setVersion(double version) {
+	public void setVersion(double version) {
 		this.version = version;
 	}
 	
@@ -433,7 +548,7 @@ public abstract class Game extends JApplet implements Runnable {
 	 * Sets the showFPS property.
 	 * @param showFPS If true, the FPS is updated and displayed every second, else the FPS is not displayed.
 	 */
-	public synchronized void showFPS(boolean showFPS) {
+	public void showFPS(boolean showFPS) {
 		this.showFPS = showFPS;
 	}
 	
@@ -449,7 +564,7 @@ public abstract class Game extends JApplet implements Runnable {
 	 * Sets the optimal FPS of this game.
 	 * @param FPS Specifies the number of updates and frames shown per second.
 	 */
-	public synchronized void setFPS(int FPS) {
+	public void setFPS(int FPS) {
 		this.FPS = FPS;
 	}
 	
@@ -465,7 +580,7 @@ public abstract class Game extends JApplet implements Runnable {
 	 * Sets the quality of this game's graphics.
 	 * @param highQuality If true, the graphics are of high quality, else the graphics are of low quality.
 	 */
-	public synchronized void setHighQuality(boolean highQuality) {
+	public void setHighQuality(boolean highQuality) {
 		if(highQuality)
 			quality = RenderingHints.VALUE_ANTIALIAS_ON;
 		else
@@ -484,7 +599,7 @@ public abstract class Game extends JApplet implements Runnable {
 	 * The standard keys are M for audio on/off, P for pause/resume, and Q for high/low quality.
 	 * @param standardKeysEnabled If true, a key press of the standard keys automatically call the appropriate methods, else this function is disabled.
 	 */
-	public synchronized void setStandardKeysEnabled(boolean standardKeysEnabled) {
+	public void setStandardKeysEnabled(boolean standardKeysEnabled) {
 		this.standardKeysEnabled = standardKeysEnabled;
 	}
 	
@@ -496,10 +611,18 @@ public abstract class Game extends JApplet implements Runnable {
 		return standardKeysEnabled;
 	}
 	
+	/**
+	 * Returns a reference to the Art object.
+	 * @return A reference to the Art object.
+	 */
 	public Art getArt() {
 		return art;
 	}
 	
+	/**
+	 * Returns a reference to the Sound object.
+	 * @return A reference to the Sound object.
+	 */
 	public Sound getSound() {
 		return sound;
 	}
@@ -522,56 +645,66 @@ public abstract class Game extends JApplet implements Runnable {
 	}
 	
 	private class Listener implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
-		public void keyTyped(KeyEvent key) {}
+		public void keyTyped(KeyEvent key) {
+			for(InputListener l : screenInfo.listeners)
+				l.keyTyped(key);
+		}
 		
 		public void keyPressed(KeyEvent key) {
-			//implement
+			for(InputListener l : screenInfo.listeners)
+				l.keyPressed(key);
 			
 			if(isStandardKeysEnabled()) {
 				switch(key.getKeyCode()) {
-					case KeyEvent.VK_M: setSoundOn(!isSoundOn()); break;
-					case KeyEvent.VK_Q:
-						setHighQuality(!isHighQuality());
-						if(isSoundOn())
-							sound.resume();
-						else
-							sound.pause();
+					case KeyEvent.VK_M: sound.setOn(!sound.isOn()); break;
+					case KeyEvent.VK_Q: setHighQuality(!isHighQuality()); break;
 				}
 			}
 		}
 		
 		public void keyReleased(KeyEvent key) {
-			//implement
+			for(InputListener l : screenInfo.listeners)
+				l.keyReleased(key);
 		}
 		
-		public void mouseClicked(MouseEvent me) {}
+		public void mouseClicked(MouseEvent me) {
+			for(InputListener l : screenInfo.listeners)
+				l.mouseClicked(me);
+		}
 		
 		public void mouseEntered(MouseEvent me) {
-			//implement
+			for(InputListener l : screenInfo.listeners)
+				l.mouseEntered(me);
 		}
 		
 		public void mouseExited(MouseEvent me) {
-			//implement
+			for(InputListener l : screenInfo.listeners)
+				l.mouseExited(me);
 		}
 		
 		public void mousePressed(MouseEvent me) {
-			//implement
+			for(InputListener l : screenInfo.listeners)
+				l.mousePressed(me);
 		}
 		
 		public void mouseReleased(MouseEvent me) {
-			//implement
+			for(InputListener l : screenInfo.listeners)
+				l.mouseReleased(me);
 		}
 		
 		public void mouseDragged(MouseEvent me) {
-			//implement
+			for(InputListener l : screenInfo.listeners)
+				l.mouseDragged(me);
 		}
 		
 		public void mouseMoved(MouseEvent me) {
-			//implement
+			for(InputListener l : screenInfo.listeners)
+				l.mouseMoved(me);
 		}
 		
-		public void mouseWheelMoved(MouseWheelEvent me) {
-			//implement
+		public void mouseWheelMoved(MouseWheelEvent mwe) {
+			for(InputListener l : screenInfo.listeners)
+				l.mouseWheelMoved(mwe);
 		}
 	}
 }

@@ -24,17 +24,15 @@ public class GameWorld implements Screen {
 	 * Initializes this object.
 	 * @param parent The parent of this object.
 	 */
-	public GameWorld(Game parent) {
-		this.parent = parent;
-		
+	public GameWorld() {
 		components = Collections.synchronizedList(new ArrayList<List<GameComponent>>());
 		components.add(Collections.synchronizedList(new ArrayList<GameComponent>()));
 		
 		setBackground(Color.lightGray);
 	}
 	
-	public void init() {
-		
+	public void init(Game game) {
+		parent = game;
 	}
 	
 	/**

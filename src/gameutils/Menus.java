@@ -23,9 +23,7 @@ public class Menus implements Screen {
 	 * Initializes this object.
 	 * @param parent The parent of this object.
 	 */
-	public Menus(Game parent) {
-		this.parent = parent;
-		
+	public Menus() {
 		menuPages = new ArrayList<MenuPage>();
 		
 		setBackground(Color.lightGray);
@@ -39,8 +37,8 @@ public class Menus implements Screen {
 	 * @param parent The parent of this object.
 	 * @param pages The MenuPages to add. The first one is the one shown.
 	 */
-	public Menus(Game parent, MenuPage ... pages) {
-		this(parent);
+	public Menus(MenuPage ... pages) {
+		this();
 		
 		for(MenuPage p : pages) {
 			pageShown = 0;
@@ -48,8 +46,8 @@ public class Menus implements Screen {
 		}
 	}
 	
-	public void init() {
-		
+	public void init(Game game) {
+		parent = game;
 	}
 	
 	/**
