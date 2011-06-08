@@ -27,9 +27,6 @@ public class Menus implements Screen {
 		menuPages = new ArrayList<MenuPage>();
 		
 		setBackground(Color.lightGray);
-		
-		MenuListener ml = new MenuListener();
-		parent.addInputListener(this,ml);
 	}
 	
 	/**
@@ -48,6 +45,9 @@ public class Menus implements Screen {
 	
 	public void init(Game game) {
 		parent = game;
+		
+		MenuListener ml = new MenuListener();
+		parent.addInputListener(this,ml);
 	}
 	
 	/**
