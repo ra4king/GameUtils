@@ -63,7 +63,7 @@ public class Menus implements Screen {
 	 * @param page The MenuPage to add.
 	 * @return The MenuPage that was added.
 	 */
-	public synchronized MenuPage addPage(MenuPage page) {
+	public MenuPage addPage(MenuPage page) {
 		if(page != null) {
 			if(pageShown == -1)
 				pageShown = 0;
@@ -114,7 +114,7 @@ public class Menus implements Screen {
 	 * Sets the current page displayed.
 	 * @param pageNum The index of the new page to display.
 	 */
-	public synchronized void setPageShown(int pageNum) {
+	public void setPageShown(int pageNum) {
 		if(pageNum < 0 || pageNum >= menuPages.size())
 			throw new IllegalArgumentException("pageNum is out of bounds.");
 		
@@ -129,7 +129,7 @@ public class Menus implements Screen {
 	 * Sets the current page displayed. Then calls 
 	 * @param pageName The description of the new page to display.
 	 */
-	public synchronized void setPageShown(String pageName) {
+	public void setPageShown(String pageName) {
 		for(int a = 0; a < menuPages.size(); a++)
 			if(menuPages.get(a).getName().equals(pageName))
 				setPageShown(a);
@@ -169,7 +169,7 @@ public class Menus implements Screen {
 	 * Sets the background of this component with an image in Art.
 	 * @param s The associated name of an image in Art. This image will be drawn before all other components.
 	 */
-	public synchronized void setBackground(String s) {
+	public void setBackground(String s) {
 		bg = null;
 		bgImage = s;
 	}
@@ -178,7 +178,7 @@ public class Menus implements Screen {
 	 * Sets the background of this component. A compatible image is created.
 	 * @param bg The image to be drawn before all other components.
 	 */
-	public synchronized void setBackground(Image bg) {
+	public void setBackground(Image bg) {
 		bgImage = null;
 		
 		this.bg = Art.createCompatibleImage(bg);
@@ -190,7 +190,7 @@ public class Menus implements Screen {
 	 * and stretches it to the width and height of the parent.
 	 * @param color The color to be used as the entire background. It will be drawn before all other components.
 	 */
-	public synchronized void setBackground(Color color) {
+	public void setBackground(Color color) {
 		bgImage = null;
 		
 		bg = Art.createCompatibleImage(1, 1, color.getAlpha() == 0 || color.getAlpha() == 255 ? (color.getAlpha() == 0 ? Transparency.BITMASK : Transparency.OPAQUE) : Transparency.TRANSLUCENT);
@@ -224,7 +224,10 @@ public class Menus implements Screen {
 	}
 	
 	public void update(long deltaTime) {
+		if(pageShown == -1)
+			return;
 		
+		menuPages.get(pageShown).update(deltaTime);
 	}
 	
 	/**

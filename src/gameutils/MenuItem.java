@@ -122,8 +122,9 @@ public abstract class MenuItem {
 	 * Notifies this MenuItem that it has been activated/deactivated.
 	 * @param isActive If true, this MenuItem is actived, else it is deactivated.
 	 */
-	protected void setActive(boolean isActive) {
-	}
+	protected void setActive(boolean isActive) {}
+	
+	public void update(long deltaTime) {}
 	
 	/**
 	 * Draws this MenuItem.

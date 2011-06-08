@@ -172,11 +172,16 @@ public class MenuPage {
 			i.setActive(isActive);
 	}
 	
+	public void update(long deltaTime) {
+		for(MenuItem i : items)
+			i.update(deltaTime);
+	}
+	
 	/**
 	 * Draws all MenuItems on this MenuPage.
 	 * @param g The Graphics context to draw to the screen.
 	 */
-	public synchronized void draw(Graphics2D g) {
+	public void draw(Graphics2D g) {
 		for(MenuItem i : items)
 			i.draw(g);
 	}

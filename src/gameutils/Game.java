@@ -454,6 +454,15 @@ public abstract class Game extends JApplet implements Runnable {
 	}
 	
 	/**
+	 * Returns the screen specified
+	 * @param name The name of the screen.
+	 * @return The screen associated with the specified name.
+	 */
+	public Screen getScreen(String name) {
+		return screens.get(name).screen;
+	}
+	
+	/**
 	 * Sets the current screen to the specified one.
 	 * @param screen The Screen reference to switch to.
 	 * @throws IllegalArgumentException If the specified screen has not already been added.

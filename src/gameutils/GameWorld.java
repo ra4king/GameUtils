@@ -156,13 +156,9 @@ public class GameWorld implements Screen {
 			while(list.remove(null)) {}
 	}
 	
-	public void show() {
-		
-	}
+	public void show() {}
 	
-	public void hide() {
-		
-	}
+	public void hide() {}
 	
 	/**
 	 * Sets the background of this component with an image in Art.
