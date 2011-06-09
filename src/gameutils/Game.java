@@ -1,5 +1,6 @@
 package gameutils;
 
+import java.applet.Applet;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Container;
@@ -24,20 +25,25 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 
-import javax.swing.JApplet;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-//TODO: Fix up interactions between Game and Screens :D
+//TODO: MAKE SENSE OF LIFE CYCLE METHODS :D
 
 /**
  * The main class that should be extended by the user.
  * It handles the game loop and certain other functions.
  * @author Roi Atalla
  */
-public abstract class Game extends JApplet implements Runnable {
+public class Game extends Applet implements Runnable {
 	private static final long serialVersionUID = -1870725768768871166L;
+	
+	public static void main(String args[]) {
+		Game game = new Game();
+		game.setupFrame("Game",500,500,false);
+		game.start();
+	}
 	
 	/**
 	 * Initializes and displays the window, then calls init().
@@ -84,7 +90,6 @@ public abstract class Game extends JApplet implements Runnable {
 	private ScreenInfo screenInfo;
 	private final Canvas canvas;
 	private final Input input;
-	private Thread gameLoop;
 	private Object quality;
 	private int FPS;
 	private double version;
@@ -93,7 +98,6 @@ public abstract class Game extends JApplet implements Runnable {
 	private boolean isApplet = true;
 	private volatile boolean isActive;
 	private volatile boolean isPaused;
-	private volatile boolean focusLost;
 	
 	/**
 	 * Default constructor, sets the FPS to 60, version to 1.0, anti-aliasing is turned on, and the showFPS and gameOver properties are set to true.
@@ -218,6 +222,8 @@ public abstract class Game extends JApplet implements Runnable {
 			super.resize(width,height);
 		else
 			setSize(width,height);
+		
+		canvas.setSize(width,height);
 	}
 	
 	/**
@@ -233,6 +239,8 @@ public abstract class Game extends JApplet implements Runnable {
 			getHighestParent().setSize(width+i.right+i.left,height+i.bottom+i.top);
 			((JFrame)getHighestParent()).setLocationRelativeTo(null);
 		}
+		
+		canvas.setSize(width,height);
 	}
 	
 	/**
@@ -240,12 +248,15 @@ public abstract class Game extends JApplet implements Runnable {
 	 */
 	public final void init() {
 		setIgnoreRepaint(true);
+		setLayout(null);
 		
 		add(canvas);
 		canvas.setIgnoreRepaint(true);
 		canvas.createBufferStrategy(2);
 		
 		canvas.addFocusListener(new FocusListener() {
+			private boolean focusLost;
+			
 			public void focusGained(FocusEvent fe) {
 				if(focusLost) {
 					focusLost = false;
@@ -263,35 +274,24 @@ public abstract class Game extends JApplet implements Runnable {
 	}
 	
 	/**
-	 * Empty method to be overrided. This is called as soon as start() is called.
-	 */
-	protected void initGame() {}
-	
-	/**
-	 * Called when this game loses focus.
-	 */
-	protected void paused() {}
-	
-	/**
-	 * Called when this game regains focus.
-	 */
-	protected void resumed() {}
-	
-	/**
 	 * Automatically called if this game is an applet, otherwise it has to be manually called.
 	 */
-	public void start() {
-		if(gameLoop == null)
-			gameLoop = new Thread(this);
-		gameLoop.start();
+	public final void start() {
+		if(!isActive())
+			new Thread(this).start();
 	}
 	
 	/**
-	 * Called when this game is stopped. Also called when the JFrame is closed.
+	 * Called when this game is stopped. If the game is not paused, this will call destroy()
 	 */
-	public void stop() {
-		isActive = false;
+	public final void stop() {
+		if(!isPaused()) {
+			isActive = false;
+			destroyGame();
+		}
 	}
+	
+	public final void destroy() {}
 	
 	private int currentFPS;
 	
@@ -299,6 +299,9 @@ public abstract class Game extends JApplet implements Runnable {
 	 * Game loop.
 	 */
 	public final void run() {
+		if(isActive())
+			return;
+		
 		try{
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
 		}
@@ -322,6 +325,8 @@ public abstract class Game extends JApplet implements Runnable {
 		long lastTime = System.nanoTime();
 		
 		isActive = true;
+		
+		canvas.requestFocusInWindow();
 		
 		while(isActive()) {
 			while(isPaused()) {
@@ -398,8 +403,8 @@ public abstract class Game extends JApplet implements Runnable {
 						continue;
 					
 					long prevTime = System.nanoTime();
-					while(System.nanoTime()-prevTime <= sleepTime)
-						Thread.yield();
+					while(System.nanoTime()-prevTime <= sleepTime-sleepTime/25)
+						Thread.sleep(1);
 				}
 			}
 			catch(Exception exc) {
@@ -407,6 +412,21 @@ public abstract class Game extends JApplet implements Runnable {
 			}
 		}
 	}
+	
+	/**
+	 * Empty method to be overrided. This is called as soon as start() is called.
+	 */
+	protected synchronized void initGame() {}
+	
+	/**
+	 * Called when this game loses focus.
+	 */
+	protected synchronized void paused() {}
+	
+	/**
+	 * Called when this game regains focus.
+	 */
+	protected synchronized void resumed() {}
 	
 	/**
 	 * Called FPS times a second. This method calls updateMenus or updateGameWorld according to the gameOver property.
@@ -435,6 +455,16 @@ public abstract class Game extends JApplet implements Runnable {
 		}
 	}
 	
+	/**
+	 * Called when this game is closed.
+	 */
+	public void destroyGame() {}
+	
+	/**
+	 * Adds a screen to this game.
+	 * @param screen The Screen to add.
+	 * @param name The name of the screen.
+	 */
 	public void addScreen(Screen screen, String name) {
 		if(screen == null)
 			throw new IllegalArgumentException("Screen cannot be null.");
