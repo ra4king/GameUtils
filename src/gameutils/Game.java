@@ -29,7 +29,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-//TODO: MAKE SENSE OF LIFE CYCLE METHODS :D
 
 /**
  * The main class that should be extended by the user.
@@ -63,7 +62,6 @@ public class Game extends Applet implements Runnable {
 		
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
-				sound.setOn(false);
 				stop();
 			}
 		});
@@ -243,56 +241,6 @@ public class Game extends Applet implements Runnable {
 		canvas.setSize(width,height);
 	}
 	
-	/**
-	 * Called as soon as this game is loaded.
-	 */
-	public final void init() {
-		setIgnoreRepaint(true);
-		setLayout(null);
-		
-		add(canvas);
-		canvas.setIgnoreRepaint(true);
-		canvas.createBufferStrategy(2);
-		
-		canvas.addFocusListener(new FocusListener() {
-			private boolean focusLost;
-			
-			public void focusGained(FocusEvent fe) {
-				if(focusLost) {
-					focusLost = false;
-					resume();
-				}
-			}
-			
-			public void focusLost(FocusEvent fe) {
-				if(!isPaused()) {
-					focusLost = true;
-					pause();
-				}
-			}
-		});
-	}
-	
-	/**
-	 * Automatically called if this game is an applet, otherwise it has to be manually called.
-	 */
-	public final void start() {
-		if(!isActive())
-			new Thread(this).start();
-	}
-	
-	/**
-	 * Called when this game is stopped. If the game is not paused, this will call destroy()
-	 */
-	public final void stop() {
-		if(!isPaused()) {
-			isActive = false;
-			destroyGame();
-		}
-	}
-	
-	public final void destroy() {}
-	
 	private int currentFPS;
 	
 	/**
@@ -329,20 +277,11 @@ public class Game extends Applet implements Runnable {
 		canvas.requestFocusInWindow();
 		
 		while(isActive()) {
-			while(isPaused()) {
-				try {
-					Thread.sleep(100);
-				}
-				catch(Exception exc) {}
-				
-				lastTime = System.nanoTime();
-			}
-			
 			long now = System.nanoTime();
 			
 			long diffTime = now-lastTime;
 			
-			while(diffTime > 0) {
+			while(diffTime > 0 && !isPaused()) {
 				long deltaTime;
 				
 				if(FPS > 0) {
@@ -414,9 +353,55 @@ public class Game extends Applet implements Runnable {
 	}
 	
 	/**
+	 * Called as soon as this game is loaded.
+	 */
+	public final void init() {
+		setIgnoreRepaint(true);
+		setLayout(null);
+		
+		add(canvas);
+		canvas.setIgnoreRepaint(true);
+		canvas.createBufferStrategy(2);
+		
+		canvas.addFocusListener(new FocusListener() {
+			private boolean focusLost;
+			
+			public void focusGained(FocusEvent fe) {
+				if(focusLost && isPaused() && isActive()) {
+					focusLost = false;
+					resume();
+				}
+			}
+			
+			public void focusLost(FocusEvent fe) {
+				if(!isPaused() && isActive()) {
+					focusLost = true;
+					pause();
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Automatically called if this game is an applet, otherwise it has to be manually called.
+	 */
+	public final void start() {
+		if(!isActive())
+			new Thread(this).start();
+	}
+	
+	/**
 	 * Empty method to be overrided. This is called as soon as start() is called.
 	 */
 	protected synchronized void initGame() {}
+	
+	/**
+	 * Called FPS times a second. This method calls updateMenus or updateGameWorld according to the gameOver property.
+	 * @param deltaTime The time passed since the last call to it.
+	 */
+	public synchronized void update(long deltaTime) {
+		screenInfo.screen.update(deltaTime);
+	}
 	
 	/**
 	 * Called when this game loses focus.
@@ -429,11 +414,17 @@ public class Game extends Applet implements Runnable {
 	protected synchronized void resumed() {}
 	
 	/**
-	 * Called FPS times a second. This method calls updateMenus or updateGameWorld according to the gameOver property.
-	 * @param deltaTime The time passed since the last call to it.
+	 * Called when this game is stopped.
 	 */
-	public synchronized void update(long deltaTime) {
-		screenInfo.screen.update(deltaTime);
+	protected synchronized void stopGame() {}
+	
+	/**
+	 * Called when this game is stopped. Calling this method stops the game loop. This method then calls stopGame().
+	 */
+	public final synchronized void stop() {
+		sound.setOn(false);
+		isActive = false;
+		stopGame();
 	}
 	
 	/**
@@ -454,11 +445,6 @@ public class Game extends Applet implements Runnable {
 			g2.drawString("Version " + version + "    " + currentFPS + " FPS",2,canvas.getHeight()-2);
 		}
 	}
-	
-	/**
-	 * Called when this game is closed.
-	 */
-	public void destroyGame() {}
 	
 	/**
 	 * Adds a screen to this game.
@@ -490,6 +476,18 @@ public class Game extends Applet implements Runnable {
 	 */
 	public Screen getScreen(String name) {
 		return screens.get(name).screen;
+	}
+	
+	/**
+	 * Returns the name of the screen.
+	 * @param screen The Screen who's name is returned.
+	 * @return The name of the specified screen.
+	 */
+	public String getName(Screen screen) {
+		for(String s : screens.keySet())
+			if(screens.get(s).screen == screen)
+				return s;
+		return null;
 	}
 	
 	/**
