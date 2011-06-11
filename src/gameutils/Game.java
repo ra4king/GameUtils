@@ -1,6 +1,7 @@
 package gameutils;
 
 import java.applet.Applet;
+import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Container;
@@ -8,6 +9,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -40,7 +43,7 @@ public class Game extends Applet implements Runnable {
 	
 	public static void main(String args[]) {
 		Game game = new Game();
-		game.setupFrame("Game",500,500,false);
+		game.setupFrame("Game",500,500,true);
 		game.start();
 	}
 	
@@ -220,8 +223,6 @@ public class Game extends Applet implements Runnable {
 			super.resize(width,height);
 		else
 			setSize(width,height);
-		
-		canvas.setSize(width,height);
 	}
 	
 	/**
@@ -237,8 +238,6 @@ public class Game extends Applet implements Runnable {
 			getHighestParent().setSize(width+i.right+i.left,height+i.bottom+i.top);
 			((JFrame)getHighestParent()).setLocationRelativeTo(null);
 		}
-		
-		canvas.setSize(width,height);
 	}
 	
 	private int currentFPS;
@@ -254,9 +253,6 @@ public class Game extends Applet implements Runnable {
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
 		}
 		catch(Exception exc) {}
-		
-		if(isApplet())
-			setSize(500,500);
 		
 		initGame();
 		
@@ -357,11 +353,17 @@ public class Game extends Applet implements Runnable {
 	 */
 	public final void init() {
 		setIgnoreRepaint(true);
-		setLayout(null);
+		setLayout(new BorderLayout());
 		
 		add(canvas);
 		canvas.setIgnoreRepaint(true);
 		canvas.createBufferStrategy(2);
+		
+		canvas.addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent ce) {
+				resized(getWidth(),getHeight());
+			}
+		});
 		
 		canvas.addFocusListener(new FocusListener() {
 			private boolean focusLost;
@@ -391,7 +393,16 @@ public class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * Empty method to be overrided. This is called as soon as start() is called.
+	 * Called when this game is stopped. Calling this method stops the game loop. This method then calls stopGame().
+	 */
+	public final synchronized void stop() {
+		sound.setOn(false);
+		isActive = false;
+		stopGame();
+	}
+	
+	/**
+	 * Called as soon as the game is created.
 	 */
 	protected synchronized void initGame() {}
 	
@@ -399,7 +410,7 @@ public class Game extends Applet implements Runnable {
 	 * Called FPS times a second. This method calls updateMenus or updateGameWorld according to the gameOver property.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
-	public synchronized void update(long deltaTime) {
+	protected synchronized void update(long deltaTime) {
 		screenInfo.screen.update(deltaTime);
 	}
 	
@@ -414,24 +425,22 @@ public class Game extends Applet implements Runnable {
 	protected synchronized void resumed() {}
 	
 	/**
+	 * called when the game is resized.
+	 * @param width The new width.
+	 * @param height The new height.
+	 */
+	protected synchronized void resized(int width, int height) {}
+	
+	/**
 	 * Called when this game is stopped.
 	 */
 	protected synchronized void stopGame() {}
 	
 	/**
-	 * Called when this game is stopped. Calling this method stops the game loop. This method then calls stopGame().
-	 */
-	public final synchronized void stop() {
-		sound.setOn(false);
-		isActive = false;
-		stopGame();
-	}
-	
-	/**
 	 * Called FPS times a second. Draws the Menus, the GameWorld, paused Menus, and/or the FPS according to the appropriate gameOver, isPaused, and showFPS properties.
 	 * @param g The Graphics context to be used to draw to the canvas.
 	 */
-	public synchronized void paint(Graphics2D g) {
+	protected synchronized void paint(Graphics2D g) {
 		Graphics2D g2 = (Graphics2D)g.create();
 		
 		if(screenInfo != null)
