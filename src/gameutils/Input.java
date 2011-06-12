@@ -19,6 +19,7 @@ public class Input {
 	private Set<Integer> keys = Collections.synchronizedSet(new HashSet<Integer>());
 	private Point currentMouseLoc;
 	private Point lastMouseClick;
+	private Point mouseDown;
 	
 	/**
 	 * Initializes the listeners on the specified component.
@@ -50,7 +51,7 @@ public class Input {
 	}
 	
 	/**
-	 * Returns the current mouse location. Then it is null'ed out.
+	 * Returns the current mouse location. This it is set to null;
 	 * @return The current mouse location.
 	 */
 	public Point getCurrentMouseLocation() {
@@ -60,7 +61,7 @@ public class Input {
 	}
 	
 	/**
-	 * Returns the last mouse click. Then it is null'ed out.
+	 * Returns the last mouse click. Then it is set to null;
 	 * @return The latest mouse click.
 	 */
 	public Point getLastMouseClick() {
@@ -70,11 +71,19 @@ public class Input {
 	}
 	
 	/**
+	 * Returns the current position of the mouse if it is down. If the mouse has been released, returns null;
+	 * @return The current position of the mouse if it is down, else null.
+	 */
+	public Point isMouseDown() {
+		return mouseDown;
+	}
+	
+	/**
 	 * Clears the Set of keys and the mouse location and last mouse click are set to null.
 	 */
 	public void reset() {
 		keys.clear();
-		currentMouseLoc = lastMouseClick = null;
+		currentMouseLoc = lastMouseClick = mouseDown = null;
 	}
 	
 	private class Listener implements KeyListener, MouseListener, MouseMotionListener {
@@ -99,10 +108,12 @@ public class Input {
 		public void mouseExited(MouseEvent me) {}
 		
 		public void mousePressed(MouseEvent me) {
-			lastMouseClick = me.getPoint();
+			mouseDown = lastMouseClick = me.getPoint();
 		}
 		
-		public void mouseReleased(MouseEvent me) {}
+		public void mouseReleased(MouseEvent me) {
+			mouseDown = null;
+		}
 		
 		public void mouseMoved(MouseEvent me) {
 			currentMouseLoc = me.getPoint();

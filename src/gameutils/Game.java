@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -38,14 +39,8 @@ import javax.swing.UIManager;
  * It handles the game loop and certain other functions.
  * @author Roi Atalla
  */
-public class Game extends Applet implements Runnable {
+public abstract class Game extends Applet implements Runnable {
 	private static final long serialVersionUID = -1870725768768871166L;
-	
-	public static void main(String args[]) {
-		Game game = new Game();
-		game.setupFrame("Game",500,500,true);
-		game.start();
-	}
 	
 	/**
 	 * Initializes and displays the window, then calls init().
@@ -59,15 +54,18 @@ public class Game extends Applet implements Runnable {
 		final JFrame frame = new JFrame(title);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setIgnoreRepaint(true);
-		frame.add(this);
 		frame.setResizable(resizable);
-		frame.setVisible(true);
 		
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
-				stop();
+				synchronized(Game.this) {
+					stop();
+				}
 			}
 		});
+		
+		frame.add(this);
+		frame.setVisible(true);
 		
 		isApplet = false;
 		
@@ -190,9 +188,11 @@ public class Game extends Applet implements Runnable {
 	/**
 	 * Manually pauses the game loop. paused() will be called
 	 */
-	public void pause() {
-		isPaused = true;
-		paused();
+	public synchronized void pause() {
+		if(isActive()) {
+			isPaused = true;
+			paused();
+		}
 	}
 	
 	/**
@@ -206,8 +206,8 @@ public class Game extends Applet implements Runnable {
 	/**
 	 * Manually resumes the game loop. resumed() will be called right before the game loop resumes.
 	 */
-	public void resume() {
-		if(isActive && isPaused) {
+	public synchronized void resume() {
+		if(isActive() && isPaused()) {
 			isPaused = false;
 			resumed();
 		}
@@ -218,7 +218,7 @@ public class Game extends Applet implements Runnable {
 	 * @param width The new width of this game's canvas.
 	 * @param height The new height of this game's canvas;
 	 */
-	public void resize(int width, int height) {
+	public synchronized void resize(int width, int height) {
 		if(isApplet())
 			super.resize(width,height);
 		else
@@ -230,7 +230,7 @@ public class Game extends Applet implements Runnable {
 	 * @param width The new width of this game's canvas
 	 * @param height The new height of this game's canvas
 	 */
-	public void setSize(int width, int height) {
+	public synchronized void setSize(int width, int height) {
 		if(isApplet())
 			super.resize(width,height);
 		else {
@@ -239,8 +239,6 @@ public class Game extends Applet implements Runnable {
 			((JFrame)getHighestParent()).setLocationRelativeTo(null);
 		}
 	}
-	
-	private int currentFPS;
 	
 	/**
 	 * Game loop.
@@ -254,7 +252,9 @@ public class Game extends Applet implements Runnable {
 		}
 		catch(Exception exc) {}
 		
-		initGame();
+		synchronized(Game.this) {
+			initGame();
+		}
 		
 		Listener listener = new Listener();
 		canvas.addKeyListener(listener);
@@ -265,6 +265,7 @@ public class Game extends Applet implements Runnable {
 		BufferStrategy strategy = canvas.getBufferStrategy();
 		
 		int frames = 0;
+		int currentFPS = 0;
 		long time = System.nanoTime();
 		long lastTime = System.nanoTime();
 		
@@ -289,7 +290,9 @@ public class Game extends Applet implements Runnable {
 					deltaTime = diffTime;
 				
 				try{
-					update(deltaTime);
+					synchronized(Game.this) {
+						update(deltaTime);
+					}
 				}
 				catch(Exception exc) {
 					exc.printStackTrace();
@@ -315,10 +318,18 @@ public class Game extends Applet implements Runnable {
 						g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,quality);
 						
 						try{
-							paint(g);
+							synchronized(Game.this) {
+								paint(g);
+							}
 						}
 						catch(Exception exc) {
 							exc.printStackTrace();
+						}
+						
+						if(showFPS) {
+							g.setColor(Color.black);
+							g.setFont(new Font(Font.SANS_SERIF,Font.TRUETYPE_FONT,10));
+							g.drawString("Version " + version + "    " + currentFPS + " FPS",2,canvas.getHeight()-2);
 						}
 						
 						g.dispose();
@@ -351,7 +362,7 @@ public class Game extends Applet implements Runnable {
 	/**
 	 * Called as soon as this game is loaded.
 	 */
-	public final void init() {
+	public synchronized final void init() {
 		setIgnoreRepaint(true);
 		setLayout(new BorderLayout());
 		
@@ -361,7 +372,9 @@ public class Game extends Applet implements Runnable {
 		
 		canvas.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent ce) {
-				resized(getWidth(),getHeight());
+				synchronized(Game.this) {
+					resized(getWidth(),getHeight());
+				}
 			}
 		});
 		
@@ -371,14 +384,18 @@ public class Game extends Applet implements Runnable {
 			public void focusGained(FocusEvent fe) {
 				if(focusLost && isPaused() && isActive()) {
 					focusLost = false;
-					resume();
+					synchronized(Game.this) {
+						resume();
+					}
 				}
 			}
 			
 			public void focusLost(FocusEvent fe) {
 				if(!isPaused() && isActive()) {
 					focusLost = true;
-					pause();
+					synchronized(Game.this) {
+						pause();
+					}
 				}
 			}
 		});
@@ -395,7 +412,7 @@ public class Game extends Applet implements Runnable {
 	/**
 	 * Called when this game is stopped. Calling this method stops the game loop. This method then calls stopGame().
 	 */
-	public final synchronized void stop() {
+	public synchronized final void stop() {
 		sound.setOn(false);
 		isActive = false;
 		stopGame();
@@ -404,7 +421,7 @@ public class Game extends Applet implements Runnable {
 	/**
 	 * Called as soon as the game is created.
 	 */
-	protected synchronized void initGame() {}
+	protected abstract void initGame();
 	
 	/**
 	 * Called FPS times a second. This method calls updateMenus or updateGameWorld according to the gameOver property.
@@ -417,24 +434,24 @@ public class Game extends Applet implements Runnable {
 	/**
 	 * Called when this game loses focus.
 	 */
-	protected synchronized void paused() {}
+	protected abstract void paused();
 	
 	/**
 	 * Called when this game regains focus.
 	 */
-	protected synchronized void resumed() {}
+	protected abstract void resumed();
 	
 	/**
 	 * called when the game is resized.
 	 * @param width The new width.
 	 * @param height The new height.
 	 */
-	protected synchronized void resized(int width, int height) {}
+	protected abstract void resized(int width, int height);
 	
 	/**
 	 * Called when this game is stopped.
 	 */
-	protected synchronized void stopGame() {}
+	protected abstract void stopGame();
 	
 	/**
 	 * Called FPS times a second. Draws the Menus, the GameWorld, paused Menus, and/or the FPS according to the appropriate gameOver, isPaused, and showFPS properties.
@@ -443,16 +460,7 @@ public class Game extends Applet implements Runnable {
 	protected synchronized void paint(Graphics2D g) {
 		Graphics2D g2 = (Graphics2D)g.create();
 		
-		if(screenInfo != null)
-			screenInfo.screen.draw(g2);
-		else
-			g2.clearRect(0,0,getWidth(),getHeight());
-		
-		if(showFPS) {
-			g2.setColor(java.awt.Color.black);
-			g2.setFont(new java.awt.Font(java.awt.Font.SANS_SERIF,java.awt.Font.TRUETYPE_FONT,10));
-			g2.drawString("Version " + version + "    " + currentFPS + " FPS",2,canvas.getHeight()-2);
-		}
+		screenInfo.screen.draw(g2);
 	}
 	
 	/**
@@ -730,12 +738,16 @@ public class Game extends Applet implements Runnable {
 	private class Listener implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
 		public void keyTyped(KeyEvent key) {
 			for(InputListener l : screenInfo.listeners)
-				l.keyTyped(key);
+				synchronized(Game.this) {
+					l.keyTyped(key);
+				}
 		}
 		
 		public void keyPressed(KeyEvent key) {
 			for(InputListener l : screenInfo.listeners)
-				l.keyPressed(key);
+				synchronized(Game.this) {
+					l.keyPressed(key);
+				}
 			
 			if(isStandardKeysEnabled()) {
 				switch(key.getKeyCode()) {
@@ -747,47 +759,65 @@ public class Game extends Applet implements Runnable {
 		
 		public void keyReleased(KeyEvent key) {
 			for(InputListener l : screenInfo.listeners)
-				l.keyReleased(key);
+				synchronized(Game.this) {
+					l.keyReleased(key);
+				}
 		}
 		
 		public void mouseClicked(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseClicked(me);
+				synchronized(Game.this) {
+					l.mouseClicked(me);
+				}
 		}
 		
 		public void mouseEntered(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseEntered(me);
+				synchronized(Game.this) {
+					l.mouseEntered(me);
+				}
 		}
 		
 		public void mouseExited(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseExited(me);
+				synchronized(Game.this) {
+					l.mouseExited(me);
+				}
 		}
 		
 		public void mousePressed(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mousePressed(me);
+				synchronized(Game.this) {
+					l.mousePressed(me);
+				}
 		}
 		
 		public void mouseReleased(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseReleased(me);
+				synchronized(Game.this) {
+					l.mouseReleased(me);
+				}
 		}
 		
 		public void mouseDragged(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseDragged(me);
+				synchronized(Game.this) {
+					l.mouseDragged(me);
+				}
 		}
 		
 		public void mouseMoved(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseMoved(me);
+				synchronized(Game.this) {
+					l.mouseMoved(me);
+				}
 		}
 		
 		public void mouseWheelMoved(MouseWheelEvent mwe) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseWheelMoved(mwe);
+				synchronized(Game.this) {
+					l.mouseWheelMoved(mwe);
+				}
 		}
 	}
 }
