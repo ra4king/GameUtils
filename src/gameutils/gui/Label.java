@@ -1,4 +1,5 @@
-package gameutils;
+package gameutils.gui;
+
 
 import java.awt.Color;
 import java.awt.Font;
@@ -10,11 +11,11 @@ import java.awt.image.BufferedImage;
  * A MenuLabel extends MenuItem and just draws a String.
  * @author Roi Atalla
  */
-public class MenuLabel extends MenuItem {
+public class Label extends Widget {
 	private String text;
 	private Color color;
 	private Font font;
-	private int cx, cy;
+	private int centerX, centerY;
 	private boolean isCentered;
 	
 	/**
@@ -26,9 +27,7 @@ public class MenuLabel extends MenuItem {
 	 * @param y The Y position of the text.
 	 * @param centered If true, the X and Y are the center of the text, else they are the top left corner of the text.
 	 */
-	public MenuLabel(String text, Color color, Font font, int x, int y, boolean centered) {
-		super(text);
-		
+	public Label(String text, Color color, Font font, int x, int y, boolean centered) {
 		if(text == null)
 			this.text = "";
 		else
@@ -44,8 +43,8 @@ public class MenuLabel extends MenuItem {
 		else
 			this.font = font;
 		
-		cx = x;
-		cy = y;
+		centerX = x;
+		centerY = y;
 		
 		isCentered = centered;
 		
@@ -61,7 +60,7 @@ public class MenuLabel extends MenuItem {
 	 * @param y The Y position of the text.
 	 * @param centered If true, the X and Y are the center of the text, else they are the top left corner of the text.
 	 */
-	public MenuLabel(String text, Color color, int fontSize, int x, int y, boolean centered) {
+	public Label(String text, Color color, int fontSize, int x, int y, boolean centered) {
 		this(text,color,new Font(Font.SANS_SERIF,Font.BOLD,fontSize),x,y,centered);
 	}
 	
@@ -73,7 +72,7 @@ public class MenuLabel extends MenuItem {
 	 * @param y The Y position of the text.
 	 * @param centered If true, the X and Y are the center of the text, else they are the top left corner of the text.
 	 */
-	public MenuLabel(String text, int fontSize, int x, int y, boolean centered) {
+	public Label(String text, int fontSize, int x, int y, boolean centered) {
 		this(text,Color.black,new Font(Font.SANS_SERIF,Font.BOLD,fontSize),x,y,centered);
 	}
 	
@@ -90,9 +89,6 @@ public class MenuLabel extends MenuItem {
 	 * @param text The new text to show.
 	 */
 	public void setText(String text) {
-		if(getName().equals(this.text))
-			setName(text);
-		
 		this.text = text;
 		
 		recalcCoords();
@@ -119,15 +115,14 @@ public class MenuLabel extends MenuItem {
 	private void recalcCoords() {
 		if(isCentered) {
 			Graphics2D g = (Graphics2D)new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB).getGraphics();
-			g.setFont(font);
-			FontMetrics fm = g.getFontMetrics();
+			FontMetrics fm = g.getFontMetrics(font);
 			int width = fm.stringWidth(text);
-			super.setX((int)(cx-width/2));
-			super.setY((int)(cy+fm.getHeight()/2));
+			super.setX((int)(centerX-width/2));
+			super.setY((int)(centerY+fm.getHeight()/2));
 		}
 		else {
-			super.setX(cx);
-			super.setY(cy);
+			super.setX(centerX);
+			super.setY(centerY);
 		}
 	}
 	
@@ -163,6 +158,8 @@ public class MenuLabel extends MenuItem {
 		this.color = color;
 	}
 	
+	public void update(long deltaTime) {}
+	
 	/**
 	 * Draws the text with the specified font and color.
 	 * @param g The Graphics context to draw to the screen.
@@ -171,6 +168,6 @@ public class MenuLabel extends MenuItem {
 		g.setColor(color);
 		g.setFont(font);
 		
-		g.drawString(text,getX(),getY());
+		g.drawString(text,getIntX(),getIntY());
 	}
 }

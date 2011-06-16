@@ -117,6 +117,7 @@ public abstract class Game extends Applet implements Runnable {
 		
 		screenInfo = new ScreenInfo(new Screen() {
 			public void init(Game game) {}
+			public Game getParent() { return null; }
 			public void show() {}
 			public void hide() {}
 			public void update(long deltaTime) {}
@@ -137,15 +138,15 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * If this game is an applet, it calls the Applet's getCodeBase(),
-	 * else the directory of the main class is returned.
+	 * Returns the current working directory of this game.
+	 * @return The current working directory of this game.
 	 */
 	public URL getCodeBase() {
 		if(isApplet())
 			return super.getCodeBase();
 		
 		try{
-			return getClass().getResource(".");
+			return new URL("file:/"+System.getProperty("user.dir")+"/");
 		}
 		catch(Exception exc) {
 			exc.printStackTrace();

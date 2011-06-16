@@ -3,7 +3,7 @@ package gameutils;
 import java.awt.Graphics2D;
 
 /**
- * An Element can be added to a class that implements TODO:Make up class name.
+ * An Element that can be added to a Screen.
  * @author Roi Atalla
  */
 public interface Element {

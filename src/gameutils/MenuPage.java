@@ -1,5 +1,7 @@
 package gameutils;
 
+import gameutils.gui.Widget;
+
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
@@ -7,20 +9,46 @@ import java.util.ArrayList;
  * A MenuPage is a page in a set of Menus.
  * @author Roi Atalla
  */
-public class MenuPage {
+public class MenuPage implements Element {
 	private Menus parent;
-	private ArrayList<MenuButton> buttons;
-	private ArrayList<MenuItem> items;
-	private String name;
+	private ArrayList<Widget> widgets;
 	
 	/**
 	 * Initializes this object.
 	 * @param name The name of this MenuPage.
 	 */
-	public MenuPage(String name) {
-		buttons = new ArrayList<MenuButton>();
-		items = new ArrayList<MenuItem>();
-		this.name = name;
+	public MenuPage() {
+		widgets = new ArrayList<Widget>();
+	}
+	
+	public void init(Screen screen) {
+		this.parent = (Menus)screen;
+	}
+	
+	/**
+	 * Calls all added MenuItem's show() method.
+	 */
+	public void show() {
+		for(Widget mi : widgets)
+			mi.show();
+	}
+	
+	/**
+	 * Calls all added MenuItem's hide() method.
+	 */
+	public void hide() {
+		for(Widget mi : widgets)
+			mi.hide();
+	}
+	
+	public void update(long deltaTime) {
+		for(Widget i : widgets)
+			i.update(deltaTime);
+	}
+	
+	public void draw(Graphics2D g) {
+		for(Widget i : widgets)
+			i.draw(g);
 	}
 	
 	/**
@@ -32,30 +60,19 @@ public class MenuPage {
 	}
 	
 	/**
-	 * Sets the parent of this MenuPage.
-	 * @param parent The parent of this MenuPage.
-	 */
-	public void setParent(Menus parent) {
-		this.parent = parent;
-	}
-	
-	/**
 	 * Adds a MenuItem to this MenuPage.
-	 * @param item The MenuItem to add.
+	 * @param widget The MenuItem to add.
 	 * @return The MenuItem added.
 	 */
-	public synchronized MenuItem addItem(MenuItem item) {
-		if(item != null) {
-			
-			if(item instanceof MenuButton)
-				buttons.add((MenuButton)item);
-			
-			items.add(item);
-			
-			item.setParent(this);
-		}
+	public Widget add(Widget widget) {
+		if(widget == null)
+			throw new IllegalArgumentException("Widget cannot be null.");
 		
-		return item;
+		widgets.add(widget);
+		
+		widget.init(parent);
+		
+		return widget;
 	}
 	
 	/**
@@ -63,40 +80,8 @@ public class MenuPage {
 	 * @param idx The index of the MenuItem.
 	 * @return The MenuItem at the specified index.
 	 */
-	public MenuItem getItem(int idx) {
-		return items.get(idx);
-	}
-	
-	/**
-	 * Returns the MenuItem with the specified name.
-	 * @param name The name of the MenuItem.
-	 * @return The MenuItem with the specified name.
-	 */
-	public MenuItem getItem(String name) {
-		for(MenuItem i : items)
-			if(i.getName().equals(name))
-				return i;
-		
-		return null;
-	}
-	
-	/**
-	 * Returns the name of this MenuPage.
-	 * @return The name of this MenuPage.
-	 */
-	public String getName() {
-		return name;
-	}
-	
-	/**
-	 * Sets the name of this MenuPage.
-	 * @param name The new name of this MenuPage.
-	 */
-	public void setName(String name) {
-		if(name == null)
-			throw new NullPointerException("name is null!");
-		
-		this.name = name;
+	public Widget getWidget(int idx) {
+		return widgets.get(idx);
 	}
 	
 	/**
@@ -113,76 +98,5 @@ public class MenuPage {
 	 */
 	public int getHeight() {
 		return parent.getHeight();
-	}
-	
-	/**
-	 * Calls the mouseReleased method of all MenuItems on this MenuPage.
-	 * @param x The X position of the mouse release.
-	 * @param y The Y position of the mouse release.
-	 */
-	public void mouseReleased(int x, int y) {
-		for(MenuButton b : buttons) {
-			b.setHighlighted(false);
-			
-			if(b.getBounds().contains(x,y) && b.isEnabled())
-				if(b.isPressed())
-					b.getAction().doAction(b);
-				else
-					b.setHighlighted(true);
-			
-			b.setPressed(false);
-		}
-	}
-	
-	/**
-	 * Calls the mousePressed of all MenuItems on this MenuPage.
-	 * @param x The X position of the mouse press.
-	 * @param y The Y position of the mouse press.
-	 */
-	public void mousePressed(int x, int y) {
-		for(MenuButton b : buttons) {
-			b.setPressed(false);
-			b.setHighlighted(false);
-			
-			if(b.getBounds().contains(x,y) && b.isEnabled())
-				b.setPressed(true);
-		}
-	}
-	
-	/**
-	 * Calls the mouseMoved of all MenuItems on this MenuPage.
-	 * @param x The X position of the mouse move.
-	 * @param y The Y position of the mouse move.
-	 */
-	public void mouseMoved(int x, int y) {
-		for(MenuButton b : buttons) {
-			b.setHighlighted(false);
-			
-			if(b.getBounds().contains(x,y) && b.isEnabled() && !b.isPressed())
-				b.setHighlighted(true);
-		}
-	}
-	
-	/**
-	 * Notifies all MenuItems on this MenuPage of activation/deactivation.
-	 * @param isActive If true, this MenuPage is active, else this MenuPage is deactivated.
-	 */
-	protected void setActive(boolean isActive) {
-		for(MenuItem i : items)
-			i.setActive(isActive);
-	}
-	
-	public void update(long deltaTime) {
-		for(MenuItem i : items)
-			i.update(deltaTime);
-	}
-	
-	/**
-	 * Draws all MenuItems on this MenuPage.
-	 * @param g The Graphics context to draw to the screen.
-	 */
-	public void draw(Graphics2D g) {
-		for(MenuItem i : items)
-			i.draw(g);
 	}
 }

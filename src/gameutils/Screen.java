@@ -14,6 +14,12 @@ public interface Screen {
 	public void init(Game game);
 	
 	/**
+	 * Returns the parent of this Screen.
+	 * @return The parent of this Screen.
+	 */
+	public Game getParent();
+	
+	/**
 	 * Called when this Screen is shown.
 	 */
 	public void show();

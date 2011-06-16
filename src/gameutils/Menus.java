@@ -5,49 +5,33 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Transparency;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Menus is a container of MenuPages.
+ * Menus organizes a group of MenuPages.
  * @author Roi Atalla
  */
 public class Menus implements Screen {
 	private Game parent;
-	private ArrayList<MenuPage> menuPages;
+	private Map<String,MenuPage> menuPages;
+	private MenuPage currentPage;
 	private Image bg;
 	private String bgImage;
-	private int pageShown = -1;
 	
 	/**
 	 * Initializes this object.
 	 * @param parent The parent of this object.
 	 */
 	public Menus() {
-		menuPages = new ArrayList<MenuPage>();
+		menuPages = Collections.synchronizedMap(new HashMap<String,MenuPage>());
 		
 		setBackground(Color.lightGray);
 	}
 	
-	/**
-	 * Initializes this object and adds the specified pages.
-	 * @param parent The parent of this object.
-	 * @param pages The MenuPages to add. The first one is the one shown.
-	 */
-	public Menus(MenuPage ... pages) {
-		this();
-		
-		for(MenuPage p : pages) {
-			pageShown = 0;
-			menuPages.add(p);
-		}
-	}
-	
 	public void init(Game game) {
 		parent = game;
-		
-		MenuListener ml = new MenuListener();
-		parent.addInputListener(this,ml);
 	}
 	
 	/**
@@ -59,33 +43,26 @@ public class Menus implements Screen {
 	}
 	
 	/**
-	 * Adds a page to the Menus.
+	 * Adds a page to the Menus. Neither name nor MenuPage can be null.
 	 * @param page The MenuPage to add.
 	 * @return The MenuPage that was added.
 	 */
-	public MenuPage addPage(MenuPage page) {
-		if(page != null) {
-			if(pageShown == -1)
-				pageShown = 0;
-			
-			menuPages.add(page);
-			
-			page.setParent(this);
-			
-			if(menuPages.size() == 1)
-				page.setActive(true);
+	public MenuPage addPage(String name, MenuPage page) {
+		if(name == null)
+			throw new IllegalArgumentException("Name cannot be null");
+		if(page == null)
+			throw new IllegalArgumentException("MenuPage cannot be null");
+		
+		menuPages.put(name,page);
+		
+		page.init(this);
+		
+		if(currentPage == null) {
+			currentPage = page;
+			page.show();
 		}
 		
 		return page;
-	}
-	
-	/**
-	 * Returns the page at the specified index.
-	 * @param idx The index of the MenuPage.
-	 * @return The MenuPage at the specified index.
-	 */
-	public MenuPage getPage(int idx) {
-		return menuPages.get(idx);
 	}
 	
 	/**
@@ -93,76 +70,66 @@ public class Menus implements Screen {
 	 * @param description The description of the MenuPage.
 	 * @return The MenuPage with the specified description, null if not found.
 	 */
-	public MenuPage getPage(String description) {
-		for(MenuPage p : menuPages)
-			if(p.getName().equals(description))
-				return p;
-		
+	public MenuPage getMenuPage(String name) {
+		return menuPages.get(name.intern());
+	}
+	
+	/**
+	 * Returns the name of the MenuPage.
+	 * @param page The MenuPage whose name is returned.
+	 * @return The name of the MenuPage. If it is not found, returns null.
+	 */
+	public String getMenuPageName(MenuPage page) {
+		for(String s : menuPages.keySet())
+			if(menuPages.get(s) == page)
+				return s;
 		return null;
-	}
-	
-	/**
-	 * Returns the index of the specified page.
-	 * @param page The MenuPage who's index is returned.
-	 * @return The index of the specified MenuPage, -1 if not found.
-	 */
-	public int getPageIndex(MenuPage page) {
-		return menuPages.indexOf(page);
-	}
-	
-	/**
-	 * Sets the current page displayed.
-	 * @param pageNum The index of the new page to display.
-	 */
-	public void setPageShown(int pageNum) {
-		if(pageNum < 0 || pageNum >= menuPages.size())
-			throw new IllegalArgumentException("pageNum is out of bounds.");
-		
-		if(pageShown != -1)
-			menuPages.get(pageShown).setActive(false);
-		menuPages.get(pageNum).setActive(true);
-		
-		pageShown = pageNum;
 	}
 	
 	/**
 	 * Sets the current page displayed. Then calls 
 	 * @param pageName The description of the new page to display.
 	 */
-	public void setPageShown(String pageName) {
-		for(int a = 0; a < menuPages.size(); a++)
-			if(menuPages.get(a).getName().equals(pageName))
-				setPageShown(a);
-	}
-	
-	public void show() {
-		if(pageShown == -1)
-			return;
+	public void setMenuPageShown(String name) {
+		MenuPage page = getMenuPage(name);
 		
-		menuPages.get(pageShown).setActive(true);
-	}
-	
-	public void hide() {
-		if(pageShown == -1)
-			return;
+		if(page == null)
+			throw new IllegalArgumentException(name + " does not exist.");
 		
-		menuPages.get(pageShown).setActive(false);
+		if(currentPage != null)
+			currentPage.hide();
+		
+		currentPage = page;
+		
+		currentPage.show();
 	}
 	
 	/**
-	 * Returns the index of the current page displayed.
-	 * @return The index of the current page displayed.
+	 * Calls the current MenuPage's show() method.
 	 */
-	public int getPageShownIndex() {
-		return pageShown;
+	public void show() {
+		if(currentPage == null)
+			return;
+		
+		currentPage.show();
+	}
+	
+	/**
+	 * Calls the current MenuPage's hide() method.
+	 */
+	public void hide() {
+		if(currentPage == null)
+			return;
+		
+		currentPage.hide();
 	}
 	
 	/**
 	 * Returns the current page displayed.
 	 * @return The current page displayed.
 	 */
-	public MenuPage getPageShown() {
-		return menuPages.get(pageShown);
+	public MenuPage getMenuPageShown() {
+		return currentPage;
 	}
 	
 	/**
@@ -224,10 +191,10 @@ public class Menus implements Screen {
 	}
 	
 	public void update(long deltaTime) {
-		if(pageShown == -1)
+		if(currentPage == null)
 			return;
 		
-		menuPages.get(pageShown).update(deltaTime);
+		currentPage.update(deltaTime);
 	}
 	
 	/**
@@ -242,41 +209,12 @@ public class Menus implements Screen {
 		if(bg != null)
 			g2.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
 		
-		if(pageShown != -1)
+		if(currentPage != null)
 			try{
-				menuPages.get(pageShown).draw(g2);
+				currentPage.draw(g2);
 			}
 			catch(Exception exc) {
 				exc.printStackTrace();
 			}
-	}
-	
-	private class MenuListener extends InputListener {
-		public void mouseReleased(MouseEvent me) {
-			if(me.getButton() == MouseEvent.BUTTON1 && pageShown != -1)
-				menuPages.get(pageShown).mouseReleased(me.getX(),me.getY());
-		}
-		
-		public void mousePressed(MouseEvent me) {
-			if(me.getButton() == MouseEvent.BUTTON1 && pageShown != -1)
-				menuPages.get(pageShown).mousePressed(me.getX(),me.getY());
-		}
-		
-		public void mouseMoved(MouseEvent me) {
-			if(pageShown != -1)
-				menuPages.get(pageShown).mouseMoved(me.getX(),me.getY());
-		}
-	}
-	
-	/**
-	 * This interface is in use mainly but the MenuButton class.
-	 * @author Roi Atalla
-	 */
-	public static interface Action {
-		/**
-		 * Called when an action has occurred.
-		 * @param button The MenuButton where an action has occurred.
-		 */
-		public void doAction(MenuButton button);
 	}
 }

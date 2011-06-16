@@ -1,10 +1,14 @@
-package gameutils;
+package gameutils.gui;
+
+import gameutils.AbstractInputListener;
+import gameutils.Screen;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -12,12 +16,12 @@ import java.awt.image.BufferedImage;
  * A MenuButton extends MenuItem and draws a button.
  * @author Roi Atalla
  */
-public class MenuButton extends MenuItem {
-	private Menus.Action action;
+public class Button extends Widget {
+	private Action action;
 	private RoundRectangle2D.Double bounds;
 	private Font font;
 	private String text;
-	private Color color;
+	private Color textColor;
 	private GradientPaint background;
 	private GradientPaint bgHighlight;
 	private GradientPaint bgPressed;
@@ -48,9 +52,7 @@ public class MenuButton extends MenuItem {
 	 * @param centered If true, the X and Y are the center of the text, else they are the top left corner of the text.
 	 * @param action The action to be called when this button is pressed.
 	 */
-	public MenuButton(String text, int fontSize, int x, int y, int arcwidth, int archeight, boolean centered, Menus.Action action) {
-		super(text);
-		
+	public Button(String text, int fontSize, int x, int y, int arcwidth, int archeight, boolean centered, Action action) {
 		this.action = action;
 		this.text = text;
 		
@@ -65,7 +67,7 @@ public class MenuButton extends MenuItem {
 		
 		recalcCoords();
 		
-		color = Color.black;
+		textColor = Color.black;
 		setBackground(new Color(0,0,0,0));
 		setBackgroundHighlight(new Color(255,255,255,100));
 		setBackgroundPressed(new Color(128,128,128,200));
@@ -75,6 +77,45 @@ public class MenuButton extends MenuItem {
 		disabled = new Color(192,192,192,100);
 		
 		isEnabled = true;
+	}
+	
+	public void init(Screen screen) {
+		super.init(screen);
+		
+		screen.getParent().addInputListener(screen, new AbstractInputListener() {
+			public void mousePressed(MouseEvent me) {
+				if(me.getButton() != MouseEvent.BUTTON1)
+					return;
+				
+				setPressed(false);
+				setHighlighted(false);
+				
+				if(getButtonBounds().contains(me.getPoint()) && isEnabled())
+					setPressed(true);
+			}
+			
+			public void mouseReleased(MouseEvent me) {
+				if(me.getButton() != MouseEvent.BUTTON1)
+					return;
+				
+				setHighlighted(false);
+				
+				if(getButtonBounds().contains(me.getPoint()) && isEnabled())
+					if(isPressed())
+						getAction().doAction(Button.this);
+					else
+						setHighlighted(true);
+				
+				setPressed(false);
+			}
+			
+			public void mouseMoved(MouseEvent me) {
+				setHighlighted(false);
+				
+				if(getButtonBounds().contains(me.getPoint()) && isEnabled() && !isPressed())
+					setHighlighted(true);
+			}
+		});
 	}
 	
 	/**
@@ -90,9 +131,6 @@ public class MenuButton extends MenuItem {
 	 * @param text The new text of this button.
 	 */
 	public void setText(String text) {
-		if(!getName().equals(this.text))
-			setName(text);
-		
 		this.text = text;
 		
 		recalcCoords();
@@ -119,8 +157,7 @@ public class MenuButton extends MenuItem {
 	
 	private void recalcCoords() {
 		Graphics2D g = (Graphics2D)new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB).getGraphics();
-		g.setFont(font);
-		FontMetrics fm = g.getFontMetrics();
+		FontMetrics fm = g.getFontMetrics(font);
 		int width = fm.stringWidth(text);
 		super.setWidth((int)(width+40));
 		super.setHeight((int)(fm.getHeight()+10));
@@ -172,7 +209,7 @@ public class MenuButton extends MenuItem {
 	 * Returns the action called when this button is pressed.
 	 * @return The action called when this button is pressed.
 	 */
-	public Menus.Action getAction() {
+	public Action getAction() {
 		return action;
 	}
 	
@@ -180,7 +217,7 @@ public class MenuButton extends MenuItem {
 	 * Sets the action to be called when this button is pressed.
 	 * @param action The new action to be called when this button is pressed.
 	 */
-	public void setAction(Menus.Action action) {
+	public void setAction(Action action) {
 		this.action = action;
 	}
 	
@@ -188,7 +225,7 @@ public class MenuButton extends MenuItem {
 	 * Returns this button's bounds.
 	 * @return This button's bounds.
 	 */
-	public RoundRectangle2D.Double getBounds() {
+	public RoundRectangle2D.Double getButtonBounds() {
 		if(bounds == null)
 			bounds = new RoundRectangle2D.Double();
 		bounds.setRoundRect(getX(),getY(),getWidth(),getHeight(),arcwidth,archeight);
@@ -248,7 +285,7 @@ public class MenuButton extends MenuItem {
 	 * @param color The new color of the text.
 	 */
 	public void setColor(Color color) {
-		this.color = color;
+		this.textColor = color;
 	}
 	
 	/**
@@ -256,7 +293,7 @@ public class MenuButton extends MenuItem {
 	 * @param background The new background color of the button.
 	 */
 	public void setBackground(Color background) {
-		this.background = new GradientPaint(getX()+getWidth()/2,getY(),Color.white,getX()+getWidth()/2,getY()+getHeight(),background);
+		this.background = new GradientPaint((float)(getX()+getWidth()/2.0),(float)getY(),Color.white,(float)(getX()+getWidth()/2.0),(float)(getY()+getHeight()),background);
 		setBackgroundPressed(background.darker());
 	}
 	
@@ -265,7 +302,7 @@ public class MenuButton extends MenuItem {
 	 * @param highlight The new background highlight color of the button.
 	 */
 	public void setBackgroundHighlight(Color highlight) {
-		bgHighlight = new GradientPaint(getX()+getWidth()/2,getY(),Color.white,getX()+getWidth()/2,getY()+getHeight(),highlight);
+		bgHighlight = new GradientPaint((float)(getX()+getWidth()/2.0),(float)getY(),Color.white,(float)(getX()+getWidth()/2.0),(float)(getY()+getHeight()),highlight);
 	}
 	
 	/**
@@ -273,7 +310,7 @@ public class MenuButton extends MenuItem {
 	 * @param pressed The new background pressed color of the button.
 	 */
 	public void setBackgroundPressed(Color pressed) {
-		bgPressed = new GradientPaint(getX()+getWidth()/2,getY(),pressed,getX()+getWidth()/2,getY()+getHeight(),Color.white);
+		bgPressed = new GradientPaint((float)(getX()+getWidth()/2.0),(float)getY(),pressed,(float)(getX()+getWidth()/2.0),(float)(getY()+getHeight()),Color.white);
 	}
 	
 	/**
@@ -300,6 +337,8 @@ public class MenuButton extends MenuItem {
 		borderPressed = pressed;
 	}
 	
+	public void update(long deltaTime) {}
+	
 	/**
 	 * Draws the button.
 	 */
@@ -308,49 +347,61 @@ public class MenuButton extends MenuItem {
 		
 		if(!isEnabled) {
 			g.setPaint(background);
-			g.fill(getBounds());
+			g.fill(getButtonBounds());
 			
 			g.setColor(border);
-			g.draw(getBounds());
+			g.draw(getButtonBounds());
 			
-			g.setColor(color);
+			g.setColor(textColor);
 			g.drawString(text,textX,textY);
 			
 			g.setColor(disabled);
-			g.fill(getBounds());
+			g.fill(getButtonBounds());
 		}
 		else if(isPressed) {
 			g.setPaint(bgPressed);
-			g.fill(getBounds());
+			g.fill(getButtonBounds());
 			
 			g.setColor(borderPressed);
-			g.draw(getBounds());
+			g.draw(getButtonBounds());
 			
-			g.setColor(color);
+			g.setColor(textColor);
 			g.drawString(text,textX,textY);
 		}
 		else if(isHighlighted) {
 			g.setPaint(background);
-			g.fill(getBounds());
+			g.fill(getButtonBounds());
 			
 			g.setPaint(bgHighlight);
-			g.fill(getBounds());
+			g.fill(getButtonBounds());
 			
 			g.setColor(borderHighlight);
-			g.draw(getBounds());
+			g.draw(getButtonBounds());
 			
-			g.setColor(color);
+			g.setColor(textColor);
 			g.drawString(text,textX,textY);
 		}
 		else {
 			g.setPaint(background);
-			g.fill(getBounds());
+			g.fill(getButtonBounds());
 			
 			g.setColor(border);
-			g.draw(getBounds());
+			g.draw(getButtonBounds());
 			
-			g.setColor(color);
+			g.setColor(textColor);
 			g.drawString(text,textX,textY);
 		}
+	}
+	
+	/**
+	 * This interface is in use mainly but the MenuButton class.
+	 * @author Roi Atalla
+	 */
+	public static interface Action {
+		/**
+		 * Called when an action has occurred.
+		 * @param button The MenuButton where an action has occurred.
+		 */
+		public void doAction(Button button);
 	}
 }
