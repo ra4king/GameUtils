@@ -119,6 +119,14 @@ public class Packet {
 	}
 	
 	/**
+	 * Peeks the next Object. The current position isn't incremented.
+	 * @return The next Object.
+	 */
+	public Object peek() {
+		return messages.get(idx);
+	}
+	
+	/**
 	 * Writes a byte.
 	 * @param b The byte.
 	 */

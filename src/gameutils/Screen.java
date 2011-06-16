@@ -8,30 +8,30 @@ import java.awt.Graphics2D;
  */
 public interface Screen {
 	/**
-	 * Called when this screen is added to a Game.
-	 * @param game The parent game of this screen.
+	 * Called when this Screen is added to a Game.
+	 * @param game The parent Game of this Screen.
 	 */
 	public void init(Game game);
 	
 	/**
-	 * Called when this screen is shown.
+	 * Called when this Screen is shown.
 	 */
 	public void show();
 	
 	/**
-	 * Called when this screen is hidden.
+	 * Called when this Screen is hidden.
 	 */
 	public void hide();
 	
 	/**
-	 * Updates the screen.
+	 * Updates this Screen.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public void update(long deltaTime);
 	
 	/**
-	 * Draws this screen.
-	 * @param g Object that used to draw to the screen.
+	 * Draws this Screen.
+	 * @param g The Graphics context to draw to the screen.
 	 */
 	public void draw(Graphics2D g);
 }

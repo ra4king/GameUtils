@@ -33,7 +33,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-
 /**
  * The main class that should be extended by the user.
  * It handles the game loop and certain other functions.
@@ -138,15 +137,15 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * If this game is an applet, it calls the super class's getCodeBase(),
-	 * else the current directory is returned.
+	 * If this game is an applet, it calls the Applet's getCodeBase(),
+	 * else the directory of the main class is returned.
 	 */
 	public URL getCodeBase() {
 		if(isApplet())
 			return super.getCodeBase();
 		
 		try{
-			return new URL("file:///"+System.getProperty("user.dir"));
+			return getClass().getResource(".");
 		}
 		catch(Exception exc) {
 			exc.printStackTrace();
@@ -165,7 +164,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * Returns the root component.
 	 * @return If this game is an applet, it returns this, else it returns the JFrame used to display this game.
 	 */
-	public Container getHighestParent() {
+	public Container getRootParent() {
 		if(isApplet())
 			return this;
 		return getParent().getParent().getParent().getParent();
@@ -234,9 +233,9 @@ public abstract class Game extends Applet implements Runnable {
 		if(isApplet())
 			super.resize(width,height);
 		else {
-			Insets i = getHighestParent().getInsets();
-			getHighestParent().setSize(width+i.right+i.left,height+i.bottom+i.top);
-			((JFrame)getHighestParent()).setLocationRelativeTo(null);
+			Insets i = getRootParent().getInsets();
+			getRootParent().setSize(width+i.right+i.left,height+i.bottom+i.top);
+			((JFrame)getRootParent()).setLocationRelativeTo(null);
 		}
 	}
 	
@@ -458,9 +457,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * @param g The Graphics context to be used to draw to the canvas.
 	 */
 	protected synchronized void paint(Graphics2D g) {
-		Graphics2D g2 = (Graphics2D)g.create();
-		
-		screenInfo.screen.draw(g2);
+		screenInfo.screen.draw((Graphics2D)g.create());
 	}
 	
 	/**

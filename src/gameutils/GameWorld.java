@@ -10,13 +10,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A GameWorld is a container of GameComponents. It has a z-buffer where 0 is backmost.
+ * A GameWorld is a container of Entities. It has a z-buffer that goes in back-to-front order, 0 being the back.
  * @author Roi Atalla
  */
 public class GameWorld implements Screen {
 	private Game parent;
-	private List<List<GameComponent>> components;
-	private List<GameComponent> allComponents;
+	private List<List<Entity>> entities;
+	private List<Entity> allEntities;
 	private Image bg;
 	private String bgImage;
 	
@@ -25,14 +25,69 @@ public class GameWorld implements Screen {
 	 * @param parent The parent of this object.
 	 */
 	public GameWorld() {
-		components = Collections.synchronizedList(new ArrayList<List<GameComponent>>());
-		components.add(Collections.synchronizedList(new ArrayList<GameComponent>()));
+		entities = Collections.synchronizedList(new ArrayList<List<Entity>>());
+		entities.add(Collections.synchronizedList(new ArrayList<Entity>()));
+		
+		allEntities = Collections.synchronizedList(new ArrayList<Entity>());
 		
 		setBackground(Color.lightGray);
 	}
 	
 	public void init(Game game) {
 		parent = game;
+	}
+	
+	/**
+	 * Calls each Entity's <code>show()</code> method in z-index order.
+	 */
+	public void show() {
+		for(List<Entity> list : entities)
+			for(Entity e : list)
+				e.show();
+	}
+	
+	/**
+	 * Calls each Entity's <code>hide()</code> method in z-index order.
+	 */
+	public void hide() {
+		for(List<Entity> list : entities)
+			for(Entity e : list)
+				e.hide();
+	}
+	
+	/**
+	 * Calls each Entity's <code>update(long)</code> method in z-index order.
+	 * @param deltaTime The time passed since the last call to it.
+	 */
+	public synchronized void update(long deltaTime) {
+		for(List<Entity> list : entities)
+			for(Entity comp : list)
+				if(comp != null)
+					comp.update(deltaTime);
+		flush();
+	}
+	
+	/**
+	 * Draws the background then all the components in z-index order.
+	 * @param g The Graphics context to draw to the screen.
+	 */
+	public synchronized void draw(Graphics2D g) {
+		Image bg = (this.bg == null ? parent.getArt().get(bgImage) : this.bg);
+		
+		if(bg != null)
+			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
+		
+		for(List<Entity> list : entities) {
+			for(Entity comp : list) {
+				try{
+					if(comp.getBounds().intersects(parent.getBounds()))
+						comp.draw((Graphics2D)g.create());
+				}
+				catch(Exception exc) {
+					exc.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -44,39 +99,44 @@ public class GameWorld implements Screen {
 	
 	/**
 	 * Adds the component with a z-index of 0.
-	 * @param comp The GameComponent to be added.
-	 * @return The GameComponent that was added.
+	 * @param comp The Entity to be added.
+	 * @return The Entity that was added.
 	 */
-	public synchronized GameComponent add(GameComponent comp) {
-		return add(comp,0);
+	public synchronized Entity add(Entity e) {
+		return add(e,0);
 	}
 	
 	/**
 	 * Adds the component with the specified z-index.
-	 * @param comp The GameComponent to be added.
-	 * @param zindex The z-index of this GameComponent.
-	 * @return The GameComponent that was added.
+	 * @param comp The Entity to be added.
+	 * @param zindex The z-index of this Entity.
+	 * @return The Entity that was added.
 	 */
-	public synchronized GameComponent add(GameComponent comp, int zindex) {
-		while(zindex >= components.size())
-			components.add(Collections.synchronizedList(new ArrayList<GameComponent>()));
+	public synchronized Entity add(Entity e, int zindex) {
+		while(zindex >= entities.size())
+			entities.add(Collections.synchronizedList(new ArrayList<Entity>()));
 		
-		components.get(zindex).add(comp);
-		comp.setParent(this);
-		return comp;
+		entities.get(zindex).add(e);
+		
+		e.init(this);
+		return e;
+	}
+	
+	public boolean contains(Entity e) {
+		return getEntities().contains(e);
 	}
 	
 	/**
 	 * Removes the component from the world.
-	 * @param comp The GameComponent to remove.
+	 * @param comp The Entity to remove.
 	 * @return True if the component was found and removed, false if the component was not found.
 	 */
-	public boolean remove(GameComponent comp) {
+	public boolean remove(Entity e) {
 		boolean removed = false;
 		
 		try{
-			for(List<GameComponent> list : components) {
-				int index = list.indexOf(comp);
+			for(List<Entity> list : entities) {
+				int index = list.indexOf(e);
 				if(index >= 0) {
 					list.set(index,null);
 					removed = true;
@@ -94,21 +154,21 @@ public class GameWorld implements Screen {
 	 * Clears this game world.
 	 */
 	public synchronized void clear() {
-		components.clear();
+		entities.clear();
 		
 		System.gc();
 		
-		components.add(Collections.synchronizedList(new ArrayList<GameComponent>()));
+		entities.add(Collections.synchronizedList(new ArrayList<Entity>()));
 	}
 	
 	/**
 	 * Returns the z-index of the specified component.
-	 * @param comp The GameComponent who's index is returned.
+	 * @param comp The Entity who's index is returned.
 	 * @return The z-index of the specified component, or -1 if the component was not found.
 	 */
-	public synchronized int getZIndex(GameComponent comp) {
-		for(int a = 0; a < components.size(); a++)
-			if(components.get(a).indexOf(comp) >= 0)
+	public synchronized int getZIndex(Entity comp) {
+		for(int a = 0; a < entities.size(); a++)
+			if(entities.get(a).indexOf(comp) >= 0)
 				return a;
 		return -1;
 	}
@@ -116,49 +176,29 @@ public class GameWorld implements Screen {
 	/**
 	 * A list of all components at the specified z-index.
 	 * @param zindex The z-index.
-	 * @return A list of all GameComponents at the specified z-index.
+	 * @return A list of all Entities at the specified z-index.
 	 */
-	public synchronized List<GameComponent> getGameComponents(int zindex) {
-		return components.get(zindex);
+	public synchronized List<Entity> getEntities(int zindex) {
+		return entities.get(zindex);
 	}
 	
 	/**
 	 * A list of all components in this entire world.
-	 * @return A list of all GameComponents in this world in z-index order.
+	 * @return A list of all Entities in this world in z-index order.
 	 */
-	public synchronized List<GameComponent> getGameComponents() {
-		if(allComponents == null)
-			allComponents = Collections.synchronizedList(new ArrayList<GameComponent>());
+	public synchronized List<Entity> getEntities() {
+		allEntities.clear();
 		
-		allComponents.clear();
+		for(List<Entity> list : entities)
+			allEntities.addAll(list);
 		
-		for(List<GameComponent> list : components)
-			allComponents.addAll(list);
-		
-		return allComponents;
-	}
-	
-	/**
-	 * Calls each GameComponent's <code>update(long)</code> method in z-index order.
-	 * @param deltaTime The time passed since the last call to it.
-	 */
-	public synchronized void update(long deltaTime) {
-		for(List<GameComponent> list : components)
-			for(GameComponent comp : list)
-				if(comp != null)
-					comp.update(deltaTime);
-		
-		flush();
+		return allEntities;
 	}
 	
 	private synchronized void flush() {
-		for(List<GameComponent> list : components)
+		for(List<Entity> list : entities)
 			while(list.remove(null)) {}
 	}
-	
-	public void show() {}
-	
-	public void hide() {}
 	
 	/**
 	 * Sets the background of this component with an image in Art.
@@ -210,7 +250,7 @@ public class GameWorld implements Screen {
 	 */
 	public synchronized int size() {
 		int size = 0;
-		for(List<GameComponent> list : components)
+		for(List<Entity> list : entities)
 			size += list.size();
 		return size;
 	}
@@ -237,28 +277,5 @@ public class GameWorld implements Screen {
 	 */
 	public int getHeight() {
 		return parent.getHeight();
-	}
-	
-	/**
-	 * Draws the background then all the components in z-index order.
-	 * @param g The Graphics context to draw to the screen.
-	 */
-	public synchronized void draw(Graphics2D g) {
-		Image bg = (this.bg == null ? parent.getArt().get(bgImage) : this.bg);
-		
-		if(bg != null)
-			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
-		
-		for(List<GameComponent> list : components) {
-			for(GameComponent comp : list) {
-				try{
-					if(comp.getBounds().intersects(parent.getBounds()))
-						comp.draw((Graphics2D)g.create());
-				}
-				catch(Exception exc) {
-					exc.printStackTrace();
-				}
-			}
-		}
 	}
 }
