@@ -78,14 +78,14 @@ public abstract class Entity implements Element {
 	 * @param y The new Y value.
 	 */
 	public void setY(double y) {
-		getBounds().setRect(getX(),y,getWidth(),getHeight());
+		bounds.setRect(getX(),y,getWidth(),getHeight());
 	}
 	
 	/**
 	 * @return The width of this game component.
 	 */
 	public double getWidth() {
-		return getBounds().getWidth();
+		return bounds.getWidth();
 	}
 	
 	public int getIntWidth() {
@@ -97,14 +97,14 @@ public abstract class Entity implements Element {
 	 * @param width The new width.
 	 */
 	public void setWidth(double width) {
-		getBounds().setRect(getX(),getY(),width,getHeight());
+		bounds.setRect(getX(),getY(),width,getHeight());
 	}
 	
 	/**
 	 * @return The height of this game component.
 	 */
 	public double getHeight() {
-		return getBounds().getHeight();
+		return bounds.getHeight();
 	}
 	
 	public double getIntHeight() {
@@ -116,7 +116,7 @@ public abstract class Entity implements Element {
 	 * @param height The new height.
 	 */
 	public void setHeight(double height) {
-		getBounds().setRect(getX(),getY(),getWidth(),height);
+		bounds.setRect(getX(),getY(),getWidth(),height);
 	}
 	
 	/**

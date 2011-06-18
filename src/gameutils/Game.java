@@ -113,6 +113,9 @@ public abstract class Game extends Applet implements Runnable {
 		art = new Art();
 		sound = new Sound();
 		
+		art.setSourceClass(getClass());
+		sound.setSourceClass(getClass());
+		
 		screens = new Hashtable<String,ScreenInfo>();
 		
 		screenInfo = new ScreenInfo(new Screen() {

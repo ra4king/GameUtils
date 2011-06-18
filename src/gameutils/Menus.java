@@ -55,12 +55,10 @@ public class Menus implements Screen {
 		
 		menuPages.put(name,page);
 		
-		page.init(game);
+		game.addScreen(page, name);
 		
-		if(currentPage == null) {
+		if(currentPage == null)
 			currentPage = page;
-			page.show();
-		}
 		
 		return page;
 	}
@@ -96,32 +94,23 @@ public class Menus implements Screen {
 		if(page == null)
 			throw new IllegalArgumentException(name + " does not exist.");
 		
-		if(currentPage != null)
-			currentPage.hide();
-		
 		currentPage = page;
 		
-		currentPage.show();
+		game.setScreen(currentPage);
 	}
 	
 	/**
-	 * Calls the current MenuPage's show() method.
+	 * Sets the screen to the current MenuPage.
 	 */
 	public void show() {
 		if(currentPage == null)
 			return;
 		
-		currentPage.show();
+		game.setScreen(currentPage);
 	}
 	
-	/**
-	 * Calls the current MenuPage's hide() method.
-	 */
 	public void hide() {
-		if(currentPage == null)
-			return;
 		
-		currentPage.hide();
 	}
 	
 	/**

@@ -9,11 +9,12 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 
 /**
- * A class that stores sound Clips.
+ * A class that stores sound clips. It uses the main class's folder as the source.
  * @author Roi Atalla
  */
 public class Sound {
 	private Map<String,Clip> clips;
+	private Class<?> clazz;
 	private volatile boolean on = true;
 	
 	Sound() {
@@ -31,13 +32,21 @@ public class Sound {
 	}
 	
 	/**
+	 * Sets the source class. This is automatically set as the main class's folder.
+	 * @param clazz
+	 */
+	public void setSourceClass(Class<?> clazz) {
+		this.clazz = clazz;
+	}
+	
+	/**
 	 * Gets the sound file by using <code>Class.getResource(String)</code> and opens a Clip on it.
 	 * Its associated name is set as its canonical name.
 	 * @param file The file to import.
 	 * @return The Clip opened.
 	 */
 	public Clip add(String file) {
-		return add(getClass().getResource(file),getFileName(file));
+		return add(file,getFileName(file));
 	}
 	
 	/**
@@ -47,7 +56,7 @@ public class Sound {
 	 * @return The Clip opened.
 	 */
 	public Clip add(String file, String name) {
-		return add(getClass().getResource(file),name);
+		return add(clazz.getResource(file),name);
 	}
 	
 	/**
@@ -310,7 +319,7 @@ public class Sound {
 		public synchronized void run() {
 			for(String s : files.keySet()) {
 				try{
-					add(getClass().getResource(files.get(s)),s);
+					add(files.get(s),s);
 					status++;
 				}
 				catch(Exception exc) {

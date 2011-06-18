@@ -12,11 +12,12 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 /**
- * A class that stores Images.
+ * A class that stores Images. It uses the main class's folder as the source.
  * @author Roi Atalla
  */
 public class Art {
 	private Map<String,Image> images;
+	private Class<?> clazz;
 	
 	Art() {
 		images = new Hashtable<String,Image>();
@@ -33,7 +34,15 @@ public class Art {
 	}
 	
 	/**
-	 * Gets the image by using <code>Class.getResource(String)</code> to obtain the URL of the file, then using <code>javax.imageio.ImageIO</code> to import it.
+	 * Sets the source class. This is automatically set as the main class's folder.
+	 * @param clazz
+	 */
+	public void setSourceClass(Class<?> clazz) {
+		this.clazz = clazz;
+	}
+	
+	/**
+	 * Obtains the image by using <code>javax.imageio.ImageIO</code> to import it.
 	 * Its associated name is its canonical name.
 	 * @param filename The file name of the image. Automatically creates a compatible image.
 	 * @return The Image itself.
@@ -41,7 +50,7 @@ public class Art {
 	 */
 	public Image add(String file) {
 		try{
-			return add(getClass().getResource(file),getFileName(file));
+			return add(file,getFileName(file));
 		}
 		catch(RuntimeException exc) {
 			System.out.println(file);
@@ -50,7 +59,7 @@ public class Art {
 	}
 	
 	/**
-	 * Gets the image by using <code>Class.getResource(String)</code> to obtain the URL of the file, then using <code>javax.imageio.ImageIO</code> to import it.
+	 * Obtains the image by using <code>javax.imageio.ImageIO</code> to import it.
 	 * @param filename The file name of the image. Automatically creates a compatible image.
 	 * @param name The name to associate with this image.
 	 * @return The Image imported.
@@ -58,7 +67,7 @@ public class Art {
 	 */
 	public Image add(String file, String name) {
 		try{
-			return add(getClass().getResource(file),name);
+			return add(clazz.getResource(file),name);
 		}
 		catch(RuntimeException exc) {
 			System.out.println(file);
@@ -67,7 +76,7 @@ public class Art {
 	}
 	
 	/**
-	 * Gets the image using <code>javax.imageio.ImageIO</code> and adds it the map.
+	 * Obtains the image using <code>javax.imageio.ImageIO</code> and adds it the map.
 	 * @param url The URL to the image. Automatically creates a compatible image.
 	 * @param name The name of the image.
 	 * @return The Image itself.
