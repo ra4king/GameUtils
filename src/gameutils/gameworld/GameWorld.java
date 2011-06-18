@@ -1,4 +1,8 @@
-package gameutils;
+package gameutils.gameworld;
+
+import gameutils.Art;
+import gameutils.Game;
+import gameutils.Screen;
 
 import java.awt.Color;
 import java.awt.Graphics;

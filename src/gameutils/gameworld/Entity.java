@@ -1,7 +1,7 @@
-package gameutils;
+package gameutils.gameworld;
 
-import gameutils.networking.Packet;
-import gameutils.networking.Serializable;
+import gameutils.Element;
+import gameutils.Screen;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
@@ -12,7 +12,7 @@ import java.awt.geom.Rectangle2D;
  * All entities that are added to GameWorld must extend this class.
  * @author Roi Atalla
  */
-public abstract class Entity implements Element, Serializable {
+public abstract class Entity implements Element {
 	private GameWorld parent;
 	private Rectangle2D.Double bounds;
 	private Rectangle2D.Double areaBounds;
@@ -158,20 +158,6 @@ public abstract class Entity implements Element, Serializable {
 		
 		areaBounds = new Rectangle2D.Double();
 		areaBounds.setFrame(area.getBounds2D());
-	}
-	
-	/**
-	 * Writes this Entity's bounds into the Packet.
-	 */
-	public void serialize(Packet p) {
-		p.writeObject(getBounds());
-	}
-	
-	/**
-	 * Reads in the bounds from the Packet.
-	 */
-	public void deserialize(Packet p) {
-		bounds = (Rectangle2D.Double)p.readObject();
 	}
 	
 	public void show() {}

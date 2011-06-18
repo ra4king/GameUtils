@@ -49,7 +49,7 @@ public abstract class PacketIO {
 							throw new IOException("Class not found!");
 						
 						Serializable s = (Serializable)clazz.newInstance();
-						s.deserialize(read());
+						s.deserialize(read(in));
 						packet.writeObject(s);
 						break;
 					}
@@ -79,7 +79,7 @@ public abstract class PacketIO {
 	 * @param packet The Packet to be written.
 	 * @throws IOException
 	 */
-	public abstract void write(Packet packet) throws IOException ;
+	public abstract void write(Packet packet) throws IOException;
 	
 	/**
 	 * This is the standard way of writing a Packet to an ObjectOutputStream. If the protocol used only accepts byte arrays, it is recommended to wrap a ByteArrayOutputStream into an ObjectOutputStream and getting the byte array data from there.
@@ -139,7 +139,7 @@ public abstract class PacketIO {
 				out.writeUTF(alias);
 				Packet p = new Packet();
 				((Serializable)o).serialize(p);
-				write(p);
+				write(p,out);
 			}
 			else {
 				out.writeByte(10);

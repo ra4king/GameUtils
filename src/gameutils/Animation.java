@@ -30,6 +30,47 @@ public class Animation {
 	}
 	
 	/**
+	 * Splits the image into separate frames depending on the width and height.
+	 * @param i The image to be split.
+	 * @param width The width of each frame.
+	 * @param height The height of each frame.
+	 * @param time The duration of each frame.
+	 * @throws IllegalArgumentException If the image cannot be split evenly or the length of the array does not equal rows times columns.
+	 */
+	public void addFrames(Image i, int width, int height, long time) {
+		int rows = i.getWidth(null)/width;
+		int cols = i.getHeight(null)/height;
+		
+		long times[] = new long[rows*cols];
+		for(int a = 0; a < times.length; a++)
+			times[a] = time;
+		
+		addFrames(i,width,height,times);
+	}
+	
+	/**
+	 * Splits the image into separate frames depending on the width and height.
+	 * @param i The image to be split.
+	 * @param width The width of each frame.
+	 * @param height The height of each frame.
+	 * @param times The duration of each frame.
+	 * @throws IllegalArgumentException If the image cannot be split evenly or the length of the array does not equal rows times columns.
+	 */
+	public void addFrames(Image i, int width, int height, long times[]) {
+		int rows = i.getWidth(null)/width;
+		int cols = i.getHeight(null)/height;
+		
+		if(rows*cols != times.length)
+			throw new IllegalArgumentException("Not enough frame durations supplied.");
+		
+		Image images[][] = Art.split(i, width, height);
+		
+		for(Image row[] : images)
+			for(Image col : row)
+				addFrame(col,times[rows*cols]);
+	}
+	
+	/**
 	 * Returns the current image displayed.
 	 * @return The current image displayed.
 	 */
@@ -45,8 +86,10 @@ public class Animation {
 		if(frames.size() > 1) {
 			currentTime += deltaTime;
 			
-			if(currentTime > totalTime)
-				currentTime = frameIndex = 0;
+			if(currentTime > totalTime) {
+				frameIndex = 0;
+				currentTime %= totalTime;
+			}
 			
 			while(currentTime > frames.get(frameIndex).time)
 				frameIndex++;

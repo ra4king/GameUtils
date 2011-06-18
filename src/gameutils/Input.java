@@ -17,9 +17,7 @@ import java.util.Set;
  */
 public class Input {
 	private Set<Integer> keys = Collections.synchronizedSet(new HashSet<Integer>());
-	private Point currentMouseLoc;
-	private Point lastMouseClick;
-	private Point mouseDown;
+	private Point currentMouseLoc, lastMouseClick, mouseDown;
 	
 	/**
 	 * Initializes the listeners on the specified component.
@@ -51,13 +49,11 @@ public class Input {
 	}
 	
 	/**
-	 * Returns the current mouse location. This it is set to null;
+	 * Returns the current mouse location.
 	 * @return The current mouse location.
 	 */
 	public Point getCurrentMouseLocation() {
-		Point p = currentMouseLoc;
-		currentMouseLoc = null;
-		return p;
+		return currentMouseLoc;
 	}
 	
 	/**
@@ -108,7 +104,7 @@ public class Input {
 		public void mouseExited(MouseEvent me) {}
 		
 		public void mousePressed(MouseEvent me) {
-			mouseDown = lastMouseClick = me.getPoint();
+			lastMouseClick = mouseDown = me.getPoint();
 		}
 		
 		public void mouseReleased(MouseEvent me) {

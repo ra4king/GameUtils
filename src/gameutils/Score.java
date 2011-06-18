@@ -10,7 +10,7 @@ public class Score {
 	private long mask;
 	
 	/**
-	 * Default constructor.
+	 * Default constructor. Sets the score to 0.
 	 */
 	public Score() {
 		this(0);
@@ -49,6 +49,14 @@ public class Score {
 	 */
 	public long get() {
 		return decrypt(score);
+	}
+	
+	/**
+	 * Sets the score.
+	 * @param score The score to be set.
+	 */
+	public void set(long score) {
+		this.score = encrypt(score);
 	}
 	
 	/**

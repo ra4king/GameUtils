@@ -24,8 +24,6 @@ public class DatagramPacketIO extends PacketIO {
 		this.socket = socket;
 	}
 	
-	//public DatagramPacketIO(DatagramSocket socket)
-	
 	private int toInt(byte data[]) {
 		if(data.length != 4)
 			throw new IllegalArgumentException("Size of data array is not 4");
@@ -42,7 +40,7 @@ public class DatagramPacketIO extends PacketIO {
 				(byte)(data >>> 24),
 				(byte)(data >>> 16),
 				(byte)(data >>> 8),
-				(byte)data };
+				(byte) data };
 	}
 	
 	public Packet read() throws IOException {

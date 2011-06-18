@@ -14,7 +14,7 @@ import java.util.Map;
  * @author Roi Atalla
  */
 public class Menus implements Screen {
-	private Game parent;
+	private Game game;
 	private Map<String,MenuPage> menuPages;
 	private MenuPage currentPage;
 	private Image bg;
@@ -22,7 +22,7 @@ public class Menus implements Screen {
 	
 	/**
 	 * Initializes this object.
-	 * @param parent The parent of this object.
+	 * @param game The parent of this object.
 	 */
 	public Menus() {
 		menuPages = Collections.synchronizedMap(new HashMap<String,MenuPage>());
@@ -31,7 +31,7 @@ public class Menus implements Screen {
 	}
 	
 	public void init(Game game) {
-		parent = game;
+		this.game = game;
 	}
 	
 	/**
@@ -39,7 +39,7 @@ public class Menus implements Screen {
 	 * @return The parent of this object.
 	 */
 	public Game getParent() {
-		return parent;
+		return game;
 	}
 	
 	/**
@@ -55,7 +55,7 @@ public class Menus implements Screen {
 		
 		menuPages.put(name,page);
 		
-		page.init(this);
+		page.init(game);
 		
 		if(currentPage == null) {
 			currentPage = page;
@@ -179,7 +179,7 @@ public class Menus implements Screen {
 	 * @return The width of this world.
 	 */
 	public int getWidth() {
-		return parent.getWidth();
+		return game.getWidth();
 	}
 	
 	/**
@@ -187,7 +187,7 @@ public class Menus implements Screen {
 	 * @return The height of this world.
 	 */
 	public int getHeight() {
-		return parent.getHeight();
+		return game.getHeight();
 	}
 	
 	public void update(long deltaTime) {
@@ -204,7 +204,7 @@ public class Menus implements Screen {
 	public void draw(Graphics2D g) {
 		Graphics2D g2 = (Graphics2D)g.create();
 		
-		Image bg = (this.bg == null ? parent.getArt().get(bgImage) : this.bg);
+		Image bg = (this.bg == null ? game.getArt().get(bgImage) : this.bg);
 		
 		if(bg != null)
 			g2.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);

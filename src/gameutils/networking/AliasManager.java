@@ -41,12 +41,12 @@ public class AliasManager {
 	/**
 	 * Registers the specified Serializable object with the specified alias.
 	 * @param s The object who's Class instance is associated by the specified alias.
-	 * @param aliasName The alias to associated with the Class instance.
+	 * @param alias The alias to associated with the Class instance.
 	 * @return The alias that was set.
 	 */
-	public static String register(Serializable s, String aliasName) {
-		alias.put(aliasName,s.getClass());
-		return aliasName;
+	public static String register(Serializable s, String alias) {
+		AliasManager.alias.put(alias,s.getClass());
+		return alias;
 	}
 	
 	/**
@@ -61,6 +61,7 @@ public class AliasManager {
 	}
 	
 	private static String getSimpleName(Object o) {
-		return o.getClass().getName().substring(o.getClass().getName().lastIndexOf('.')+1);
+		String name = o.getClass().getName();
+		return name.substring(name.lastIndexOf('.')+1);
 	}
 }

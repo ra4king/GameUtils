@@ -7,7 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * A MenuItem is an item which is added to a MenuPage.
+ * A Widget could be added to any Screen.
  * @author Roi Atalla
  */
 public abstract class Widget implements Element {
@@ -31,20 +31,20 @@ public abstract class Widget implements Element {
 	public void hide() {}
 	
 	/**
-	 * Updates this MenuItem.
+	 * Updates this Widget.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public abstract void update(long deltaTime);
 	
 	/**
-	 * Draws this MenuItem.
+	 * Draws this Widget.
 	 * @param g The Graphics context to draw to the screen.
 	 */
 	public abstract void draw(Graphics2D g);
 	
 	/**
-	 * Returns the parent of this MenuItem.
-	 * @return The parent of this MenuItem.
+	 * Returns the parent of this Widget.
+	 * @return The parent of this Widget.
 	 */
 	public Screen getParent() {
 		return parent;
