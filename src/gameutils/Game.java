@@ -147,7 +147,7 @@ public abstract class Game extends Applet implements Runnable {
 			return super.getCodeBase();
 		
 		try{
-			return new URL("file:/"+System.getProperty("user.dir")+"/");
+			return getClass().getResource("/");
 		}
 		catch(Exception exc) {
 			exc.printStackTrace();
@@ -189,7 +189,7 @@ public abstract class Game extends Applet implements Runnable {
 	/**
 	 * Manually pauses the game loop. paused() will be called
 	 */
-	public synchronized void pause() {
+	public void pause() {
 		if(isActive()) {
 			isPaused = true;
 			paused();
@@ -207,7 +207,7 @@ public abstract class Game extends Applet implements Runnable {
 	/**
 	 * Manually resumes the game loop. resumed() will be called right before the game loop resumes.
 	 */
-	public synchronized void resume() {
+	public void resume() {
 		if(isActive() && isPaused()) {
 			isPaused = false;
 			resumed();
@@ -219,7 +219,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * @param width The new width of this game's canvas.
 	 * @param height The new height of this game's canvas;
 	 */
-	public synchronized void resize(int width, int height) {
+	public void resize(int width, int height) {
 		if(isApplet())
 			super.resize(width,height);
 		else
@@ -231,7 +231,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * @param width The new width of this game's canvas
 	 * @param height The new height of this game's canvas
 	 */
-	public synchronized void setSize(int width, int height) {
+	public void setSize(int width, int height) {
 		if(isApplet())
 			super.resize(width,height);
 		else {
@@ -385,18 +385,14 @@ public abstract class Game extends Applet implements Runnable {
 			public void focusGained(FocusEvent fe) {
 				if(focusLost && isPaused() && isActive()) {
 					focusLost = false;
-					synchronized(Game.this) {
-						resume();
-					}
+					resume();
 				}
 			}
 			
 			public void focusLost(FocusEvent fe) {
 				if(!isPaused() && isActive()) {
 					focusLost = true;
-					synchronized(Game.this) {
-						pause();
-					}
+					pause();
 				}
 			}
 		});
@@ -413,7 +409,7 @@ public abstract class Game extends Applet implements Runnable {
 	/**
 	 * Called when this game is stopped. Calling this method stops the game loop. This method then calls stopGame().
 	 */
-	public synchronized final void stop() {
+	public final void stop() {
 		sound.setOn(false);
 		isActive = false;
 		stopGame();
@@ -468,7 +464,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * @param screen The Screen to add.
 	 * @param name The name of the screen.
 	 */
-	public void addScreen(Screen screen, String name) {
+	public synchronized void addScreen(Screen screen, String name) {
 		if(screen == null)
 			throw new IllegalArgumentException("Screen cannot be null.");
 		if(name == null)
@@ -482,7 +478,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * Returns the current screen.
 	 * @return The current screen.
 	 */
-	public Screen getScreen() {
+	public synchronized Screen getScreen() {
 		return screenInfo.screen;
 	}
 	
@@ -490,7 +486,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * Returns the name of the current screen. This is the same as calling <code>getName(getScreen())</code>.
 	 * @return The name of the current screen.
 	 */
-	public String getScreenName() {
+	public synchronized String getScreenName() {
 		return getName(getScreen());
 	}
 	
@@ -499,7 +495,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * @param name The name of the screen.
 	 * @return The screen associated with the specified name.
 	 */
-	public Screen getScreen(String name) {
+	public synchronized Screen getScreen(String name) {
 		return screens.get(name).screen;
 	}
 	
@@ -508,7 +504,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * @param screen The Screen who's name is returned.
 	 * @return The name of the specified screen.
 	 */
-	public String getName(Screen screen) {
+	public synchronized String getName(Screen screen) {
 		for(String s : screens.keySet())
 			if(screens.get(s).screen == screen)
 				return s;
@@ -746,16 +742,12 @@ public abstract class Game extends Applet implements Runnable {
 	private class Listener implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
 		public void keyTyped(KeyEvent key) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.keyTyped(key);
-				}
+				l.keyTyped(key);
 		}
 		
 		public void keyPressed(KeyEvent key) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.keyPressed(key);
-				}
+				l.keyPressed(key);
 			
 			if(isStandardKeysEnabled()) {
 				switch(key.getKeyCode()) {
@@ -767,65 +759,47 @@ public abstract class Game extends Applet implements Runnable {
 		
 		public void keyReleased(KeyEvent key) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.keyReleased(key);
-				}
+				l.keyReleased(key);
 		}
 		
 		public void mouseClicked(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.mouseClicked(me);
-				}
+				l.mouseClicked(me);
 		}
 		
 		public void mouseEntered(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.mouseEntered(me);
-				}
+				l.mouseEntered(me);
 		}
 		
 		public void mouseExited(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.mouseExited(me);
-				}
+				l.mouseExited(me);
 		}
 		
 		public void mousePressed(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.mousePressed(me);
-				}
+				l.mousePressed(me);
 		}
 		
 		public void mouseReleased(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.mouseReleased(me);
-				}
+				l.mouseReleased(me);
 		}
 		
 		public void mouseDragged(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.mouseDragged(me);
-				}
+				l.mouseDragged(me);
 		}
 		
 		public void mouseMoved(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.mouseMoved(me);
-				}
+				l.mouseMoved(me);
 		}
 		
 		public void mouseWheelMoved(MouseWheelEvent mwe) {
 			for(InputListener l : screenInfo.listeners)
-				synchronized(Game.this) {
-					l.mouseWheelMoved(mwe);
-				}
+				l.mouseWheelMoved(mwe);
 		}
 	}
 }
