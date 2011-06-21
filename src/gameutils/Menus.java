@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Menus organizes a group of MenuPages.
+ * Menus organizes a group of MenuPages. <br>
+ * <b>REMEMBER:</b> A Menus object is only temporarily set as the Screen in a Game. The show() method sets the Game's Screen as the current MenuPage.
+ * This is important to consider when setting InputListeners. An InputListener should never be added on a Menus. 
  * @author Roi Atalla
  */
 public class Menus implements Screen {
@@ -96,7 +98,7 @@ public class Menus implements Screen {
 	}
 	
 	/**
-	 * Sets the screen to the current MenuPage.
+	 * Sets the Game's Screen to the current MenuPage.
 	 */
 	public void show() {
 		if(currentPage == null)
