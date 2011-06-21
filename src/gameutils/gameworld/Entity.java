@@ -8,7 +8,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 
 /**
- * TODO: FIX THIS ENTIRE THING: shape.getBounds2D() isn't persistant!
  * All entities that are added to GameWorld must extend this class.
  * @author Roi Atalla
  */
@@ -17,13 +16,19 @@ public abstract class Entity implements Element {
 	private Rectangle2D.Double bounds;
 	private Rectangle2D.Double areaBounds;
 	private Area area;
+	private double x, y, width, height;
 	
 	public Entity() {
 		this(0,0,0,0);
 	}
 	
 	public Entity(double x, double y, double w, double h) {
-		bounds = new Rectangle2D.Double(x,y,w,h);
+		bounds = new Rectangle2D.Double();
+		
+		this.x = x;
+		this.y = y;
+		this.width = w;
+		this.height = h;
 	}
 	
 	public void init(Screen world) {
@@ -41,7 +46,7 @@ public abstract class Entity implements Element {
 	 * @return The leftmost X position.
 	 */
 	public double getX() {
-		return bounds.x;
+		return x;
 	}
 	
 	/**
@@ -56,14 +61,14 @@ public abstract class Entity implements Element {
 	 * @param x The new X value.
 	 */
 	public void setX(double x) {
-		bounds.x = x;
+		this.x = x;
 	}
 	
 	/**
 	 * @return The topmost Y position.
 	 */
 	public double getY() {
-		return bounds.y;
+		return y;
 	}
 	
 	/**
@@ -78,14 +83,14 @@ public abstract class Entity implements Element {
 	 * @param y The new Y value.
 	 */
 	public void setY(double y) {
-		bounds.setRect(getX(),y,getWidth(),getHeight());
+		this.y = y;
 	}
 	
 	/**
 	 * @return The width of this game component.
 	 */
 	public double getWidth() {
-		return bounds.getWidth();
+		return width;
 	}
 	
 	public int getIntWidth() {
@@ -97,17 +102,17 @@ public abstract class Entity implements Element {
 	 * @param width The new width.
 	 */
 	public void setWidth(double width) {
-		bounds.setRect(getX(),getY(),width,getHeight());
+		this.width = width;
 	}
 	
 	/**
 	 * @return The height of this game component.
 	 */
 	public double getHeight() {
-		return bounds.getHeight();
+		return height;
 	}
 	
-	public double getIntHeight() {
+	public int getIntHeight() {
 		return (int)Math.round(getHeight());
 	}
 	
@@ -116,13 +121,14 @@ public abstract class Entity implements Element {
 	 * @param height The new height.
 	 */
 	public void setHeight(double height) {
-		bounds.setRect(getX(),getY(),getWidth(),height);
+		this.height = height;
 	}
 	
 	/**
 	 * @return The bounds of this game component.
 	 */
 	public Rectangle2D.Double getBounds() {
+		bounds.setFrame(x,y,width,height);
 		return bounds;
 	}
 	

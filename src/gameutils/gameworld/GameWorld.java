@@ -123,6 +123,7 @@ public class GameWorld implements Screen {
 		entities.get(zindex).add(e);
 		
 		e.init(this);
+		
 		return e;
 	}
 	
