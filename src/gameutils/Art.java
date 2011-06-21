@@ -6,21 +6,20 @@ import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.net.URL;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 /**
- * A class that stores Images. It uses the main class's folder as the source.
+ * A class that stores Images.
  * @author Roi Atalla
  */
 public class Art {
 	private Map<String,Image> images;
-	private Class<?> clazz;
 	
 	Art() {
-		images = new Hashtable<String,Image>();
+		images = new HashMap<String,Image>();
 	}
 	
 	/**
@@ -34,45 +33,25 @@ public class Art {
 	}
 	
 	/**
-	 * Sets the source class. This is automatically set as the main class's folder.
-	 * @param clazz
-	 */
-	public void setSourceClass(Class<?> clazz) {
-		this.clazz = clazz;
-	}
-	
-	/**
-	 * Obtains the image by using <code>javax.imageio.ImageIO</code> to import it.
+	 * This method searches the root directory for the file path. Then it obtains the image by using <code>javax.imageio.ImageIO</code>.
 	 * Its associated name is its canonical name.
 	 * @param filename The file name of the image. Automatically creates a compatible image.
 	 * @return The Image itself.
 	 * @throws Exception
 	 */
 	public Image add(String file) {
-		try{
-			return add(file,getFileName(file));
-		}
-		catch(RuntimeException exc) {
-			System.out.println(file);
-			throw exc;
-		}
+		return add(file,getFileName(file));
 	}
 	
 	/**
-	 * Obtains the image by using <code>javax.imageio.ImageIO</code> to import it.
+	 * This method searches the root directory for the file path. Then it obtains the image by using <code>javax.imageio.ImageIO</code>.
 	 * @param filename The file name of the image. Automatically creates a compatible image.
 	 * @param name The name to associate with this image.
 	 * @return The Image imported.
 	 * @throws Exception
 	 */
 	public Image add(String file, String name) {
-		try{
-			return add(clazz.getResource(file),name);
-		}
-		catch(RuntimeException exc) {
-			System.out.println(file);
-			throw exc;
-		}
+		return add(getClass().getResource("/"+file),name);
 	}
 	
 	/**
@@ -87,7 +66,7 @@ public class Art {
 			return add(ImageIO.read(url),name);
 		}
 		catch(Exception exc) {
-			throw new RuntimeException("Error downloading image: " + exc);
+			throw new IllegalArgumentException("Error loading image: " + url + " with name: " + name);
 		}
 	}
 	
@@ -97,22 +76,8 @@ public class Art {
 	 * @param name The name of the image.
 	 * @return The Image itself.
 	 */
-	public Image add(Image image, String name) {
-		return add(image, name, true);
-	}
-	
-	/**
-	 * Adds the image to the map.
-	 * @param image The image to be added.
-	 * @param name The name of the image.
-	 * @param createCompatible If true, it will create a compatible image, else it will directly add this image.
-	 * @return The Image itself.
-	 */
-	public Image add(Image image, String name, boolean createCompatible) {
-		if(createCompatible)
-			return images.put(name,createCompatibleImage(image));
-		else
-			return images.put(name,image);
+	public synchronized Image add(Image image, String name) {
+		return images.put(name,createCompatibleImage(image));
 	}
 	
 	/**
@@ -121,7 +86,7 @@ public class Art {
 	 * @return The image associated with this name, if not found, returns null.
 	 */
 	public Image get(String name) {
-		return images.get(name.intern());
+		return images.get(name);
 	}
 	
 	/**
@@ -144,7 +109,7 @@ public class Art {
 	 * @param newName The new named to be used.
 	 */
 	public void rename(String oldName, String newName) {
-		add(remove(oldName.intern()),newName.intern());
+		add(remove(oldName),newName);
 	}
 	
 	/**
@@ -154,8 +119,6 @@ public class Art {
 	 * @return The old image.
 	 */
 	public Image replace(String oldName, Image newImage) {
-		oldName = oldName.intern();
-		
 		if(get(oldName) == null)
 			throw new IllegalArgumentException("Invalid name");
 		
@@ -167,16 +130,16 @@ public class Art {
 	 * @param first The name of the first image.
 	 * @param second The name of the second image.
 	 */
-	public synchronized void swap(String first, String second) {
-		Image i = images.get(first.intern());
-		Image i2 = images.get(second.intern());
+	public void swap(String first, String second) {
+		Image i = images.get(first);
+		Image i2 = images.get(second);
 		
 		if(i == null)
 			throw new IllegalArgumentException("First name is invalid.");
 		if(i2 == null)
 			throw new IllegalArgumentException("Second name is invalid");
 		
-		images.put(second.intern(),images.put(first.intern(),images.get(second.intern())));
+		images.put(second,images.put(first,images.get(second)));
 	}
 	
 	/**
@@ -185,8 +148,8 @@ public class Art {
 	 * @return The image associated with this name, if not found, returns null.
 	 */
 	public synchronized Image remove(String name) {
-		Image i = images.get(name.intern());
-		images.remove(name.intern());
+		Image i = images.get(name);
+		images.remove(name);
 		return i;
 	}
 	
@@ -201,7 +164,7 @@ public class Art {
 		Image im[][] = split(image,width,height);
 		for(Image i[] : im)
 			for(Image i2 : i)
-				add(i2,"Image"+images.size(),true);
+				add(i2,"Image"+images.size());
 		return im;
 	}
 	
@@ -301,8 +264,12 @@ public class Art {
 	 * @author Roi Atalla
 	 */
 	public class Loader implements Runnable {
-		private Map<String,String> files = new Hashtable<String,String>();
+		private Map<String,String> files;
 		private int status;
+		
+		public Loader() {
+			files = new HashMap<String,String>();
+		}
 		
 		/**
 		 * Returns the total number of images in this buffer.
@@ -333,7 +300,7 @@ public class Art {
 		 * @param file The file to be loaded.
 		 * @param name The name to be associated to this image.
 		 */
-		public void addFile(String file, String name) {
+		public synchronized void addFile(String file, String name) {
 			files.put(name,file);
 		}
 		
@@ -366,7 +333,7 @@ public class Art {
 		/**
 		 * Adds all images to the Art instance.
 		 */
-		public void run() {
+		public synchronized void run() {
 			for(String s : files.keySet()) {
 				try{
 					add(files.get(s),s);

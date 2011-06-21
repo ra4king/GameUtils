@@ -1,11 +1,6 @@
 package gameutils;
 
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Transparency;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,17 +12,13 @@ public class Menus implements Screen {
 	private Game game;
 	private Map<String,MenuPage> menuPages;
 	private MenuPage currentPage;
-	private Image bg;
-	private String bgImage;
 	
 	/**
 	 * Initializes this object.
 	 * @param game The parent of this object.
 	 */
 	public Menus() {
-		menuPages = Collections.synchronizedMap(new HashMap<String,MenuPage>());
-		
-		setBackground(Color.lightGray);
+		menuPages = new HashMap<String,MenuPage>();
 	}
 	
 	public void init(Game game) {
@@ -47,7 +38,7 @@ public class Menus implements Screen {
 	 * @param page The MenuPage to add.
 	 * @return The MenuPage that was added.
 	 */
-	public MenuPage addPage(String name, MenuPage page) {
+	public synchronized MenuPage addPage(String name, MenuPage page) {
 		if(name == null)
 			throw new IllegalArgumentException("Name cannot be null");
 		if(page == null)
@@ -56,9 +47,6 @@ public class Menus implements Screen {
 		menuPages.put(name,page);
 		
 		game.addScreen(page, name);
-		
-		if(currentPage == null)
-			currentPage = page;
 		
 		return page;
 	}
@@ -69,7 +57,15 @@ public class Menus implements Screen {
 	 * @return The MenuPage with the specified description, null if not found.
 	 */
 	public MenuPage getMenuPage(String name) {
-		return menuPages.get(name.intern());
+		return menuPages.get(name);
+	}
+	
+	/**
+	 * Returns the current page displayed.
+	 * @return The current page displayed.
+	 */
+	public MenuPage getMenuPageShown() {
+		return currentPage;
 	}
 	
 	/**
@@ -77,7 +73,7 @@ public class Menus implements Screen {
 	 * @param page The MenuPage whose name is returned.
 	 * @return The name of the MenuPage. If it is not found, returns null.
 	 */
-	public String getMenuPageName(MenuPage page) {
+	public synchronized String getMenuPageName(MenuPage page) {
 		for(String s : menuPages.keySet())
 			if(menuPages.get(s) == page)
 				return s;
@@ -85,7 +81,7 @@ public class Menus implements Screen {
 	}
 	
 	/**
-	 * Sets the current page displayed. Then calls 
+	 * Sets the current page displayed. This must be called after this Menus has been added and set to Game.
 	 * @param pageName The description of the new page to display.
 	 */
 	public void setMenuPageShown(String name) {
@@ -113,97 +109,13 @@ public class Menus implements Screen {
 		
 	}
 	
-	/**
-	 * Returns the current page displayed.
-	 * @return The current page displayed.
-	 */
-	public MenuPage getMenuPageShown() {
-		return currentPage;
-	}
-	
-	/**
-	 * Sets the background of this component with an image in Art.
-	 * @param s The associated name of an image in Art. This image will be drawn before all other components.
-	 */
-	public void setBackground(String s) {
-		bg = null;
-		bgImage = s;
-	}
-	
-	/**
-	 * Sets the background of this component. A compatible image is created.
-	 * @param bg The image to be drawn before all other components.
-	 */
-	public void setBackground(Image bg) {
-		bgImage = null;
-		
-		this.bg = Art.createCompatibleImage(bg);
-	}
-	
-	/**
-	 * Sets the background to the specified color.
-	 * This method creates a 1x1 image with the specified color
-	 * and stretches it to the width and height of the parent.
-	 * @param color The color to be used as the entire background. It will be drawn before all other components.
-	 */
-	public void setBackground(Color color) {
-		bgImage = null;
-		
-		bg = Art.createCompatibleImage(1, 1, color.getAlpha() == 0 || color.getAlpha() == 255 ? (color.getAlpha() == 0 ? Transparency.BITMASK : Transparency.OPAQUE) : Transparency.TRANSLUCENT);
-		Graphics g = bg.getGraphics();
-		g.setColor(color);
-		g.fillRect(0,0,1,1);
-	}
-	
-	/**
-	 * Returns the background image.
-	 * @return The image used as the background.
-	 */
-	public Image getBackgroundImage() {
-		return bg;
-	}
-	
-	/**
-	 * This calls the parent's getWidth() method.
-	 * @return The width of this world.
-	 */
-	public int getWidth() {
-		return game.getWidth();
-	}
-	
-	/**
-	 * This calls the parent's getHeight() method.
-	 * @return The height of this world.
-	 */
-	public int getHeight() {
-		return game.getHeight();
-	}
-	
+	//Shouldn't even be called.
 	public void update(long deltaTime) {
-		if(currentPage == null)
-			return;
-		
-		currentPage.update(deltaTime);
+		throw new RuntimeException("THIS METHOD SHOULDN'T BE CALLED!!!");
 	}
 	
-	/**
-	 * Draws the background then current MenuPage displayed.
-	 * @param g The Graphics context to draw to the screen.
-	 */
+	//Shouldn't even be called.
 	public void draw(Graphics2D g) {
-		Graphics2D g2 = (Graphics2D)g.create();
-		
-		Image bg = (this.bg == null ? game.getArt().get(bgImage) : this.bg);
-		
-		if(bg != null)
-			g2.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
-		
-		if(currentPage != null)
-			try{
-				currentPage.draw(g2);
-			}
-			catch(Exception exc) {
-				exc.printStackTrace();
-			}
+		throw new RuntimeException("THIS METHOD SHOULDN'T BE CALLED!!!");
 	}
 }

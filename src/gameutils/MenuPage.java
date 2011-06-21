@@ -2,7 +2,11 @@ package gameutils;
 
 import gameutils.gui.Widget;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Transparency;
 import java.util.ArrayList;
 
 /**
@@ -13,6 +17,8 @@ public class MenuPage implements Screen {
 	private Menus menus;
 	private Game game;
 	private ArrayList<Widget> widgets;
+	private Image bg;
+	private String bgImage;
 	
 	/**
 	 * Initializes this object.
@@ -25,42 +31,12 @@ public class MenuPage implements Screen {
 		this.menus = menus;
 		
 		widgets = new ArrayList<Widget>();
+		
+		setBackground(Color.lightGray);
 	}
 	
 	public void init(Game game) {
 		this.game = game;
-	}
-	
-	/**
-	 * Calls all added Widget's show() method.
-	 */
-	public void show() {
-		for(Widget w : widgets)
-			w.show();
-	}
-	
-	/**
-	 * Calls all added Widget's hide() method.
-	 */
-	public void hide() {
-		for(Widget w : widgets)
-			w.hide();
-	}
-	
-	/**
-	 * Calls all added Widget's update(long) method.
-	 */
-	public void update(long deltaTime) {
-		for(Widget w : widgets)
-			w.update(deltaTime);
-	}
-	
-	/**
-	 * Draws all added Widget's draw(Graphics2D) method in the order they were added in.
-	 */
-	public void draw(Graphics2D g) {
-		for(Widget w : widgets)
-			w.draw(g);
 	}
 	
 	/**
@@ -69,6 +45,43 @@ public class MenuPage implements Screen {
 	 */
 	public Game getParent() {
 		return game;
+	}
+	
+	/**
+	 * Calls all added Widget's show() method.
+	 */
+	public synchronized void show() {
+		for(Widget w : widgets)
+			w.show();
+	}
+	
+	/**
+	 * Calls all added Widget's hide() method.
+	 */
+	public synchronized void hide() {
+		for(Widget w : widgets)
+			w.hide();
+	}
+	
+	/**
+	 * Calls all added Widget's update(long) method.
+	 */
+	public synchronized void update(long deltaTime) {
+		for(Widget w : widgets)
+			w.update(deltaTime);
+	}
+	
+	/**
+	 * Draws the background then calls all added Widget's draw(Graphics2D) method in the order they were added in.
+	 */
+	public synchronized void draw(Graphics2D g) {
+		Image bg = (this.bg == null ? game.getArt().get(bgImage) : this.bg);
+		
+		if(bg != null)
+			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
+		
+		for(Widget w : widgets)
+			w.draw((Graphics2D)g.create());
 	}
 	
 	/**
@@ -84,7 +97,7 @@ public class MenuPage implements Screen {
 	 * @param widget The Widget to add.
 	 * @return The Widget added.
 	 */
-	public Widget add(Widget widget) {
+	public synchronized Widget add(Widget widget) {
 		if(widget == null)
 			throw new IllegalArgumentException("Widget cannot be null.");
 		
@@ -109,7 +122,7 @@ public class MenuPage implements Screen {
 	 * @param widget The Widget to be removed.
 	 * @return True if the Widget has been found and removed, false otherwise.
 	 */
-	public boolean remove(Widget widget) {
+	public synchronized boolean remove(Widget widget) {
 		return widgets.remove(widget);
 	}
 	
@@ -118,7 +131,7 @@ public class MenuPage implements Screen {
 	 * @return The width of this MenuPage.
 	 */
 	public int getWidth() {
-		return menus.getWidth();
+		return game.getWidth();
 	}
 	
 	/**
@@ -126,6 +139,48 @@ public class MenuPage implements Screen {
 	 * @return The height of this MenuPage.
 	 */
 	public int getHeight() {
-		return menus.getHeight();
+		return game.getHeight();
+	}
+	
+	/**
+	 * Sets the background of this component with an image in Art.
+	 * @param s The associated name of an image in Art. This image will be drawn before all other components.
+	 */
+	public void setBackground(String s) {
+		bg = null;
+		bgImage = s;
+	}
+	
+	/**
+	 * Sets the background of this component. A compatible image is created.
+	 * @param bg The image to be drawn before all other components.
+	 */
+	public void setBackground(Image bg) {
+		bgImage = null;
+		
+		this.bg = Art.createCompatibleImage(bg);
+	}
+	
+	/**
+	 * Sets the background to the specified color.
+	 * This method creates a 1x1 image with the specified color
+	 * and stretches it to the width and height of the parent.
+	 * @param color The color to be used as the entire background. It will be drawn before all other components.
+	 */
+	public void setBackground(Color color) {
+		bgImage = null;
+		
+		bg = Art.createCompatibleImage(1, 1, color.getAlpha() == 0 || color.getAlpha() == 255 ? (color.getAlpha() == 0 ? Transparency.BITMASK : Transparency.OPAQUE) : Transparency.TRANSLUCENT);
+		Graphics g = bg.getGraphics();
+		g.setColor(color);
+		g.fillRect(0,0,1,1);
+	}
+	
+	/**
+	 * Returns the background image.
+	 * @return The image used as the background.
+	 */
+	public Image getBackgroundImage() {
+		return bg;
 	}
 }

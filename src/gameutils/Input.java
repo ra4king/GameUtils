@@ -89,10 +89,7 @@ public class Input {
 		}
 		
 		public void keyReleased(KeyEvent key) {
-			if(keys.remove(key.getKeyCode()))
-				return;
-			
-			System.out.println("Error, input not found: " + KeyEvent.getKeyText(key.getKeyCode()));
+			keys.remove(key.getKeyCode());
 		}
 		
 		public void keyTyped(KeyEvent key) {}

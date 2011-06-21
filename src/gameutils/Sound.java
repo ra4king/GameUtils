@@ -1,7 +1,7 @@
 package gameutils;
 
 import java.net.URL;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.sound.sampled.AudioSystem;
@@ -9,16 +9,15 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 
 /**
- * A class that stores sound clips. It uses the main class's folder as the source.
+ * A class that stores sound clips.
  * @author Roi Atalla
  */
 public class Sound {
 	private Map<String,Clip> clips;
-	private Class<?> clazz;
 	private volatile boolean on = true;
 	
 	Sound() {
-		clips = new Hashtable<String,Clip>();
+		clips = new HashMap<String,Clip>();
 	}
 	
 	/**
@@ -32,15 +31,7 @@ public class Sound {
 	}
 	
 	/**
-	 * Sets the source class. This is automatically set as the main class's folder.
-	 * @param clazz
-	 */
-	public void setSourceClass(Class<?> clazz) {
-		this.clazz = clazz;
-	}
-	
-	/**
-	 * Gets the sound file by using <code>Class.getResource(String)</code> and opens a Clip on it.
+	 * This method searches the root directory for the file path. Then it opens a Clip on the specified file.
 	 * Its associated name is set as its canonical name.
 	 * @param file The file to import.
 	 * @return The Clip opened.
@@ -50,13 +41,13 @@ public class Sound {
 	}
 	
 	/**
-	 * Gets the sound file by using <code>Class.getResource(String)</code> and opens a Clip on it.
+	 * This method searches the root directory for the file path. Then it opens a Clip on the specified file.
 	 * @param file The file to import.
 	 * @param name The name to associate with this Clip.
 	 * @return The Clip opened.
 	 */
 	public Clip add(String file, String name) {
-		return add(clazz.getResource(file),name);
+		return add(getClass().getResource("/"+file),name);
 	}
 	
 	/**
@@ -72,8 +63,7 @@ public class Sound {
 			return add(clip,name);
 		}
 		catch(Exception exc) {
-			exc.printStackTrace();
-			return null;
+			throw new IllegalArgumentException("Error loading clip: " + url + " with name: " + name);
 		}
 	}
 	
@@ -83,7 +73,7 @@ public class Sound {
 	 * @param name The name to associate with this clip.
 	 * @return The clip that was added.
 	 */
-	public Clip add(Clip clip, String name) {
+	public synchronized Clip add(Clip clip, String name) {
 		if(clip.isOpen())
 			clips.put(name,clip);
 		
@@ -96,7 +86,7 @@ public class Sound {
 	 * @return The Clip with the specified name.
 	 */
 	public Clip getClip(String name) {
-		return clips.get(name.intern());
+		return clips.get(name);
 	}
 	
 	/**
@@ -106,7 +96,7 @@ public class Sound {
 	 * @throws Exception
 	 */
 	public void rename(String oldName, String newName) {
-		add(remove(oldName.intern()),newName.intern());
+		add(remove(oldName),newName);
 	}
 	
 	/**
@@ -116,8 +106,6 @@ public class Sound {
 	 * @return The Clip that was replaced.
 	 */
 	public Clip replace(String oldName, Clip newClip) {
-		oldName = oldName.intern();
-		
 		if(getClip(oldName) == null)
 			throw new IllegalArgumentException("Invalid name");
 		
@@ -132,15 +120,15 @@ public class Sound {
 	 * @param second The second Clip.
 	 */
 	public synchronized void swap(String first, String second) {
-		Clip c = clips.get(first.intern());
-		Clip c2 = clips.get(second.intern());
+		Clip c = clips.get(first);
+		Clip c2 = clips.get(second);
 		
 		if(c == null)
 			throw new IllegalArgumentException("First name is invalid.");
 		if(c2 == null)
 			throw new IllegalArgumentException("Second name is invalid");
 		
-		clips.put(second.intern(),clips.put(first.intern(),clips.get(second.intern())));
+		clips.put(second,clips.put(first,clips.get(second)));
 	}
 	
 	/**
@@ -150,7 +138,7 @@ public class Sound {
 	 */
 	public synchronized Clip remove(String name) {
 		Clip c = getClip(name);
-		clips.remove(name.intern());
+		clips.remove(name);
 		return c;
 	}
 	
@@ -189,7 +177,7 @@ public class Sound {
 	/**
 	 * Pauses all currently playing Clips.
 	 */
-	public void pause() {
+	public synchronized void pause() {
 		for(Clip c : clips.values())
 			c.stop();
 	}
@@ -197,7 +185,7 @@ public class Sound {
 	/**
 	 * Plays all currently paused Clips.
 	 */
-	public void resume() {
+	public synchronized void resume() {
 		for(Clip c : clips.values()) {
 			if(on && c.getMicrosecondPosition() != c.getMicrosecondLength() &&
 					c.getMicrosecondPosition() != 0) {
@@ -227,7 +215,7 @@ public class Sound {
 	 * Sets the sound on/off.
 	 * @param isOn If true, all currently playing Clips are set to the minimum volume, else they are set to default volume.
 	 */
-	public void setOn(boolean isOn) {
+	public synchronized void setOn(boolean isOn) {
 		on = isOn;
 		
 		for(Clip c : clips.values()) {
@@ -252,7 +240,7 @@ public class Sound {
 	 * @author Roi Atalla
 	 */
 	public class Loader implements Runnable {
-		private Map<String,String> files = new Hashtable<String,String>();
+		private Map<String,String> files = new HashMap<String,String>();
 		private int status;
 		
 		/**
@@ -284,7 +272,7 @@ public class Sound {
 		 * @param file The file to be loaded.
 		 * @param name The name to be associated to this Clip.
 		 */
-		public void addFile(String file, String name) {
+		public synchronized void addFile(String file, String name) {
 			files.put(name,file);
 		}
 		

@@ -26,7 +26,8 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JFrame;
@@ -113,10 +114,7 @@ public abstract class Game extends Applet implements Runnable {
 		art = new Art();
 		sound = new Sound();
 		
-		art.setSourceClass(getClass());
-		sound.setSourceClass(getClass());
-		
-		screens = new Hashtable<String,ScreenInfo>();
+		screens = Collections.synchronizedMap(new HashMap<String,ScreenInfo>());
 		
 		screenInfo = new ScreenInfo(new Screen() {
 			public void init(Game game) {}
@@ -427,7 +425,7 @@ public abstract class Game extends Applet implements Runnable {
 	protected abstract void initGame();
 	
 	/**
-	 * Called FPS times a second. This method calls updateMenus or updateGameWorld according to the gameOver property.
+	 * Called FPS times a second. Updates the current screen.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	protected synchronized void update(long deltaTime) {
@@ -457,10 +455,11 @@ public abstract class Game extends Applet implements Runnable {
 	protected abstract void stopGame();
 	
 	/**
-	 * Called FPS times a second. Draws the Menus, the GameWorld, paused Menus, and/or the FPS according to the appropriate gameOver, isPaused, and showFPS properties.
+	 * Called FPS times a second. Clears the window using the Graphics2D's background color then draws the current screen.
 	 * @param g The Graphics context to be used to draw to the canvas.
 	 */
 	protected synchronized void paint(Graphics2D g) {
+		g.clearRect(0, 0, getWidth(), getHeight());
 		screenInfo.screen.draw((Graphics2D)g.create());
 	}
 	
@@ -480,11 +479,19 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * Returns the current screen being shown.
-	 * @return The current screen being shown.
+	 * Returns the current screen.
+	 * @return The current screen.
 	 */
 	public Screen getScreen() {
 		return screenInfo.screen;
+	}
+	
+	/**
+	 * Returns the name of the current screen. This is the same as calling <code>getName(getScreen())</code>.
+	 * @return The name of the current screen.
+	 */
+	public String getScreenName() {
+		return getName(getScreen());
 	}
 	
 	/**

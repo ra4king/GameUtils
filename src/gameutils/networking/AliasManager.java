@@ -1,6 +1,6 @@
 package gameutils.networking;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,7 +9,7 @@ import java.util.Set;
  * @author Roi Atalla
  */
 public class AliasManager {
-	private static Map<String,Class<?>> alias = new Hashtable<String,Class<?>>();
+	private static Map<String,Class<?>> alias = new HashMap<String,Class<?>>();
 	
 	/**
 	 * Returns the Class object associated with the specified alias.
@@ -17,7 +17,7 @@ public class AliasManager {
 	 * @return The Class object associated with the specified alias.
 	 */
 	public static Class<?> getClass(String name) {
-		return alias.get(name.intern());
+		return alias.get(name);
 	}
 	
 	/**
