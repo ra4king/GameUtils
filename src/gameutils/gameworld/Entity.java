@@ -2,6 +2,7 @@ package gameutils.gameworld;
 
 import gameutils.Element;
 import gameutils.Screen;
+import gameutils.util.FastMath;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
@@ -53,7 +54,7 @@ public abstract class Entity implements Element {
 	 * @return The nearest integer of the leftmost X position.
 	 */
 	public int getIntX() {
-		return (int)Math.round(getX());
+		return (int)FastMath.round(getX());
 	}
 	
 	/**
@@ -75,7 +76,7 @@ public abstract class Entity implements Element {
 	 * @return The nearest integer of the topmost Y position.
 	 */
 	public int getIntY() {
-		return (int)Math.round(getY());
+		return (int)FastMath.round(getY());
 	}
 	
 	/**
@@ -94,7 +95,7 @@ public abstract class Entity implements Element {
 	}
 	
 	public int getIntWidth() {
-		return (int)Math.round(getWidth());
+		return (int)FastMath.round(getWidth());
 	}
 	
 	/**
@@ -113,7 +114,7 @@ public abstract class Entity implements Element {
 	}
 	
 	public int getIntHeight() {
-		return (int)Math.round(getHeight());
+		return (int)FastMath.round(getHeight());
 	}
 	
 	/**

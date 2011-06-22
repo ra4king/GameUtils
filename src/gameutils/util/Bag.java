@@ -15,23 +15,20 @@ public class Bag<T> extends ArrayList<T> {
 		super.add(idx,t);
 	}
 	
-	public void swap(int idx1, int idx2) {
-		set(idx1,set(idx2,get(idx1)));
+	public T set(int idx, T t) {
+		checkIfNull(t);
+		return super.set(idx,t);
 	}
 	
 	public T remove(int idx) {
 		checkRange(idx);
 		
-		if(idx == size()-1)
-			return super.remove(idx);
-		
-		swap(idx,size()-1);
-		
-		return super.remove(size()-1);
+		return super.set(idx,null);
 	}
 	
 	public boolean remove(Object o) {
-		checkIfNull(o);
+		if(o == null)
+			return super.remove(o);
 		
 		int idx = indexOf(o);
 		if(idx == -1)

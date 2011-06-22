@@ -4,6 +4,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 
+/**
+ * Implements the methods in InputListener so you wouldn't have to implement the ones you don't need.
+ * @author Roi Atalla
+ */
 public abstract class AbstractInputListener implements InputListener {
 	public void keyPressed(KeyEvent key) {}
 	public void keyReleased(KeyEvent key) {}

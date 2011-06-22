@@ -1,5 +1,7 @@
 package gameutils;
 
+import gameutils.util.FastMath;
+
 /**
  * Stores the score and high score.
  * @author Roi Atalla
@@ -52,7 +54,7 @@ public class Score {
 	 * @return The score rounded to a long.
 	 */
 	public long getLong() {
-		return Math.round(get());
+		return FastMath.round(get());
 	}
 	
 	/**

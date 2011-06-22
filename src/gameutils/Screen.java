@@ -3,7 +3,7 @@ package gameutils;
 import java.awt.Graphics2D;
 
 /**
- * A screen is what will be currently drawn in a game. Only one screen can be active at a time.
+ * A Screen is a game state. Only one Screen can be active in a Game at a time.
  * @author Roi A.
  */
 public interface Screen {

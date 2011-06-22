@@ -1,6 +1,5 @@
 package gameutils.gui;
 
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -8,7 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
- * A MenuLabel extends MenuItem and just draws a String.
+ * A Label extends Widget and just draws a String.
  * @author Roi Atalla
  */
 public class Label extends Widget {

@@ -1,5 +1,7 @@
 package gameutils;
 
+import gameutils.util.FastMath;
+
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -35,15 +37,58 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 /**
- * The main class that should be extended by the user.
- * It handles the game loop and certain other functions.
+ * Game is the main class that must be extended by the user. It handles the game loop and certain other functions.<br>
+ * Game extends Applet but also supports being a desktop app.<br>
+ * Remember: if this game will be used as an Applet, a default constructor <strong>MUST</strong> be present.<br>
+ * <br>
+ * It uses a Screen system where only 1 Screen is active at one time.<br>
+ * <br>
+ * A typical game looks like this: <br>
+ * <br>
+ * <code>
+ * public class MyGame extends Game {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;public static void main(String args[]) {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyGame game = new MyGame();<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;game.setupFrame("My Game",800,600,true);<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;game.start();<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;public void initGame() {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Initialize the game<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;public void update(long deltaTime) {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Update the game<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * <br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;public void paused() {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Pause the game<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ *<br>     
+ * &nbsp;&nbsp;&nbsp;&nbsp;public void resumed() {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Resume the game<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ *<br>     
+ * &nbsp;&nbsp;&nbsp;&nbsp;public void resized(int width, int height) {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Resize the game<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ *<br>     
+ * &nbsp;&nbsp;&nbsp;&nbsp;public void stopGame() {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Stop the game<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ *<br>     
+ * &nbsp;&nbsp;&nbsp;&nbsp;public void paint(Graphics2D g) {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Draw the game<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * }
+ * </code>
  * @author Roi Atalla
  */
 public abstract class Game extends Applet implements Runnable {
 	private static final long serialVersionUID = -1870725768768871166L;
 	
 	/**
-	 * Initializes and displays the window, then calls init().
+	 * Initializes and displays the window.
 	 * @param title The title of the window
 	 * @param width The width of the window
 	 * @param height The height of the window
@@ -83,6 +128,11 @@ public abstract class Game extends Applet implements Runnable {
 	 */
 	public static final int MAX_FPS = 0;
 	
+	/**
+	 * 1 second in nanoseconds, AKA 1,000,000 nanoseconds.
+	 */
+	public static final double ONE_SECOND = 1e9;
+	
 	private final Art art;
 	private final Sound sound;
 	private final Map<String,ScreenInfo> screens;
@@ -99,14 +149,19 @@ public abstract class Game extends Applet implements Runnable {
 	private volatile boolean isPaused;
 	
 	/**
-	 * Default constructor, sets the FPS to 60, version to 1.0, anti-aliasing is turned on, and the showFPS and gameOver properties are set to true.
+	 * Default constructor. The defaults are:<br>
+	 * - 60FPS<br>
+	 * - Version 1.0<br>
+	 * - showFPS = true<br>
+	 * - quality = high<br>
+	 * - standardKeysEnabled = true
 	 */
 	public Game() {
 		this(60,1.0);
 	}
 	
 	/**
-	 * Sets the FPS and version.
+	 * Sets defaults and the FPS and version.
 	 * @param FPS The FPS to achieve.
 	 * @param version The version of this game.
 	 */
@@ -155,16 +210,13 @@ public abstract class Game extends Applet implements Runnable {
 		}
 	}
 	
-	/**
-	 * Returns the canvas's Graphics object.
-	 */
 	public Graphics getGraphics() {
 		return canvas.getGraphics();
 	}
 	
 	/**
 	 * Returns the root component.
-	 * @return If this game is an applet, it returns this, else it returns the JFrame used to display this game.
+	 * @return If this game is an Applet, it returns this instance, else it returns the JFrame used to display this game.
 	 */
 	public Container getRootParent() {
 		if(isApplet())
@@ -173,7 +225,7 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * @return Returns true if this game is an applet, false otherwise.
+	 * @return Returns true if this game is an Applet, false otherwise.
 	 */
 	public boolean isApplet() {
 		return isApplet;
@@ -227,7 +279,7 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * If this game is an applet, it calls the superclass's resize method, else it adjusts the JFrame according to the platform specific inset values.
+	 * If this game is an Applet, it calls the superclass's resize method, else it adjusts the JFrame according to the platform specific Insets.
 	 * @param width The new width of this game's canvas
 	 * @param height The new height of this game's canvas
 	 */
@@ -247,6 +299,8 @@ public abstract class Game extends Applet implements Runnable {
 	public final void run() {
 		if(isActive())
 			return;
+		
+		Thread.currentThread().setName("Game Loop Thread");
 		
 		try{
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
@@ -345,7 +399,7 @@ public abstract class Game extends Applet implements Runnable {
 			
 			try{
 				if(FPS > 0) {
-					long sleepTime = Math.round((1000000000.0/FPS)-(System.nanoTime()-lastTime));
+					long sleepTime = FastMath.round((ONE_SECOND/FPS)-(System.nanoTime()-lastTime));
 					if(sleepTime <= 0)
 						continue;
 					
@@ -360,9 +414,6 @@ public abstract class Game extends Applet implements Runnable {
 		}
 	}
 	
-	/**
-	 * Called as soon as this game is loaded.
-	 */
 	public synchronized final void init() {
 		setIgnoreRepaint(true);
 		setLayout(new BorderLayout());
@@ -399,7 +450,7 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * Automatically called if this game is an applet, otherwise it has to be manually called.
+	 * Automatically called if this game is an Applet, otherwise it has to be manually called.
 	 */
 	public final void start() {
 		if(!isActive())
@@ -421,7 +472,7 @@ public abstract class Game extends Applet implements Runnable {
 	protected abstract void initGame();
 	
 	/**
-	 * Called FPS times a second. Updates the current screen.
+	 * Called the set FPS times a second. Updates the current screen.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	protected synchronized void update(long deltaTime) {
@@ -451,7 +502,7 @@ public abstract class Game extends Applet implements Runnable {
 	protected abstract void stopGame();
 	
 	/**
-	 * Called FPS times a second. Clears the window using the Graphics2D's background color then draws the current screen.
+	 * Called the set FPS times a second. Clears the window using the Graphics2D's background color then draws the current screen.
 	 * @param g The Graphics context to be used to draw to the canvas.
 	 */
 	protected synchronized void paint(Graphics2D g) {
@@ -751,6 +802,7 @@ public abstract class Game extends Applet implements Runnable {
 			
 			if(isStandardKeysEnabled()) {
 				switch(key.getKeyCode()) {
+					case KeyEvent.VK_P: if(isPaused()) resume(); else pause(); break;
 					case KeyEvent.VK_M: sound.setOn(!sound.isOn()); break;
 					case KeyEvent.VK_Q: setHighQuality(!isHighQuality()); break;
 				}

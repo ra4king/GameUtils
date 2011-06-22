@@ -57,7 +57,7 @@ public class Input {
 	}
 	
 	/**
-	 * Returns the last mouse click. Then it is set to null;
+	 * Returns the last mouse click. Then it is set to null.
 	 * @return The latest mouse click.
 	 */
 	public Point getLastMouseClick() {
@@ -67,7 +67,7 @@ public class Input {
 	}
 	
 	/**
-	 * Returns the current position of the mouse if it is down. If the mouse has been released, returns null;
+	 * Returns the current position of the mouse if it is down. If the mouse has been released, returns null.
 	 * @return The current position of the mouse if it is down, else null.
 	 */
 	public Point isMouseDown() {

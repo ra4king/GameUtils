@@ -2,6 +2,7 @@ package gameutils.gui;
 
 import gameutils.AbstractInputListener;
 import gameutils.Screen;
+import gameutils.util.FastMath;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -13,7 +14,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
- * A MenuButton extends MenuItem and draws a button.
+ * A Button extends Widget and draws a button.
  * @author Roi Atalla
  */
 public class Button extends Widget {
@@ -38,10 +39,15 @@ public class Button extends Widget {
 	private boolean isEnabled;
 	
 	/**
-	 * Initializes this Object. The default text color is black, background is transparent,
-	 * background highlight is half transparent white, background pressed is half transparent
-	 * light gray, border is black, border highlight is orange, border pressed is dark gray,
-	 * and disabled color half transparent dark gray.
+	 * Initializes this Object. The defaults are:<br>
+	 * - text color = black<br>
+	 * - background = transparent,<br>
+	 * - background highlight = half transparent white<br>
+	 * - background pressed = half transparent light gray<br>
+	 * - border = black<br>
+	 * - border highlight = orange<br>
+	 * - border pressed = dark gray,<br>
+	 * - disabled color = half transparent dark gray.<br>
 	 * 
 	 * @param text The text to show on the button.
 	 * @param fontSize The font size of the text. The default font is Bold Sans-Serif.
@@ -169,8 +175,8 @@ public class Button extends Widget {
 			super.setX(centerX);
 			super.setY(centerY);
 		}
-		textX = (int)Math.round(getX()+(getWidth()-width)/2);
-		textY = (int)Math.round(getY()+getHeight()/2+fm.getHeight()/2-fm.getDescent());
+		textX = (int)FastMath.round(getX()+(getWidth()-width)/2);
+		textY = (int)FastMath.round(getY()+getHeight()/2+fm.getHeight()/2-fm.getDescent());
 	}
 	
 	/**
@@ -394,13 +400,13 @@ public class Button extends Widget {
 	}
 	
 	/**
-	 * This interface is in use mainly but the MenuButton class.
+	 * This interface is in use mainly but the Button class.
 	 * @author Roi Atalla
 	 */
 	public static interface Action {
 		/**
 		 * Called when an action has occurred.
-		 * @param button The MenuButton where an action has occurred.
+		 * @param button The Button where an action has occurred.
 		 */
 		public void doAction(Button button);
 	}

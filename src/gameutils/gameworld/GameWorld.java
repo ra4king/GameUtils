@@ -3,6 +3,7 @@ package gameutils.gameworld;
 import gameutils.Art;
 import gameutils.Game;
 import gameutils.Screen;
+import gameutils.util.Bag;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -10,8 +11,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Transparency;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A GameWorld is a container of Entities. It has a z-buffer that goes in back-to-front order, 0 being the back.
@@ -19,20 +18,19 @@ import java.util.List;
  */
 public class GameWorld implements Screen {
 	private Game parent;
-	private List<List<Entity>> entities;
-	private List<Entity> allEntities;
+	private ArrayList<Bag<Entity>> entities;
+	private ArrayList<Entity> allEntities;
 	private Image bg;
 	private String bgImage;
 	
 	/**
 	 * Initializes this object.
-	 * @param parent The parent of this object.
 	 */
 	public GameWorld() {
-		entities = Collections.synchronizedList(new ArrayList<List<Entity>>());
-		entities.add(Collections.synchronizedList(new ArrayList<Entity>()));
+		entities = new ArrayList<Bag<Entity>>();
+		entities.add(new Bag<Entity>());
 		
-		allEntities = Collections.synchronizedList(new ArrayList<Entity>());
+		allEntities = new ArrayList<Entity>();
 		
 		setBackground(Color.lightGray);
 	}
@@ -45,8 +43,8 @@ public class GameWorld implements Screen {
 	 * Calls each Entity's <code>show()</code> method in z-index order.
 	 */
 	public void show() {
-		for(List<Entity> list : entities)
-			for(Entity e : list)
+		for(Bag<Entity> bag : entities)
+			for(Entity e : bag)
 				e.show();
 	}
 	
@@ -54,8 +52,8 @@ public class GameWorld implements Screen {
 	 * Calls each Entity's <code>hide()</code> method in z-index order.
 	 */
 	public void hide() {
-		for(List<Entity> list : entities)
-			for(Entity e : list)
+		for(Bag<Entity> bag : entities)
+			for(Entity e : bag)
 				e.hide();
 	}
 	
@@ -64,15 +62,15 @@ public class GameWorld implements Screen {
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public synchronized void update(long deltaTime) {
-		for(List<Entity> list : entities)
-			for(Entity comp : list)
+		for(Bag<Entity> bag : entities)
+			for(Entity comp : bag)
 				if(comp != null)
 					comp.update(deltaTime);
 		flush();
 	}
 	
 	/**
-	 * Draws the background then all the components in z-index order.
+	 * Draws the background then all the Entities in z-index order.
 	 * @param g The Graphics context to draw to the screen.
 	 */
 	public synchronized void draw(Graphics2D g) {
@@ -81,8 +79,8 @@ public class GameWorld implements Screen {
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
 		
-		for(List<Entity> list : entities) {
-			for(Entity comp : list) {
+		for(Bag<Entity> bag : entities) {
+			for(Entity comp : bag) {
 				try{
 					if(comp.getBounds().intersects(parent.getBounds()))
 						comp.draw((Graphics2D)g.create());
@@ -102,8 +100,8 @@ public class GameWorld implements Screen {
 	}
 	
 	/**
-	 * Adds the component with a z-index of 0.
-	 * @param comp The Entity to be added.
+	 * Adds the Entity with a z-index of 0.
+	 * @param e The Entity to be added.
 	 * @return The Entity that was added.
 	 */
 	public synchronized Entity add(Entity e) {
@@ -111,14 +109,14 @@ public class GameWorld implements Screen {
 	}
 	
 	/**
-	 * Adds the component with the specified z-index.
-	 * @param comp The Entity to be added.
+	 * Adds the Entity with the specified z-index.
+	 * @param e The Entity to be added.
 	 * @param zindex The z-index of this Entity.
 	 * @return The Entity that was added.
 	 */
 	public synchronized Entity add(Entity e, int zindex) {
 		while(zindex >= entities.size())
-			entities.add(Collections.synchronizedList(new ArrayList<Entity>()));
+			entities.add(new Bag<Entity>());
 		
 		entities.get(zindex).add(e);
 		
@@ -127,32 +125,29 @@ public class GameWorld implements Screen {
 		return e;
 	}
 	
+	/**
+	 * Returns true if this GameWorld contains this Entity.
+	 * @param e The Entity to search for.
+	 * @return True if this GameWorld contains this Entity, false otherwise.
+	 */
 	public boolean contains(Entity e) {
 		return getEntities().contains(e);
 	}
 	
 	/**
-	 * Removes the component from the world.
-	 * @param comp The Entity to remove.
-	 * @return True if the component was found and removed, false if the component was not found.
+	 * Removes the Entity from the world.
+	 * @param e The Entity to remove.
+	 * @return True if the Entity was found and removed, false if the Entity was not found.
 	 */
 	public boolean remove(Entity e) {
-		boolean removed = false;
-		
-		try{
-			for(List<Entity> list : entities) {
-				int index = list.indexOf(e);
-				if(index >= 0) {
-					list.set(index,null);
-					removed = true;
-				}
+		for(Bag<Entity> bag : entities) {
+			if(bag.remove(e)) {
+				e.hide();
+				return true;
 			}
 		}
-		catch(Exception exc) {
-			exc.printStackTrace();
-		}
 		
-		return removed;
+		return false;
 	}
 	
 	/**
@@ -163,51 +158,68 @@ public class GameWorld implements Screen {
 		
 		System.gc();
 		
-		entities.add(Collections.synchronizedList(new ArrayList<Entity>()));
+		entities.add(new Bag<Entity>());
 	}
 	
 	/**
-	 * Returns the z-index of the specified component.
-	 * @param comp The Entity who's index is returned.
-	 * @return The z-index of the specified component, or -1 if the component was not found.
+	 * Changes the z-index of the specified Entity.
+	 * @param e The Entity whose z-index is changed.
+	 * @param newZIndex The new z-index
+	 * @return True if the Entity was found and updated, false otherwise.
 	 */
-	public synchronized int getZIndex(Entity comp) {
+	public synchronized boolean changeZIndex(Entity e, int newZIndex) {
+		if(remove(e))
+			return false;
+		
+		add(e,newZIndex);
+		
+		e.show();
+		
+		return true;
+	}
+	
+	/**
+	 * Returns the z-index of the specified Entity.
+	 * @param e The Entity who's index is returned.
+	 * @return The z-index of the specified Entity, or -1 if the Entity was not found.
+	 */
+	public synchronized int getZIndex(Entity e) {
 		for(int a = 0; a < entities.size(); a++)
-			if(entities.get(a).indexOf(comp) >= 0)
+			if(entities.get(a).indexOf(e) >= 0)
 				return a;
 		return -1;
 	}
 	
 	/**
-	 * A list of all components at the specified z-index.
+	 * A list of all Entities at the specified z-index.
 	 * @param zindex The z-index.
 	 * @return A list of all Entities at the specified z-index.
 	 */
-	public synchronized List<Entity> getEntities(int zindex) {
+	public synchronized Bag<Entity> getEntities(int zindex) {
 		return entities.get(zindex);
 	}
 	
 	/**
-	 * A list of all components in this entire world.
+	 * A list of all Entities in this entire world.
 	 * @return A list of all Entities in this world in z-index order.
 	 */
-	public synchronized List<Entity> getEntities() {
+	public synchronized ArrayList<Entity> getEntities() {
 		allEntities.clear();
 		
-		for(List<Entity> list : entities)
-			allEntities.addAll(list);
+		for(Bag<Entity> bag : entities)
+			allEntities.addAll(bag);
 		
 		return allEntities;
 	}
 	
 	private synchronized void flush() {
-		for(List<Entity> list : entities)
-			while(list.remove(null)) {}
+		for(Bag<Entity> bag : entities)
+			while(bag.remove(null)) {}
 	}
 	
 	/**
-	 * Sets the background of this component with an image in Art.
-	 * @param s The associated name of an image in Art. This image will be drawn before all other components.
+	 * Sets the background of this GameWorld with an image in Art.
+	 * @param s The associated name of an image in Art. This image will be drawn before all other Entities.
 	 */
 	public synchronized void setBackground(String s) {
 		bg = null;
@@ -215,8 +227,8 @@ public class GameWorld implements Screen {
 	}
 	
 	/**
-	 * Sets the background of this component. A compatible image is created.
-	 * @param bg The image to be drawn before all other components.
+	 * Sets the background of this GameWorld. A compatible image is created.
+	 * @param bg The image to be drawn before all other Entities.
 	 */
 	public synchronized void setBackground(Image bg) {
 		bgImage = null;
@@ -228,7 +240,7 @@ public class GameWorld implements Screen {
 	 * Sets the background to the specified color.
 	 * This method creates a 1x1 image with the specified color
 	 * and stretches it to the width and height of the parent.
-	 * @param color The color to be used as the entire background. It will be drawn before all other components.
+	 * @param color The color to be used as the entire background. It will be drawn before all other Entities.
 	 */
 	public synchronized void setBackground(Color color) {
 		bgImage = null;
@@ -251,21 +263,13 @@ public class GameWorld implements Screen {
 	}
 	
 	/**
-	 * @return The total number of components in this world.
+	 * @return The total number of Entities in this world.
 	 */
 	public synchronized int size() {
 		int size = 0;
-		for(List<Entity> list : entities)
-			size += list.size();
+		for(Bag<Entity> bag : entities)
+			size += bag.size();
 		return size;
-	}
-	
-	/**
-	 * This calls the parent's getCodeBase() method.
-	 * @return The current working directory.
-	 */
-	public String getCodeBase() {
-		return parent.getCodeBase().toString();
 	}
 	
 	/**

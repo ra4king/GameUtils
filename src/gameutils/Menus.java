@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * Menus organizes a group of MenuPages. <br>
  * <b>REMEMBER:</b> A Menus object is only temporarily set as the Screen in a Game. The show() method sets the Game's Screen as the current MenuPage.
- * This is important to consider when setting InputListeners. An InputListener should never be added on a Menus. 
+ * This is important to consider when setting InputListeners. <b>Adding an InputListener to a Menus is pointless and should not be done. Instead, add it to a specific MenuPage.</b> 
  * @author Roi Atalla
  */
 public class Menus implements Screen {
@@ -37,6 +37,7 @@ public class Menus implements Screen {
 	
 	/**
 	 * Adds a page to the Menus. Neither name nor MenuPage can be null.
+	 * @param name The name of the MenuPage.
 	 * @param page The MenuPage to add.
 	 * @return The MenuPage that was added.
 	 */
@@ -55,8 +56,8 @@ public class Menus implements Screen {
 	
 	/**
 	 * Returns the page with the specified description.
-	 * @param description The description of the MenuPage.
-	 * @return The MenuPage with the specified description, null if not found.
+	 * @param name The name of the MenuPage.
+	 * @return The MenuPage with the specified name, null if not found.
 	 */
 	public MenuPage getMenuPage(String name) {
 		return menuPages.get(name);
@@ -84,7 +85,7 @@ public class Menus implements Screen {
 	
 	/**
 	 * Sets the current page displayed. This must be called after this Menus has been added and set to Game.
-	 * @param pageName The description of the new page to display.
+	 * @param name The name of the new page to display.
 	 */
 	public void setMenuPageShown(String name) {
 		MenuPage page = getMenuPage(name);
@@ -107,17 +108,21 @@ public class Menus implements Screen {
 		game.setScreen(currentPage);
 	}
 	
-	public void hide() {
-		
-	}
+	public void hide() {}
 	
-	//Shouldn't even be called.
+	/**
+	 * Throws an exception.
+	 * @throws UnsupportedOperationException
+	 */
 	public void update(long deltaTime) {
-		throw new RuntimeException("THIS METHOD SHOULDN'T BE CALLED!!!");
+		throw new UnsupportedOperationException("THIS METHOD SHOULDN'T BE CALLED!!!");
 	}
 	
-	//Shouldn't even be called.
+	/**
+	 * Throws an exception.
+	 * @throws UnsupportedOperationException
+	 */
 	public void draw(Graphics2D g) {
-		throw new RuntimeException("THIS METHOD SHOULDN'T BE CALLED!!!");
+		throw new UnsupportedOperationException("THIS METHOD SHOULDN'T BE CALLED!!!");
 	}
 }

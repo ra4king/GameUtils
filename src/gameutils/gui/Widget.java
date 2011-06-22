@@ -2,6 +2,7 @@ package gameutils.gui;
 
 import gameutils.Element;
 import gameutils.Screen;
+import gameutils.util.FastMath;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
@@ -63,7 +64,7 @@ public abstract class Widget implements Element {
 	 * @return The X position in integer precision.
 	 */
 	public int getIntX() {
-		return (int)Math.round(getX());
+		return (int)FastMath.round(getX());
 	}
 	
 	/**
@@ -87,7 +88,7 @@ public abstract class Widget implements Element {
 	 * @return The Y position in integer precision.
 	 */
 	public int getIntY() {
-		return (int)Math.round(getY());
+		return (int)FastMath.round(getY());
 	}
 	
 	/**
@@ -111,7 +112,7 @@ public abstract class Widget implements Element {
 	 * @return The width in integer precision.
 	 */
 	public int getIntWidth() {
-		return (int)Math.round(getWidth());
+		return (int)FastMath.round(getWidth());
 	}
 	
 	/**
@@ -135,7 +136,7 @@ public abstract class Widget implements Element {
 	 * @return The height in integer precision.
 	 */
 	public int getIntHeight() {
-		return (int)Math.round(getHeight());
+		return (int)FastMath.round(getHeight());
 	}
 	
 	/**

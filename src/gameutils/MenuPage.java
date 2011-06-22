@@ -10,7 +10,7 @@ import java.awt.Transparency;
 import java.util.ArrayList;
 
 /**
- * A MenuPage is a page in a set of Menus. It holds and organizes a set of Widgets.
+ * A MenuPage is a Screen that holds and organizes a set of Widgets.
  * @author Roi Atalla
  */
 public class MenuPage implements Screen {
@@ -22,11 +22,13 @@ public class MenuPage implements Screen {
 	
 	/**
 	 * Initializes this object.
-	 * @param name The name of this MenuPage.
+	 * @param menus The Menus parent of this MenuPage.
 	 */
 	public MenuPage(Menus menus) {
 		if(menus == null)
 			throw new IllegalArgumentException("Menus cannot be null.");
+		if(menus.getParent() == null)
+			throw new IllegalStateException("Menus has to be added to a Game.");
 		
 		this.menus = menus;
 		
