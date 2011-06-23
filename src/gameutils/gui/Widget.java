@@ -14,13 +14,29 @@ import java.awt.geom.Rectangle2D;
 public abstract class Widget implements Element {
 	private Screen parent;
 	private Rectangle2D.Double bounds;
+	private double x, y, width, height;
 	
+	/**
+	 * Sets X, Y, width and height to 0.
+	 */
 	public Widget() {
 		this(0,0,0,0);
 	}
 	
+	/**
+	 * Sets the X, Y, width, and height.
+	 * @param x The X position.
+	 * @param y The Y position.
+	 * @param w The width.
+	 * @param h The height.
+	 */
 	public Widget(double x, double y, double w, double h) {
 		bounds = new Rectangle2D.Double(x,y,w,h);
+		
+		this.x = x;
+		this.y = y;
+		width = w;
+		height = h;
 	}
 	
 	public void init(Screen screen) {
@@ -56,7 +72,7 @@ public abstract class Widget implements Element {
 	 * @return The X position.
 	 */
 	public double getX() {
-		return bounds.x;
+		return x;
 	}
 	
 	/**
@@ -72,7 +88,7 @@ public abstract class Widget implements Element {
 	 * @param x The new X position.
 	 */
 	public void setX(double x) {
-		bounds.x = x;
+		this.x = x;
 	}
 	
 	/**
@@ -80,7 +96,7 @@ public abstract class Widget implements Element {
 	 * @return The Y position.
 	 */
 	public double getY() {
-		return bounds.y;
+		return y;
 	}
 	
 	/**
@@ -96,7 +112,7 @@ public abstract class Widget implements Element {
 	 * @param y The new Y position.
 	 */
 	public void setY(double y) {
-		bounds.y = y;
+		this.y = y;
 	}
 	
 	/**
@@ -104,7 +120,7 @@ public abstract class Widget implements Element {
 	 * @return The width.
 	 */
 	public double getWidth() {
-		return bounds.width;
+		return width;
 	}
 	
 	/**
@@ -120,7 +136,7 @@ public abstract class Widget implements Element {
 	 * @param width The new width.
 	 */
 	public void setWidth(double width) {
-		bounds.width = width;
+		this.width = width;
 	}
 	
 	/**
@@ -128,7 +144,7 @@ public abstract class Widget implements Element {
 	 * @return The height.
 	 */
 	public double getHeight() {
-		return bounds.height;
+		return height;
 	}
 	
 	/**
@@ -144,7 +160,7 @@ public abstract class Widget implements Element {
 	 * @param height The new height.
 	 */
 	public void setHeight(double height) {
-		bounds.height = height;
+		this.height = height;
 	}
 	
 	/**
@@ -152,6 +168,7 @@ public abstract class Widget implements Element {
 	 * @return The bounds of this Widget.
 	 */
 	public Rectangle2D.Double getBounds() {
+		bounds.setFrame(x,y,width,height);
 		return bounds;
 	}
 }

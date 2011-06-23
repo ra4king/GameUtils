@@ -19,17 +19,27 @@ public abstract class Entity implements Element {
 	private Area area;
 	private double x, y, width, height;
 	
+	/**
+	 * Sets the X, Y, width, and height to 0.
+	 */
 	public Entity() {
 		this(0,0,0,0);
 	}
 	
+	/**
+	 * Sets the X, Y, width, and height.
+	 * @param x The X position.
+	 * @param y The Y position.
+	 * @param w The width.
+	 * @param h The height.
+	 */
 	public Entity(double x, double y, double w, double h) {
-		bounds = new Rectangle2D.Double();
+		bounds = new Rectangle2D.Double(x,y,w,h);
 		
 		this.x = x;
 		this.y = y;
-		this.width = w;
-		this.height = h;
+		width = w;
+		height = h;
 	}
 	
 	public void init(Screen world) {

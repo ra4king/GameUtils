@@ -4,46 +4,49 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.image.BufferedImage;
 
 /**
- * A Label extends Widget and just draws a String.
+ * A Label extends Widget and just draws a String. If you are confused with the usage of Paint, remember Color implements Paint so you can still a Color if you wish.
  * @author Roi Atalla
  */
 public class Label extends Widget {
 	private String text;
-	private Color color;
+	private Paint background, textPaint;
 	private Font font;
-	private int centerX, centerY;
+	private int textX, textY;
 	private boolean isCentered;
 	
 	/**
-	 * Initializes this object.
-	 * @param text The text to show.
-	 * @param color The color of the text.
-	 * @param font The font of the text.
+	 * Initializes this object. Background is set to transparent.
+	 * @param text The text to show. If this is null, an empty string is set.
+	 * @param paint The Paint of the text. If this is null, the Paint is set to Color.black.
+	 * @param font The font of the text. If this is null, it uses a Bold Sans Serif with a point size of 20.
 	 * @param x The X position of the text.
 	 * @param y The Y position of the text.
 	 * @param centered If true, the X and Y are the center of the text, else they are the top left corner of the text.
 	 */
-	public Label(String text, Color color, Font font, int x, int y, boolean centered) {
+	public Label(String text, Paint paint, Font font, int x, int y, boolean centered) {
 		if(text == null)
 			this.text = "";
 		else
 			this.text = text;
 		
-		if(color == null)
-			this.color = Color.black;
+		if(paint == null)
+			this.textPaint = Color.black;
 		else
-			this.color = color;
+			this.textPaint = paint;
+		
+		background = new Color(0,0,0,0);
 		
 		if(font == null)
 			this.font = new Font(Font.SANS_SERIF,Font.BOLD,20);
 		else
 			this.font = font;
 		
-		centerX = x;
-		centerY = y;
+		textX = x;
+		textY = y;
 		
 		isCentered = centered;
 		
@@ -52,27 +55,27 @@ public class Label extends Widget {
 	
 	/**
 	 * Initializes this object.
-	 * @param text The text to show.
-	 * @param color The color of the text.
-	 * @param fontSize The font size of the text. The default font is a Bold Sans-Serif.
+	 * @param text The text to show. If this is null, an empty string is set.
+	 * @param paint The Paint of the text. If this is null, the Paint is set to Color.black.
+	 * @param fontSize The font size of the text. The default font is a Bold Sans Serif.
 	 * @param x The X position of the text.
 	 * @param y The Y position of the text.
 	 * @param centered If true, the X and Y are the center of the text, else they are the top left corner of the text.
 	 */
-	public Label(String text, Color color, int fontSize, int x, int y, boolean centered) {
-		this(text,color,new Font(Font.SANS_SERIF,Font.BOLD,fontSize),x,y,centered);
+	public Label(String text, Paint paint, int fontSize, int x, int y, boolean centered) {
+		this(text,paint,new Font(Font.SANS_SERIF,Font.BOLD,fontSize),x,y,centered);
 	}
 	
 	/**
 	 * Initializes this object.
-	 * @param text The text to show. The default color is black.
+	 * @param text The text to show. If this is null, an empty string is set. The default color is black.
 	 * @param fontSize The font size of the text. The default font is a Bold Sans-Serif.
 	 * @param x The X position of the text.
 	 * @param y The Y position of the text.
 	 * @param centered If true, the X and Y are the center of the text, else they are the top left corner of the text.
 	 */
 	public Label(String text, int fontSize, int x, int y, boolean centered) {
-		this(text,Color.black,new Font(Font.SANS_SERIF,Font.BOLD,fontSize),x,y,centered);
+		this(text,null,new Font(Font.SANS_SERIF,Font.BOLD,fontSize),x,y,centered);
 	}
 	
 	/**
@@ -112,17 +115,24 @@ public class Label extends Widget {
 	}
 	
 	private void recalcCoords() {
+		Graphics2D g = (Graphics2D)new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB).getGraphics();
+		FontMetrics fm = g.getFontMetrics(font);
+		int width = fm.stringWidth(text);
+		int height = fm.getHeight();
+		
 		if(isCentered) {
-			Graphics2D g = (Graphics2D)new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB).getGraphics();
-			FontMetrics fm = g.getFontMetrics(font);
-			int width = fm.stringWidth(text);
-			super.setX((int)(centerX-width/2));
-			super.setY((int)(centerY+fm.getHeight()/2));
+			textX -= width/2;
+			textY += fm.getHeight()/2;
+			super.setX(textX);
+			super.setY(textY-fm.getAscent());
 		}
 		else {
-			super.setX(centerX);
-			super.setY(centerY);
+			super.setX(textX);
+			super.setY(textY-fm.getAscent());
 		}
+		
+		super.setWidth(width);
+		super.setHeight(height);
 	}
 	
 	/**
@@ -145,28 +155,47 @@ public class Label extends Widget {
 	 * Returns the color of the text.
 	 * @return The color of the text.
 	 */
-	public Color getColor() {
-		return color;
+	public Paint getTextPaint() {
+		return textPaint;
 	}
 	
 	/**
-	 * Sets the color of the text.
-	 * @param color The new color of the text.
+	 * Sets the Paint of the text.
+	 * @param paint The Paint of the text.
 	 */
-	public void setColor(Color color) {
-		this.color = color;
+	public void setTextPaint(Paint paint) {
+		textPaint = paint;
+	}
+	
+	/**
+	 * Returns the background.
+	 * @return The background.
+	 */
+	public Paint getBackground() {
+		return background;
+	}
+	
+	/**
+	 * Sets the background.
+	 * @param paint The background.
+	 */
+	public void setBackground(Paint paint) {
+		background = paint;
 	}
 	
 	public void update(long deltaTime) {}
 	
 	/**
-	 * Draws the text with the specified font and color.
+	 * Fills the background then draws the text with the specified font and paint.
 	 * @param g The Graphics context to draw to the screen.
 	 */
 	public void draw(Graphics2D g) {
-		g.setColor(color);
+		g.setPaint(background);
+		g.fill(getBounds());
+		
+		g.setPaint(textPaint);
 		g.setFont(font);
 		
-		g.drawString(text,getIntX(),getIntY());
+		g.drawString(text,textX,textY);
 	}
 }

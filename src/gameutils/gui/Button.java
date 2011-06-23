@@ -9,12 +9,13 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
- * A Button extends Widget and draws a button.
+ * A Button extends Widget and draws a button. If you are confused with the usage of Paint, remember Color implements Paint so you can still a Color if you wish.
  * @author Roi Atalla
  */
 public class Button extends Widget {
@@ -22,14 +23,10 @@ public class Button extends Widget {
 	private RoundRectangle2D.Double bounds;
 	private Font font;
 	private String text;
-	private Color textColor;
-	private GradientPaint background;
-	private GradientPaint bgHighlight;
-	private GradientPaint bgPressed;
-	private Color border;
-	private Color borderHighlight;
-	private Color borderPressed;
-	private Color disabled;
+	private Paint textPaint;
+	private Paint background, backgroundHighlight, backgroundPressed;
+	private Paint border, borderHighlight, borderPressed;
+	private Paint disabledBackground, disabledBorder;
 	private int textX, textY;
 	private int centerX, centerY;
 	private int arcwidth, archeight;
@@ -39,15 +36,15 @@ public class Button extends Widget {
 	private boolean isEnabled;
 	
 	/**
-	 * Initializes this Object. The defaults are:<br>
-	 * - text color = black<br>
+	 * Initializes this Button. The defaults are:<br>
+	 * - text = black<br>
 	 * - background = transparent,<br>
 	 * - background highlight = half transparent white<br>
 	 * - background pressed = half transparent light gray<br>
 	 * - border = black<br>
 	 * - border highlight = orange<br>
 	 * - border pressed = dark gray,<br>
-	 * - disabled color = half transparent dark gray.<br>
+	 * - disabled = half transparent dark gray.<br>
 	 * 
 	 * @param text The text to show on the button.
 	 * @param fontSize The font size of the text. The default font is Bold Sans-Serif.
@@ -73,14 +70,15 @@ public class Button extends Widget {
 		
 		recalcCoords();
 		
-		textColor = Color.black;
-		setBackground(new Color(0,0,0,0));
-		setBackgroundHighlight(new Color(255,255,255,100));
-		setBackgroundPressed(new Color(128,128,128,200));
+		textPaint = Color.black;
+		setBackgroundGradient(new Color(0,0,0,0));
+		setBackgroundHighlightGradient(new Color(255,255,255,100));
+		setBackgroundPressedGradient(new Color(128,128,128,200));
 		border = Color.black;
 		borderHighlight = Color.orange;
 		borderPressed = Color.darkGray;
-		disabled = new Color(192,192,192,100);
+		disabledBackground = new Color(192,192,192,100);
+		disabledBorder = Color.black;
 		
 		isEnabled = true;
 	}
@@ -287,60 +285,201 @@ public class Button extends Widget {
 	}
 	
 	/**
-	 * Sets the color of the text.
-	 * @param color The new color of the text.
+	 * Returns the Paint of the text.
+	 * @return The Paint of the text.
 	 */
-	public void setColor(Color color) {
-		this.textColor = color;
+	public Paint getTextPaint() {
+		return textPaint;
 	}
 	
 	/**
-	 * Sets the background color of the button.
-	 * @param background The new background color of the button.
+	 * Sets the Paint of the text.
+	 * @param paint The new Paint of the text.
 	 */
-	public void setBackground(Color background) {
-		this.background = new GradientPaint((float)(getX()+getWidth()/2.0),(float)getY(),Color.white,(float)(getX()+getWidth()/2.0),(float)(getY()+getHeight()),background);
-		setBackgroundPressed(background.darker());
+	public void setTextPaint(Paint paint) {
+		textPaint = paint;
 	}
 	
 	/**
-	 * Sets the background color of the button when it is highlighted.
-	 * @param highlight The new background highlight color of the button.
+	 * Returns the background Paint.
+	 * @return The background Paint.
 	 */
-	public void setBackgroundHighlight(Color highlight) {
-		bgHighlight = new GradientPaint((float)(getX()+getWidth()/2.0),(float)getY(),Color.white,(float)(getX()+getWidth()/2.0),(float)(getY()+getHeight()),highlight);
+	public Paint getBackground() {
+		return background;
 	}
 	
 	/**
-	 * Sets the background color of the button when it is pressed.
-	 * @param pressed The new background pressed color of the button.
+	 * Sets the background Paint.
+	 * @param paint The background Paint to set.
 	 */
-	public void setBackgroundPressed(Color pressed) {
-		bgPressed = new GradientPaint((float)(getX()+getWidth()/2.0),(float)getY(),pressed,(float)(getX()+getWidth()/2.0),(float)(getY()+getHeight()),Color.white);
+	public void setBackground(Paint paint) {
+		background = paint;
 	}
 	
 	/**
-	 * Sets the border color of the button.
-	 * @param border The new border color of the button.
+	 * Convenience method to set a gradient background. The top color is white.
+	 * Automatically sets the background pressed gradient Paint to a color darker than the specified one.
+	 * @param bottom The bottom color of the gradient.
 	 */
-	public void setBorder(Color border) {
-		this.border = border;
+	public void setBackgroundGradient(Color bottom) {
+		setBackgroundGradient(Color.white,bottom);
 	}
 	
 	/**
-	 * Sets the border color of the button when it is highlighted.
-	 * @param highlight The new border highlight color of the button.
+	 * Convenience method to set a gradient background. The top color is white.
+	 * Automatically sets the background pressed gradient Paint to a color darker than the specified one.
+	 * @param top The top color of the gradient.
+	 * @param bottom The bottom color of the gradient.
 	 */
-	public void setBorderHighlight(Color highlight) {
-		borderHighlight = highlight;
+	public void setBackgroundGradient(Color top, Color bottom) {
+		this.background = new GradientPaint((float)(getX()+getWidth()/2.0),(float)getY(),top,(float)(getX()+getWidth()/2.0),(float)(getY()+getHeight()),bottom);
+		setBackgroundPressedGradient(bottom.darker());
 	}
 	
 	/**
-	 * Sets the border color of the button when it is pressed.
-	 * @param pressed The new border pressed color of the button.
+	 * Returns the background Paint shown when the button is highlighted.
+	 * @return The background Paint shown when the button is highlighted.
 	 */
-	public void setBorderPressed(Color pressed) {
-		borderPressed = pressed;
+	public Paint getBackgroundHighlight() {
+		return backgroundHighlight;
+	}
+	
+	/**
+	 * Sets the background Paint shown when the button is highlighted.
+	 * @param paint The background Paint to show when the button is highlighted.
+	 */
+	public void setBackgroundHighlight(Paint paint) {
+		backgroundHighlight = paint;
+	}
+	
+	/**
+	 * Convenience method to set a gradient background Paint shown when the button is highlighted. The top color is white.
+	 * @param bottom The bottom color of the gradient.
+	 */
+	public void setBackgroundHighlightGradient(Color bottom) {
+		setBackgroundHighlightGradient(Color.white,bottom);
+	}
+	
+	/**
+	 * Convenience method to set a gradient background Paint shown when the button is highlighted.
+	 * @param top The top color of the gradient.
+	 * @param bottom The bottom color of the gradient.
+	 */
+	public void setBackgroundHighlightGradient(Color top, Color bottom) {
+		backgroundHighlight = new GradientPaint((float)(getX()+getWidth()/2.0),(float)getY(),top,(float)(getX()+getWidth()/2.0),(float)(getY()+getHeight()),bottom);
+	}
+	
+	/**
+	 * Returns the background Paint shown when the button is pressed.
+	 * @return The background Paint shown when the button is pressed.
+	 */
+	public Paint getBackgroundPressed() {
+		return backgroundPressed;
+	}
+	
+	/**
+	 * Sets the background Paint shown when the button is pressed.
+	 * @param paint The background Paint to show when the button is pressed
+	 */
+	public void setBackgroundPressed(Paint paint) {
+		backgroundPressed = paint;
+	}
+	
+	/**
+	 * Convenience method to set a gradient background Paint when the button is pressed. The bottom color is white.
+	 * @param top The top color of the gradient.
+	 */
+	public void setBackgroundPressedGradient(Color top) {
+		setBackgroundPressedGradient(top,Color.white);
+	}
+	
+	/**
+	 * Convenience method to set a gradient background Paint when the button is pressed.
+	 * @param top The top color of the gradient.
+	 * @param bottom The bottom color of the gradient.
+	 */
+	public void setBackgroundPressedGradient(Color top, Color bottom) {
+		backgroundPressed = new GradientPaint((float)(getX()+getWidth()/2.0),(float)getY(),top,(float)(getX()+getWidth()/2.0),(float)(getY()+getHeight()),bottom);
+	}
+	
+	/**
+	 * Returns the border Paint.
+	 * @return The border Paint.
+	 */
+	public Paint getBorder() {
+		return border;
+	}
+	
+	/**
+	 * Sets the border Paint.
+	 * @param paint The border Paint to set.
+	 */
+	public void setBorder(Paint paint) {
+		border = paint;
+	}
+	
+	/**
+	 * Returns the border Paint shown when the button is highlighted.
+	 * @return The border Paint shown when the button is highlighted.
+	 */
+	public Paint getBorderHighlight() {
+		return borderHighlight;
+	}
+	
+	/**
+	 * Sets the border Paint shown when the button is highlighted.
+	 * @param paint The border Paint to show when the button is highlighted.
+	 */
+	public void setBorderHighlight(Paint paint) {
+		borderHighlight = paint;
+	}
+	
+	/**
+	 * Returns the border Paint shown when the button is pressed.
+	 * @return The border Paint shown when the button is pressed.
+	 */
+	public Paint getBorderPressed() {
+		return borderPressed;
+	}
+	
+	/**
+	 * Sets the border Paint shown when the button is pressed.
+	 * @param paint The border Paint to show when the button is pressed.
+	 */
+	public void setBorderPressed(Paint paint) {
+		this.borderPressed = paint;
+	}
+	
+	/**
+	 * Returns the disabled background Paint.
+	 * @return The disabled background Paint.
+	 */
+	public Paint getDisabledBackground() {
+		return disabledBackground;
+	}
+	
+	/**
+	 * Sets the disabled background Paint. This is actually an overlay over the normal background.
+	 * @param paint The disabled background Paint to set.
+	 */
+	public void setDisabledBackground(Paint paint) {
+		disabledBackground = paint;
+	}
+	
+	/**
+	 * Returns the disabled border Paint.
+	 * @return The disabled border Paint.
+	 */
+	public Paint getDisabledBorder() {
+		return disabledBorder;
+	}
+	
+	/**
+	 * Sets the disabled border Paint.
+	 * @param paint The disabled border Paint to set.
+	 */
+	public void setDisabledBorder(Paint paint) {
+		disabledBorder = paint;
 	}
 	
 	public void update(long deltaTime) {}
@@ -351,51 +490,37 @@ public class Button extends Widget {
 	public void draw(Graphics2D g) {
 		g.setFont(font);
 		
-		if(!isEnabled) {
-			g.setPaint(background);
-			g.fill(getButtonBounds());
-			
-			g.setColor(border);
-			g.draw(getButtonBounds());
-			
-			g.setColor(textColor);
-			g.drawString(text,textX,textY);
-			
-			g.setColor(disabled);
-			g.fill(getButtonBounds());
-		}
-		else if(isPressed) {
-			g.setPaint(bgPressed);
-			g.fill(getButtonBounds());
-			
-			g.setColor(borderPressed);
-			g.draw(getButtonBounds());
-			
-			g.setColor(textColor);
-			g.drawString(text,textX,textY);
+		Paint bg, bordr;
+		if(isPressed) {
+			bg = backgroundPressed;
+			bordr = borderPressed;
 		}
 		else if(isHighlighted) {
-			g.setPaint(background);
-			g.fill(getButtonBounds());
-			
-			g.setPaint(bgHighlight);
-			g.fill(getButtonBounds());
-			
-			g.setColor(borderHighlight);
-			g.draw(getButtonBounds());
-			
-			g.setColor(textColor);
-			g.drawString(text,textX,textY);
+			bg = backgroundHighlight;
+			bordr = borderHighlight;
 		}
 		else {
+			bg = background;
+			bordr = border;
+		}
+		
+		if(isHighlighted) {
 			g.setPaint(background);
 			g.fill(getButtonBounds());
-			
-			g.setColor(border);
-			g.draw(getButtonBounds());
-			
-			g.setColor(textColor);
-			g.drawString(text,textX,textY);
+		}
+		
+		g.setPaint(bg);
+		g.fill(getButtonBounds());
+		
+		g.setPaint(bordr);
+		g.draw(getButtonBounds());
+		
+		g.setPaint(textPaint);
+		g.drawString(text,textX,textY);
+		
+		if(!isEnabled) {
+			g.setPaint(disabledBackground);
+			g.fill(getButtonBounds());
 		}
 	}
 	

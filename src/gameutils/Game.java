@@ -129,9 +129,14 @@ public abstract class Game extends Applet implements Runnable {
 	public static final int MAX_FPS = 0;
 	
 	/**
-	 * 1 second in nanoseconds, AKA 1,000,000 nanoseconds.
+	 * 1 second in nanoseconds in double precision, AKA 1,000,000 nanoseconds.
 	 */
 	public static final double ONE_SECOND = 1e9;
+	
+	/**
+	 * 1 second in nanoseconds as a long, AKA 1,000,000 nanoseconds.
+	 */
+	public static final long ONE_SECOND_L = (long)ONE_SECOND;
 	
 	private final Art art;
 	private final Sound sound;
@@ -215,7 +220,7 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * Returns the root component.
+	 * Returns the appropriate container of this game: this instance if it is an Applet, the JFrame if it is a desktop application.
 	 * @return If this game is an Applet, it returns this instance, else it returns the JFrame used to display this game.
 	 */
 	public Container getRootParent() {
@@ -326,7 +331,7 @@ public abstract class Game extends Applet implements Runnable {
 		
 		isActive = true;
 		
-		canvas.requestFocusInWindow();
+		canvas.requestFocus();
 		
 		while(isActive()) {
 			long now = System.nanoTime();
@@ -336,11 +341,8 @@ public abstract class Game extends Applet implements Runnable {
 			while(diffTime > 0 && !isPaused()) {
 				long deltaTime;
 				
-				if(FPS > 0) {
-					long rem = diffTime%(1000000000/FPS);
-					
-					deltaTime = rem == 0 ? 1000000000/FPS : rem;
-				}
+				if(FPS > 0)
+					deltaTime = Math.min(diffTime,ONE_SECOND_L/FPS);
 				else
 					deltaTime = diffTime;
 				
@@ -358,7 +360,7 @@ public abstract class Game extends Applet implements Runnable {
 			
 			lastTime = now;
 			
-			if(System.nanoTime()-time >= 1000000000) {
+			if(System.nanoTime()-time >= ONE_SECOND_L) {
 				time = System.nanoTime();
 				currentFPS = frames;
 				frames = 0;
