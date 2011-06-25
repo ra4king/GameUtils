@@ -3,6 +3,7 @@ package gameutils.networking;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketAddress;
 
 /**
  * An abstract class for all types of connections:<br/>
@@ -154,7 +155,7 @@ public abstract class PacketIO {
 	 * Returns the IP address of the remote connection.
 	 * @return The IP address of the remote connection.
 	 */
-	public abstract String getHostAddress();
+	public abstract SocketAddress getSocketAddress();
 	
 	/**
 	 * Closes this connection.

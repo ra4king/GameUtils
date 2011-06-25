@@ -57,8 +57,8 @@ public class Packet {
 	}
 	
 	/**
-	 * Reads the next int.
-	 * @return The next int.
+	 * Reads the next integer.
+	 * @return The next integer.
 	 */
 	public int readInt() {
 		return (Integer)readObject();
@@ -126,95 +126,184 @@ public class Packet {
 		return messages.get(idx);
 	}
 	
+	public Packet slice(int start) {
+		if(start > messages.size())
+			throw new IndexOutOfBoundsException();
+		
+		Packet packet = new Packet();
+		packet.messages.addAll(start,messages);
+		return packet;
+	}
+	
+	public Packet slice(int start, int end) {
+		if(start > messages.size() || end > messages.size())
+			throw new IndexOutOfBoundsException();
+		
+		Packet packet = new Packet();
+		for(; start < end; start++)
+			packet.messages.add(messages.get(start));
+		return packet;
+	}
+	
 	/**
 	 * Writes a byte.
 	 * @param b The byte.
+	 * @return Returns this.
 	 */
-	public void writeByte(byte b) {
+	public Packet writeByte(byte b) {
 		writeObject(b);
+		return this;
 	}
 	
 	/**
 	 * Writes a short.
 	 * @param s The short.
+	 * @return Returns this.
 	 */
-	public void writeShort(short s) {
+	public Packet writeShort(short s) {
 		writeObject(s);
+		return this;
 	}
 	
 	/**
 	 * Writes a char.
 	 * @param c The char.
+	 * @return Returns this.
 	 */
-	public void writeChar(char c) {
+	public Packet writeChar(char c) {
 		writeObject(c);
+		return this;
 	}
 	
 	/**
-	 * Writes an int.
-	 * @param i The int.
+	 * Writes an integer.
+	 * @param i The integer.
+	 * @return Returns this.
 	 */
-	public void writeInt(int i) {
+	public Packet writeInt(int i) {
 		writeObject(i);
+		return this;
 	}
 	
 	/**
 	 * Writes a long.
 	 * @param l The long.
+	 * @return Returns this.
 	 */
-	public void writeLong(long l) {
+	public Packet writeLong(long l) {
 		writeObject(l);
+		return this;
 	}
 	
 	/**
 	 * Writes a float.
 	 * @param f The float.
+	 * @return Returns this.
 	 */
-	public void writeFloat(float f) {
+	public Packet writeFloat(float f) {
 		writeObject(f);
+		return this;
 	}
 	
 	/**
 	 * Writes a double.
 	 * @param d The double.
+	 * @return Returns this.
 	 */
-	public void writeDouble(double d) {
+	public Packet writeDouble(double d) {
 		writeObject(d);
+		return this;
 	}
 	
 	/**
 	 * Writes a boolean.
 	 * @param b The boolean.
+	 * @return Returns this.
 	 */
-	public void writeBoolean(boolean b) {
+	public Packet writeBoolean(boolean b) {
 		writeObject(b);
+		return this;
 	}
 	
 	/**
 	 * Writes a String.
 	 * @param s The String.
+	 * @return Returns this.
 	 */
-	public void writeString(String s) {
+	public Packet writeString(String s) {
 		writeObject(s);
+		return this;
 	}
 	
 	/**
 	 * Writes a Packet.
 	 * @param p The Packet.
+	 * @return Returns this.
 	 */
-	public void writePacket(Packet p) {
+	public Packet writePacket(Packet p) {
 		messages.addAll(p.messages);
+		return this;
 	}
 	
 	/**
 	 * Writes an object. Must implement java.io.Serializable or gameutils.networking.Serializable.
 	 * @param o The object.
+	 * @return Returns this.
 	 */
-	public void writeObject(Object o) {
+	public Packet writeObject(Object o) {
 		if(o instanceof java.io.Serializable || o instanceof Serializable)
 			messages.add(o);
 		else
 			throw new IllegalArgumentException("Object not serializable.");
+		
+		return this;
+	}
+	
+	/**
+	 * Absolute get method
+	 * @param index The index of the object
+	 * @return The object at the specified index.
+	 */
+	public Object get(int index) {
+		return messages.get(index);
+	}
+	
+	/**
+	 * Absolute set method
+	 * @param index The index of the object
+	 * @param o The object to set 
+	 * @return Returns this.
+	 */
+	public Packet set(int index, Object o) {
+		messages.set(index,o);
+		return this;
+	}
+	
+	/**
+	 * Resets the position but does not clear the buffer.
+	 * @return Returns this.
+	 */
+	public Packet reset() {
+		idx = 0;
+		return this;
+	}
+	
+	/**
+	 * Clears the entire buffer and resets the Packet.
+	 * @return Returns this.
+	 */
+	public Packet clear() {
+		messages.clear();
+		reset();
+		return this;
+	}
+	
+	/**
+	 * Returns true if there are more messages to read, false otherwise.
+	 * @return True if there are more messages to read, false otherwise.
+	 */
+	public boolean hasMore() {
+		return idx < size();
 	}
 	
 	/**
@@ -236,11 +325,14 @@ public class Packet {
 	/**
 	 * Sets the address to connect to or which is received from.
 	 * @param address The new address to connect to or the one to received from.
+	 * @return Returns this.
 	 */
-	public void setAddress(SocketAddress address) {
+	public Packet setAddress(SocketAddress address) {
 		if(address == null)
 			throw new IllegalArgumentException("address cannot be null");
 		
 		this.address = address;
+		
+		return this;
 	}
 }

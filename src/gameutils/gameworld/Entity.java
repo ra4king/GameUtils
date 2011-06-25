@@ -42,6 +42,14 @@ public abstract class Entity implements Element {
 		height = h;
 	}
 	
+	public boolean equals(Object o) {
+		if(o instanceof Entity) {
+			Entity e = (Entity)o;
+			return e.getBounds().equals(getBounds());
+		}
+		return false;
+	}
+	
 	public void init(Screen world) {
 		parent = (GameWorld)world;
 	}
@@ -133,6 +141,38 @@ public abstract class Entity implements Element {
 	 */
 	public void setHeight(double height) {
 		this.height = height;
+	}
+	
+	/**
+	 * Returns the center X position.
+	 * @return The center X position.
+	 */
+	public double getCenterX() {
+		return getX()+getWidth()/2;
+	}
+	
+	/**
+	 * Returns the nearest integer of the center X position.
+	 * @return The nearest integer of the center X position.
+	 */
+	public int getIntCenterX() {
+		return (int)FastMath.round(getCenterX());
+	}
+	
+	/**
+	 * Returns the center Y position.
+	 * @return The center Y position.
+	 */
+	public double getCenterY() {
+		return getY()+getHeight()/2;
+	}
+	
+	/**
+	 * Returns the nearest integer of the center Y position.
+	 * @return The nearest integer of the center Y position.
+	 */
+	public int getIntCenterY() {
+		return (int)FastMath.round(getCenterY());
 	}
 	
 	/**

@@ -7,24 +7,35 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketAddress;
 
 /**
  * A blocking UDP wrapper.
  * @author Roi Atalla
  */
-public class DatagramPacketIO extends PacketIO {
+public class DatagramSocketPacketIO extends PacketIO {
 	private DatagramSocket socket;
+	private int bufferSize;
+	
+	/**
+	 * Initializes this object. Default buffer size is 8192 bytes.
+	 * @param socket The connection.
+	 */
+	public DatagramSocketPacketIO(DatagramSocket socket) {
+		this(socket,8192);
+	}
 	
 	/**
 	 * Initializes this object.
 	 * @param socket The connection.
-	 * @throws IOException
+	 * @param bufferSize The buffer size.
 	 */
-	public DatagramPacketIO(DatagramSocket socket) throws IOException {
+	public DatagramSocketPacketIO(DatagramSocket socket, int bufferSize) {
 		this.socket = socket;
+		this.bufferSize = bufferSize;
 	}
 	
-	private int toInt(byte data[]) {
+	/*private int toInt(byte data[]) {
 		if(data.length != 4)
 			throw new IllegalArgumentException("Size of data array is not 4");
 		
@@ -41,15 +52,10 @@ public class DatagramPacketIO extends PacketIO {
 				(byte)(data >>> 16),
 				(byte)(data >>> 8),
 				(byte) data };
-	}
+	}*/
 	
 	public Packet read() throws IOException {
-		DatagramPacket datagram = new DatagramPacket(new byte[4],4);
-		socket.receive(datagram);
-		
-		int byteLength = toInt(datagram.getData());
-		
-		datagram = new DatagramPacket(new byte[byteLength],byteLength);
+		DatagramPacket datagram = new DatagramPacket(new byte[bufferSize],bufferSize);
 		socket.receive(datagram);
 		
 		ByteArrayInputStream bin = new ByteArrayInputStream(datagram.getData());
@@ -71,13 +77,19 @@ public class DatagramPacketIO extends PacketIO {
 		
 		byte data[] = bout.toByteArray();
 		
-		socket.send(new DatagramPacket(toByteArray(data.length),4,packet.getAddress()));
-		
-		socket.send(new DatagramPacket(data,data.length,packet.getAddress()));
+		socket.send(new DatagramPacket(data,bufferSize,packet.getAddress()));
 	}
 	
-	public String getHostAddress() {
-		return socket.getInetAddress().getHostAddress();
+	public int getBufferSize() {
+		return bufferSize;
+	}
+	
+	public void setBufferSize(int bufferSize) {
+		this.bufferSize = bufferSize;
+	}
+	
+	public SocketAddress getSocketAddress() {
+		return socket.getRemoteSocketAddress();
 	}
 	
 	public void close() throws IOException {

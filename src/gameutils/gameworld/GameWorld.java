@@ -134,6 +134,16 @@ public class GameWorld implements Screen {
 		return getEntities().contains(e);
 	}
 	
+	public boolean replace(Entity old, Entity e) {
+		int zindex = getZIndex(old);
+		if(zindex < 0)
+			return false;
+		
+		Bag<Entity> bag = entities.get(zindex);
+		bag.set(bag.indexOf(old),e);
+		return true;
+	}
+	
 	/**
 	 * Removes the Entity from the world.
 	 * @param e The Entity to remove.
@@ -188,6 +198,15 @@ public class GameWorld implements Screen {
 			if(entities.get(a).indexOf(e) >= 0)
 				return a;
 		return -1;
+	}
+	
+	/**
+	 * Returns true if the specified z-index exists.
+	 * @param zindex The z-index to check.
+	 * @return True if the specified z-index exists, false otherwise.
+	 */
+	public synchronized boolean containsZIndex(int zindex) {
+		return zindex < entities.size();
 	}
 	
 	/**

@@ -129,6 +129,11 @@ public abstract class Game extends Applet implements Runnable {
 	public static final int MAX_FPS = 0;
 	
 	/**
+	 * Used to notify the game loop thread to update the maximum number of times before render.
+	 */
+	public static final int MAX_UPDATES = -1;
+	
+	/**
 	 * 1 second in nanoseconds in double precision, AKA 1,000,000 nanoseconds.
 	 */
 	public static final double ONE_SECOND = 1e9;
@@ -145,6 +150,7 @@ public abstract class Game extends Applet implements Runnable {
 	private final Canvas canvas;
 	private final Input input;
 	private Object quality;
+	private int maxUpdates;
 	private int FPS;
 	private double version;
 	private boolean showFPS;
@@ -155,6 +161,7 @@ public abstract class Game extends Applet implements Runnable {
 	
 	/**
 	 * Default constructor. The defaults are:<br>
+	 * - MAX_UPDATES is set
 	 * - 60FPS<br>
 	 * - Version 1.0<br>
 	 * - showFPS = true<br>
@@ -196,6 +203,8 @@ public abstract class Game extends Applet implements Runnable {
 		showFPS = true;
 		
 		quality = RenderingHints.VALUE_ANTIALIAS_ON;
+		
+		maxUpdates = MAX_UPDATES;
 	}
 	
 	/**
@@ -337,8 +346,9 @@ public abstract class Game extends Applet implements Runnable {
 			long now = System.nanoTime();
 			
 			long diffTime = now-lastTime;
+			int updateCount = 0;
 			
-			while(diffTime > 0 && !isPaused()) {
+			while(diffTime > 0 && (maxUpdates == MAX_UPDATES || updateCount < maxUpdates) && !isPaused()) {
 				long deltaTime;
 				
 				if(FPS > 0)
@@ -356,6 +366,8 @@ public abstract class Game extends Applet implements Runnable {
 				}
 				
 				diffTime -= deltaTime;
+				
+				updateCount++;
 			}
 			
 			lastTime = now;
@@ -757,6 +769,22 @@ public abstract class Game extends Applet implements Runnable {
 	 */
 	public boolean isStandardKeysEnabled() {
 		return standardKeysEnabled;
+	}
+	
+	/**
+	 * Sets the maximum number of updates before render.
+	 * @param maxUpdates The maximum number of updates before render.
+	 */
+	public void setMaximumUpdatesBeforeRender(int maxUpdates) {
+		this.maxUpdates = maxUpdates;
+	}
+	
+	/**
+	 * Returns the maximum number of updates before render.
+	 * @return The maximum number of updates before render.
+	 */
+	public int getMaximumUpdatesBeforeRender() {
+		return maxUpdates;
 	}
 	
 	/**
