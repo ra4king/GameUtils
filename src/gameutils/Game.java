@@ -344,8 +344,9 @@ public abstract class Game extends Applet implements Runnable {
 		
 		while(isActive()) {
 			long now = System.nanoTime();
-			
 			long diffTime = now-lastTime;
+			lastTime = now;
+			
 			int updateCount = 0;
 			
 			while(diffTime > 0 && (maxUpdates == MAX_UPDATES || updateCount < maxUpdates) && !isPaused()) {
@@ -369,16 +370,6 @@ public abstract class Game extends Applet implements Runnable {
 				
 				updateCount++;
 			}
-			
-			lastTime = now;
-			
-			if(System.nanoTime()-time >= ONE_SECOND_L) {
-				time = System.nanoTime();
-				currentFPS = frames;
-				frames = 0;
-			}
-			
-			frames++;
 			
 			try{
 				do{
@@ -411,6 +402,14 @@ public abstract class Game extends Applet implements Runnable {
 				exc.printStackTrace();
 			}
 			
+			if(System.nanoTime()-time >= ONE_SECOND_L) {
+				time = System.nanoTime();
+				currentFPS = frames;
+				frames = 0;
+			}
+			
+			frames++;
+			
 			try{
 				if(FPS > 0) {
 					long sleepTime = FastMath.round((ONE_SECOND/FPS)-(System.nanoTime()-lastTime));
@@ -418,7 +417,7 @@ public abstract class Game extends Applet implements Runnable {
 						continue;
 					
 					long prevTime = System.nanoTime();
-					while(System.nanoTime()-prevTime <= sleepTime-sleepTime/25)
+					while(System.nanoTime()-prevTime <= sleepTime)
 						Thread.sleep(1);
 				}
 			}
@@ -426,6 +425,8 @@ public abstract class Game extends Applet implements Runnable {
 				exc.printStackTrace();
 			}
 		}
+		
+		stopGame();
 	}
 	
 	public synchronized final void init() {
@@ -472,12 +473,11 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * Called when this game is stopped. Calling this method stops the game loop. This method then calls stopGame().
+	 * Called when this game is stopped. Calling this method stops the game loop. stopGame() is then called.
 	 */
 	public final void stop() {
 		sound.setOn(false);
 		isActive = false;
-		stopGame();
 	}
 	
 	/**

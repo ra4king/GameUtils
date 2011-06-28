@@ -80,7 +80,7 @@ public abstract class PacketIO {
 	 * @param packet The Packet to be written.
 	 * @throws IOException
 	 */
-	public abstract void write(Packet packet) throws IOException;
+	public abstract boolean write(Packet packet) throws IOException;
 	
 	/**
 	 * This is the standard way of writing a Packet to an ObjectOutputStream. If the protocol used only accepts byte arrays, it is recommended to wrap a ByteArrayOutputStream into an ObjectOutputStream and getting the byte array data from there.

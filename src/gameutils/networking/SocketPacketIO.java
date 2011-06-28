@@ -41,8 +41,9 @@ public class SocketPacketIO extends PacketIO {
 	/**
 	 * Writes a packet to the underlying connection. If an address is specified, it is ignored.
 	 */
-	public void write(Packet packet) throws IOException {
+	public boolean write(Packet packet) throws IOException {
 		write(packet,out);
+		return true;
 	}
 	
 	/**

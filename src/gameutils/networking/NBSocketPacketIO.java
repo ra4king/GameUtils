@@ -10,33 +10,33 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class SocketChannelPacketIO extends PacketIO {
+public class NBSocketPacketIO extends PacketIO {
 	private SocketChannel channel;
 	private ByteBuffer in, out;
 	
-	public SocketChannelPacketIO(String address, int port, boolean isBlocking) throws IOException {
+	public NBSocketPacketIO(String address, int port, boolean isBlocking) throws IOException {
 		this(new InetSocketAddress(address,port),isBlocking);
 	}
 	
-	public SocketChannelPacketIO(String address, int port, boolean isBlocking, int bufferSize) throws IOException {
+	public NBSocketPacketIO(String address, int port, boolean isBlocking, int bufferSize) throws IOException {
 		this(new InetSocketAddress(address,port),isBlocking,bufferSize);
 	}
 	
-	public SocketChannelPacketIO(SocketAddress address, boolean isBlocking) throws IOException {
+	public NBSocketPacketIO(SocketAddress address, boolean isBlocking) throws IOException {
 		this(address,isBlocking,8192);
 	}
 	
-	public SocketChannelPacketIO(SocketAddress address, boolean isBlocking, int bufferSize) throws IOException {
+	public NBSocketPacketIO(SocketAddress address, boolean isBlocking, int bufferSize) throws IOException {
 		this(SocketChannel.open(address),bufferSize);
 		
 		channel.configureBlocking(isBlocking);
 	}
 	
-	public SocketChannelPacketIO(SocketChannel channel) {
+	public NBSocketPacketIO(SocketChannel channel) {
 		this(channel,8192);
 	}
 	
-	public SocketChannelPacketIO(SocketChannel channel, int bufferSize) {
+	public NBSocketPacketIO(SocketChannel channel, int bufferSize) {
 		if(!channel.isOpen())
 			throw new IllegalStateException("channel is not open.");
 		this.channel = channel;
@@ -44,7 +44,7 @@ public class SocketChannelPacketIO extends PacketIO {
 		setBufferSize(bufferSize);
 	}
 	
-	public synchronized Packet read() throws IOException {
+	public Packet read() throws IOException {
 		in.clear();
 		
 		if(channel.read(in) <= 0)
@@ -52,13 +52,17 @@ public class SocketChannelPacketIO extends PacketIO {
 		
 		in.flip();
 		
-		ObjectInputStream oin = new ObjectInputStream(new ByteArrayInputStream(in.array()));
+		byte array[] = new byte[in.limit()];
+		for(int a = 0; a < array.length; a++)
+			array[a] = in.get();
+		
+		ObjectInputStream oin = new ObjectInputStream(new ByteArrayInputStream(array));
 		Packet packet = read(oin);
 		packet.setAddress(getSocketAddress());
 		return packet;
 	}
 	
-	public synchronized void write(Packet packet) throws IOException {
+	public boolean write(Packet packet) throws IOException {
 		out.clear();
 		
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -67,7 +71,7 @@ public class SocketChannelPacketIO extends PacketIO {
 		out.put(adjustSize(bout.toByteArray()));
 		out.flip();
 		
-		channel.write(out);
+		return channel.write(out) == out.limit();
 	}
 	
 	public int getBufferSize() {
@@ -75,7 +79,7 @@ public class SocketChannelPacketIO extends PacketIO {
 	}
 	
 	public void setBufferSize(int bufferSize) {
-		in = ByteBuffer.allocate(bufferSize);
+		in = ByteBuffer.allocateDirect(bufferSize);
 		out = ByteBuffer.allocateDirect(bufferSize);
 	}
 	
@@ -100,8 +104,9 @@ public class SocketChannelPacketIO extends PacketIO {
 	}
 	
 	private byte[] adjustSize(byte array[]) {
-		if(array.length < out.capacity())
+		if(array.length <= out.capacity())
 			return array;
+		System.out.println("ADJUSTING SIZE!");
 		byte adjust[] = new byte[out.capacity()];
 		System.arraycopy(array, 0, adjust, 0, adjust.length);
 		return adjust;
