@@ -1,54 +1,73 @@
 package gameutils.util;
 
 public class FastMath {
-	public static final double PI = Math.PI;
-	public static final double E = Math.E;
+	public static final float PI = (float)Math.PI;
+	public static final float E = (float)Math.E;
 	
-	private static final double RAD,DEG;
-	private static final float RADf, DEGf;
-	private static final double radToIndex, degToIndex;
+	private static final float RAD,DEG;
+	private static final float radToIndex, degToIndex;
 	private static final int SIN_MASK = ~(-1 << 12);
-	private static final double[] sin, cos;
-	private static final int largeInt   = 16 * 1024;
+	private static final float[] sin, cos;
 	
 	private static final int ATAN2_COUNT = (~(-1 << (7 << 1))) + 1;
 	private static final int ATAN2_DIM = (int) Math.sqrt(ATAN2_COUNT);
-	private static final double[] atan2 = new double[ATAN2_COUNT];
+	private static final float[] atan2 = new float[ATAN2_COUNT];
 	
 	static {
-		RAD = Math.PI/180.0;
-		DEG = 180.0/Math.PI;
-		
-		RADf = (float)(Math.PI/180.0);
-		DEGf = (float)(180.0/Math.PI);
+		RAD = (float)(Math.PI/180.0);
+		DEG = (float)(180.0/Math.PI);
 		
 		final int SIN_COUNT = SIN_MASK + 1;
 		
-		final double radFull    = Math.PI * 2.0;
+		final float radFull    = PI * 2.0f;
 		radToIndex = SIN_COUNT/radFull;
-		degToIndex = SIN_COUNT/360.0;
+		degToIndex = SIN_COUNT/360.0f;
 		
-		sin = new double[SIN_COUNT];
-		cos = new double[SIN_COUNT];
+		sin = new float[SIN_COUNT];
+		cos = new float[SIN_COUNT];
 		
 		for(int i = 0; i < SIN_COUNT; i++) {
-			sin[i] = Math.sin((i + 0.5)/SIN_COUNT * radFull);
-			cos[i] = Math.cos((i + 0.5)/SIN_COUNT * radFull);
+			sin[i] = (float)Math.sin((i + 0.5)/SIN_COUNT * radFull);
+			cos[i] = (float)Math.cos((i + 0.5)/SIN_COUNT * radFull);
 		}
 		
 		for(int i = 0; i < 360; i += 90) {
-			sin[(int)(i * degToIndex) & SIN_MASK] = Math.sin(i * Math.PI/180.0);
-			cos[(int)(i * degToIndex) & SIN_MASK] = Math.cos(i * Math.PI/180.0);
+			sin[(int)(i * degToIndex) & SIN_MASK] = (float)Math.sin(i * Math.PI/180.0);
+			cos[(int)(i * degToIndex) & SIN_MASK] = (float)Math.cos(i * Math.PI/180.0);
 		}
 		
 		for(int i = 0; i < ATAN2_DIM; i++) {
 			for (int j = 0; j < ATAN2_DIM; j++) {
-				double x0 = i/ATAN2_DIM;
-				double y0 = j/ATAN2_DIM;
+				float x0 = i/ATAN2_DIM;
+				float y0 = j/ATAN2_DIM;
 				
-				atan2[j * ATAN2_DIM + i] = Math.atan2(y0, x0);
+				atan2[j * ATAN2_DIM + i] = (float)Math.atan2(y0, x0);
 			}
 		}
+	}
+	
+	public static final int min(int a, int b) {
+		return Math.min(a, b);
+	}
+	
+	public static final float min(float a, float b) {
+		return Math.min(a,b);
+	}
+	
+	public static final double min(double a, double b) {
+		return Math.min(a,b);
+	}
+	
+	public static final int max(int a, int b) {
+		return Math.max(a, b);
+	}
+	
+	public static final float max(float a, float b) {
+		return Math.max(a,b);
+	}
+	
+	public static final double max(double a, double b) {
+		return Math.max(a,b);
 	}
 	
 	public static final int abs(int a) {
@@ -68,31 +87,31 @@ public class FastMath {
 	}
 	
 	public static final int ceil(float x) {
-		return largeInt - (int)(largeInt - x);
+		return (int)Math.ceil(x);
 	}
 	
 	public static final int ceil(double x) {
-		return largeInt - (int)(largeInt - x);
+		return (int)Math.ceil(x);
 	}
 	
 	public static final int floor(float x) {
-		return (int)(x + largeInt) - largeInt;
+		return (int)Math.floor(x);
 	}
 	
 	public static final int floor(double x) {
-		return (int)(x + largeInt) - largeInt;
+		return (int)Math.floor(x);
 	}
 	
 	public static final int round(float x) {
-		return (int)(x + largeInt + 0.5f) - largeInt;
+		return Math.round(x);
 	}
 	
 	public static final int round(double x) {
-		return (int)(x + largeInt + 0.5) - largeInt;
+		return (int)Math.round(x);
 	}
 	
 	public static final float toDegrees(float rad) {
-		return rad*DEGf;
+		return rad*DEG;
 	}
 	
 	public static final double toDegrees(double rad) {
@@ -100,7 +119,7 @@ public class FastMath {
 	}
 	
 	public static final float toRadians(float deg) {
-		return deg*RADf;
+		return deg*RAD;
 	}
 	
 	public static final double toRadians(double deg) {
@@ -108,79 +127,55 @@ public class FastMath {
 	}
 	
 	public static final float sin(float rad) {
-		return (float)sin(rad);
-	}
-	
-	public static final double sin(double rad) {
 		return sin[(int)(rad * radToIndex) & SIN_MASK];
 	}
 	
 	public static final float cos(float rad) {
-		return (float)cos(rad);
-	}
-	
-	public static final double cos(double rad) {
 		return cos[(int)(rad * radToIndex) & SIN_MASK];
 	}
 	
 	public static final float sinDeg(float deg) {
-		return (float)sinDeg(deg);
-	}
-	
-	public static final double sinDeg(double deg) {
 		return sin[(int)(deg * degToIndex) & SIN_MASK];
 	}
 	
 	public static final float cosDeg(float deg) {
-		return (float)cosDeg(deg);
-	}
-	
-	public static final double cosDeg(double deg) {
 		return cos[(int) (deg * degToIndex) & SIN_MASK];
 	}
 	
 	public static final float atan2Deg(float y, float x) {
-		return (float)atan2Deg(y,x);
-	}
-	
-	public static final double atan2Deg(double y, double x) {
 		return atan2(y, x) * DEG;
 	}
 	
 	public static final float atan2(float y, float x) {
-		return (float)atan2(y,x);
-	}
-	
-	public static final double atan2(double y, double x) {
-		double add, mul;
+		float add, mul;
 		
-		if(x < 0.0) {
-			if(y < 0.0) {
+		if(x < 0.0f) {
+			if(y < 0.0f) {
 				x = -x;
 				y = -y;
 				
-				mul = 1.0;
+				mul = 1.0f;
 			}
 			else {
 				x = -x;
-				mul = -1.0;
+				mul = -1.0f;
 			}
 			
-			add = -3.141592653;
+			add = -PI;
 		}
 		else {
-			if(y < 0.0) {
+			if(y < 0.0f) {
 				y = -y;
-				mul = -1.0;
+				mul = -1.0f;
 			}
 			else {
-				mul = 1.0;
+				mul = 1.0f;
 			}
 			
-			add = 0.0;
+			add = 0.0f;
 		}
 		
-		double invDiv = (ATAN2_DIM-1) / ((x < y) ? y : x);
+		float invDiv = (ATAN2_DIM-1) / ((x < y) ? y : x);
 		
 		int xi = (int)(x * invDiv);
 		int yi = (int)(y * invDiv);

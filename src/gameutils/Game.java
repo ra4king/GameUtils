@@ -103,9 +103,7 @@ public abstract class Game extends Applet implements Runnable {
 		
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
-				synchronized(Game.this) {
-					stop();
-				}
+				stop();
 			}
 		});
 		
@@ -429,7 +427,7 @@ public abstract class Game extends Applet implements Runnable {
 		stopGame();
 	}
 	
-	public synchronized final void init() {
+	public final void init() {
 		setIgnoreRepaint(true);
 		setLayout(new BorderLayout());
 		
@@ -439,9 +437,7 @@ public abstract class Game extends Applet implements Runnable {
 		
 		canvas.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent ce) {
-				synchronized(Game.this) {
-					resized(getWidth(),getHeight());
-				}
+				resized(getWidth(),getHeight());
 			}
 		});
 		
@@ -489,7 +485,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * Called the set FPS times a second. Updates the current screen.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
-	protected synchronized void update(long deltaTime) {
+	protected void update(long deltaTime) {
 		screenInfo.screen.update(deltaTime);
 	}
 	
@@ -519,7 +515,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * Called the set FPS times a second. Clears the window using the Graphics2D's background color then draws the current screen.
 	 * @param g The Graphics context to be used to draw to the canvas.
 	 */
-	protected synchronized void paint(Graphics2D g) {
+	protected void paint(Graphics2D g) {
 		g.clearRect(0, 0, getWidth(), getHeight());
 		screenInfo.screen.draw((Graphics2D)g.create());
 	}
@@ -543,7 +539,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * Returns the current screen.
 	 * @return The current screen.
 	 */
-	public synchronized Screen getScreen() {
+	public Screen getScreen() {
 		return screenInfo.screen;
 	}
 	
@@ -551,7 +547,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * Returns the name of the current screen. This is the same as calling <code>getName(getScreen())</code>.
 	 * @return The name of the current screen.
 	 */
-	public synchronized String getScreenName() {
+	public String getScreenName() {
 		return getName(getScreen());
 	}
 	
@@ -560,7 +556,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * @param name The name of the screen.
 	 * @return The screen associated with the specified name.
 	 */
-	public synchronized Screen getScreen(String name) {
+	public Screen getScreen(String name) {
 		return screens.get(name).screen;
 	}
 	
@@ -574,6 +570,16 @@ public abstract class Game extends Applet implements Runnable {
 			if(screens.get(s).screen == screen)
 				return s;
 		return null;
+	}
+	
+	/**
+	 * Adds the screen and sets it as the current screen.
+	 * @param screen The Screen to be added and set.
+	 * @param name The name assigned to the Screen.
+	 */
+	public synchronized void setScreen(Screen screen, String name) {
+		addScreen(screen,name);
+		setScreen(name);
 	}
 	
 	/**
@@ -823,12 +829,12 @@ public abstract class Game extends Applet implements Runnable {
 	private class Listener implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
 		public void keyTyped(KeyEvent key) {
 			for(InputListener l : screenInfo.listeners)
-				l.keyTyped(key);
+				l.keyTyped(key,getScreen());
 		}
 		
 		public void keyPressed(KeyEvent key) {
 			for(InputListener l : screenInfo.listeners)
-				l.keyPressed(key);
+				l.keyPressed(key,getScreen());
 			
 			if(isStandardKeysEnabled()) {
 				switch(key.getKeyCode()) {
@@ -841,47 +847,47 @@ public abstract class Game extends Applet implements Runnable {
 		
 		public void keyReleased(KeyEvent key) {
 			for(InputListener l : screenInfo.listeners)
-				l.keyReleased(key);
+				l.keyReleased(key,getScreen());
 		}
 		
 		public void mouseClicked(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseClicked(me);
+				l.mouseClicked(me,getScreen());
 		}
 		
 		public void mouseEntered(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseEntered(me);
+				l.mouseEntered(me,getScreen());
 		}
 		
 		public void mouseExited(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseExited(me);
+				l.mouseExited(me,getScreen());
 		}
 		
 		public void mousePressed(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mousePressed(me);
+				l.mousePressed(me,getScreen());
 		}
 		
 		public void mouseReleased(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseReleased(me);
+				l.mouseReleased(me,getScreen());
 		}
 		
 		public void mouseDragged(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseDragged(me);
+				l.mouseDragged(me,getScreen());
 		}
 		
 		public void mouseMoved(MouseEvent me) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseMoved(me);
+				l.mouseMoved(me,getScreen());
 		}
 		
 		public void mouseWheelMoved(MouseWheelEvent mwe) {
 			for(InputListener l : screenInfo.listeners)
-				l.mouseWheelMoved(mwe);
+				l.mouseWheelMoved(mwe,getScreen());
 		}
 	}
 }

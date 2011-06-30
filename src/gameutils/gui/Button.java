@@ -1,6 +1,6 @@
 package gameutils.gui;
 
-import gameutils.AbstractInputListener;
+import gameutils.InputAdapter;
 import gameutils.Screen;
 import gameutils.util.FastMath;
 
@@ -86,8 +86,8 @@ public class Button extends Widget {
 	public void init(Screen screen) {
 		super.init(screen);
 		
-		screen.getParent().addInputListener(screen, new AbstractInputListener() {
-			public void mousePressed(MouseEvent me) {
+		screen.getParent().addInputListener(screen, new InputAdapter() {
+			public void mousePressed(MouseEvent me, Screen screen) {
 				if(me.getButton() != MouseEvent.BUTTON1)
 					return;
 				
@@ -98,7 +98,7 @@ public class Button extends Widget {
 					setPressed(true);
 			}
 			
-			public void mouseReleased(MouseEvent me) {
+			public void mouseReleased(MouseEvent me, Screen screen) {
 				if(me.getButton() != MouseEvent.BUTTON1)
 					return;
 				
@@ -113,7 +113,7 @@ public class Button extends Widget {
 				setPressed(false);
 			}
 			
-			public void mouseMoved(MouseEvent me) {
+			public void mouseMoved(MouseEvent me, Screen screen) {
 				setHighlighted(false);
 				
 				if(getButtonBounds().contains(me.getPoint()) && isEnabled() && !isPressed())

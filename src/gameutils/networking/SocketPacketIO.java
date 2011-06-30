@@ -17,6 +17,10 @@ public class SocketPacketIO extends PacketIO {
 	private ObjectOutputStream out;
 	private Socket socket;
 	
+	public SocketPacketIO(String address, int port) throws IOException {
+		this(new Socket(address,port));
+	}
+	
 	/**
 	 * Initializes this object.
 	 * @param socket The connection.

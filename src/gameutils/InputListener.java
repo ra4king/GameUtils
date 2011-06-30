@@ -9,18 +9,18 @@ import java.awt.event.MouseWheelEvent;
  * @author Roi Atalla
  */
 public interface InputListener {
-	public void keyPressed(KeyEvent key);
-	public void keyReleased(KeyEvent key);
-	public void keyTyped(KeyEvent key);
+	public void keyPressed(KeyEvent key, Screen screen);
+	public void keyReleased(KeyEvent key, Screen screen);
+	public void keyTyped(KeyEvent key, Screen screen);
 	
-	public void mouseEntered(MouseEvent me);
-	public void mouseExited(MouseEvent me);
-	public void mousePressed(MouseEvent me);
-	public void mouseReleased(MouseEvent me);
-	public void mouseClicked(MouseEvent me);
+	public void mouseEntered(MouseEvent me, Screen screen);
+	public void mouseExited(MouseEvent me, Screen screen);
+	public void mousePressed(MouseEvent me, Screen screen);
+	public void mouseReleased(MouseEvent me, Screen screen);
+	public void mouseClicked(MouseEvent me, Screen screen);
 	
-	public void mouseDragged(MouseEvent me);
-	public void mouseMoved(MouseEvent me);
+	public void mouseDragged(MouseEvent me, Screen screen);
+	public void mouseMoved(MouseEvent me, Screen screen);
 	
-	public void mouseWheelMoved(MouseWheelEvent mwe);
+	public void mouseWheelMoved(MouseWheelEvent mwe, Screen screen);
 }
