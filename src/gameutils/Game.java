@@ -152,6 +152,7 @@ public abstract class Game extends Applet implements Runnable {
 	private int FPS;
 	private double version;
 	private boolean showFPS;
+	private boolean useYield;
 	private boolean standardKeysEnabled = true;
 	private boolean isApplet = true;
 	private volatile boolean isActive;
@@ -415,8 +416,12 @@ public abstract class Game extends Applet implements Runnable {
 						continue;
 					
 					long prevTime = System.nanoTime();
-					while(System.nanoTime()-prevTime <= sleepTime)
-						Thread.sleep(1);
+					while(System.nanoTime()-prevTime <= sleepTime) {
+						if(useYield)
+							Thread.yield();
+						else
+							Thread.sleep(1);
+					}
 				}
 			}
 			catch(Exception exc) {
@@ -740,6 +745,25 @@ public abstract class Game extends Applet implements Runnable {
 	 */
 	public int getFPS() {
 		return FPS;
+	}
+	
+	/**
+	 * Sets whether the game loop should use Thread.yield() or Thread.sleep(1).<br>
+	 * Thread.yield() produces a smoother game loop but at the expense of a high CPU usage.<br>
+	 * Thread.sleep(1) is less smooth but barely uses any CPU time.<br>
+	 * The default is Thread.sleep(1).
+	 * @param useYield If true, uses Thread.yield(), otherwise uses Thread.sleep(1).
+	 */
+	public void useYield(boolean useYield) {
+		this.useYield = useYield;
+	}
+	
+	/**
+	 * Returns whether the game loop uses Thread.yield() or Thread.sleep(1). The default is Thread.sleep(1).
+	 * @return True if the game loop uses Thread.yield(), false if it uses Thread.sleep(1).
+	 */
+	public boolean usesYield() {
+		return useYield;
 	}
 	
 	/**
