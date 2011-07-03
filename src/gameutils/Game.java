@@ -339,9 +339,8 @@ public abstract class Game extends Applet implements Runnable {
 		canvas.requestFocus();
 		
 		while(isActive()) {
-			long now = System.nanoTime();
-			long diffTime = now-lastTime;
-			lastTime = now;
+			long diffTime = System.nanoTime()-lastTime;
+			lastTime += ONE_SECOND_L/FPS;
 			
 			int updateCount = 0;
 			
