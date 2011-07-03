@@ -188,10 +188,7 @@ public abstract class Game extends Applet implements Runnable {
 			public void show() {}
 			public void hide() {}
 			public void update(long deltaTime) {}
-			public void draw(Graphics2D g) {
-				g.setColor(Color.lightGray);
-				g.fillRect(0, 0, getWidth(), getHeight());
-			}
+			public void draw(Graphics2D g) {}
 		});
 		
 		canvas = new Canvas();
