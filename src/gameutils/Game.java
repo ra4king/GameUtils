@@ -932,18 +932,12 @@ public abstract class Game extends Applet implements Runnable {
 			synchronized(events) {
 				events.add(new Event(0,key));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.keyTyped(key,getScreen());
 		}
 		
 		public void keyPressed(KeyEvent key) {
 			synchronized(events) {
 				events.add(new Event(1,key));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.keyPressed(key,getScreen());
 			
 			if(isStandardKeysEnabled()) {
 				switch(key.getKeyCode()) {
@@ -958,81 +952,54 @@ public abstract class Game extends Applet implements Runnable {
 			synchronized(events) {
 				events.add(new Event(2,key));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.keyReleased(key,getScreen());
 		}
 		
 		public void mouseClicked(MouseEvent me) {
 			synchronized(events) {
 				events.add(new Event(3,me));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.mouseClicked(me,getScreen());
 		}
 		
 		public void mouseEntered(MouseEvent me) {
 			synchronized(events) {
 				events.add(new Event(4,me));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.mouseEntered(me,getScreen());
 		}
 		
 		public void mouseExited(MouseEvent me) {
 			synchronized(events) {
 				events.add(new Event(5,me));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.mouseExited(me,getScreen());
 		}
 		
 		public void mousePressed(MouseEvent me) {
 			synchronized(events) {
 				events.add(new Event(6,me));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.mousePressed(me,getScreen());
 		}
 		
 		public void mouseReleased(MouseEvent me) {
 			synchronized(events) {
 				events.add(new Event(7,me));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.mouseReleased(me,getScreen());
 		}
 		
 		public void mouseDragged(MouseEvent me) {
 			synchronized(events) {
 				events.add(new Event(8,me));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.mouseDragged(me,getScreen());
 		}
 		
 		public void mouseMoved(MouseEvent me) {
 			synchronized(events) {
 				events.add(new Event(9,me));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.mouseMoved(me,getScreen());
 		}
 		
 		public void mouseWheelMoved(MouseWheelEvent mwe) {
 			synchronized(events) {
 				events.add(new Event(10,mwe));
 			}
-			
-			//for(InputListener l : currentScreen.listeners)
-			//	l.mouseWheelMoved(mwe,getScreen());
 		}
 	}
 }
