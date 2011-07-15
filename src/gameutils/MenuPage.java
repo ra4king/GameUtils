@@ -27,7 +27,7 @@ public class MenuPage implements Screen {
 	public MenuPage(Menus menus) {
 		if(menus == null)
 			throw new IllegalArgumentException("Menus cannot be null.");
-		if(menus.getParent() == null)
+		if(menus.getGame() == null)
 			throw new IllegalStateException("Menus has to be added to a Game.");
 		
 		this.menus = menus;
@@ -45,7 +45,7 @@ public class MenuPage implements Screen {
 	 * Returns the parent of this MenuPage.
 	 * @return The parent of this MenuPage.
 	 */
-	public Game getParent() {
+	public Game getGame() {
 		return game;
 	}
 	

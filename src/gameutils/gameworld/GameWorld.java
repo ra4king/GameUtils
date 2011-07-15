@@ -109,7 +109,7 @@ public class GameWorld implements Screen {
 	/**
 	 * @return The parent of this object.
 	 */
-	public Game getParent() {
+	public Game getGame() {
 		return parent;
 	}
 	

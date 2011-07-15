@@ -20,7 +20,7 @@ public abstract class BasicScreen implements Screen, InputListener {
 		game.addInputListener(this, this);
 	}
 	
-	public Game getParent() {
+	public Game getGame() {
 		return game;
 	}
 	

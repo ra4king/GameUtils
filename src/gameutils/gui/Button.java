@@ -86,7 +86,7 @@ public class Button extends Widget {
 	public void init(Screen screen) {
 		super.init(screen);
 		
-		screen.getParent().addInputListener(screen, new InputAdapter() {
+		screen.getGame().addInputListener(screen, new InputAdapter() {
 			public void mousePressed(MouseEvent me, Screen screen) {
 				if(me.getButton() != MouseEvent.BUTTON1)
 					return;

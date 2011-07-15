@@ -183,7 +183,7 @@ public abstract class Game extends Applet implements Runnable {
 		
 		currentScreen = new ScreenInfo(new Screen() {
 			public void init(Game game) {}
-			public Game getParent() { return null; }
+			public Game getGame() { return null; }
 			public void show() {}
 			public void hide() {}
 			public void paused() {}

@@ -17,7 +17,7 @@ public interface Screen {
 	 * Returns the parent of this Screen.
 	 * @return The parent of this Screen.
 	 */
-	public Game getParent();
+	public Game getGame();
 	
 	/**
 	 * Called when this Screen is shown.

@@ -31,7 +31,7 @@ public class Menus implements Screen {
 	 * Returns the parent of this object.
 	 * @return The parent of this object.
 	 */
-	public Game getParent() {
+	public Game getGame() {
 		return game;
 	}
 	
