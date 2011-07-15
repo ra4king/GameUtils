@@ -3,6 +3,7 @@ package gameutils;
 import gameutils.util.FastMath;
 
 import java.applet.Applet;
+import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Color;
@@ -58,7 +59,8 @@ import javax.swing.UIManager;
  * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
  * <br>
  * &nbsp;&nbsp;&nbsp;&nbsp;public void update(long deltaTime) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Update the game<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;super.update(deltaTime);<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Optional: update the game<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
  * <br>
  * &nbsp;&nbsp;&nbsp;&nbsp;public void paused() {<br>
@@ -78,7 +80,8 @@ import javax.swing.UIManager;
  * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
  *<br>     
  * &nbsp;&nbsp;&nbsp;&nbsp;public void paint(Graphics2D g) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Draw the game<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;super.paint(g);<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Optional: draw the game<br>
  * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
  * }
  * </code>
@@ -132,21 +135,17 @@ public abstract class Game extends Applet implements Runnable {
 	public static final int MAX_UPDATES = -1;
 	
 	/**
-	 * 1 second in nanoseconds in double precision, AKA 1,000,000 nanoseconds.
+	 * 1 second in nanoseconds, AKA 1,000,000 nanoseconds.
 	 */
-	public static final double ONE_SECOND = 1e9;
-	
-	/**
-	 * 1 second in nanoseconds as a long, AKA 1,000,000 nanoseconds.
-	 */
-	public static final long ONE_SECOND_L = (long)ONE_SECOND;
+	public static final long ONE_SECOND = (long)1e9;
 	
 	private final Art art;
 	private final Sound sound;
 	private final Map<String,ScreenInfo> screens;
-	private ScreenInfo screenInfo;
+	private ScreenInfo currentScreen;
 	private final Canvas canvas;
 	private final Input input;
+	private ArrayList<Event> events;
 	private Object quality;
 	private int maxUpdates;
 	private int FPS;
@@ -182,17 +181,22 @@ public abstract class Game extends Applet implements Runnable {
 		
 		screens = Collections.synchronizedMap(new HashMap<String,ScreenInfo>());
 		
-		screenInfo = new ScreenInfo(new Screen() {
+		currentScreen = new ScreenInfo(new Screen() {
 			public void init(Game game) {}
 			public Game getParent() { return null; }
 			public void show() {}
 			public void hide() {}
+			public void paused() {}
+			public void resumed() {}
+			public void resized(int width, int height) {}
 			public void update(long deltaTime) {}
 			public void draw(Graphics2D g) {}
 		});
 		
 		canvas = new Canvas();
 		input = new Input(canvas);
+		
+		events = new ArrayList<Event>();
 		
 		this.FPS = FPS;
 		this.version = version;
@@ -340,17 +344,12 @@ public abstract class Game extends Applet implements Runnable {
 		
 		while(isActive()) {
 			long diffTime = System.nanoTime()-lastTime;
-			lastTime += ONE_SECOND_L/FPS;
+			lastTime += diffTime;
 			
 			int updateCount = 0;
 			
-			while(diffTime > 0 && (maxUpdates == MAX_UPDATES || updateCount < maxUpdates) && !isPaused()) {
-				long deltaTime;
-				
-				if(FPS > 0)
-					deltaTime = Math.min(diffTime,ONE_SECOND_L/FPS);
-				else
-					deltaTime = diffTime;
+			while(diffTime > 0 && (maxUpdates <= 0 || updateCount < maxUpdates) && !isPaused()) {
+				long deltaTime = FPS > 0 ? deltaTime = Math.min(diffTime,ONE_SECOND/FPS) : diffTime;
 				
 				try{
 					synchronized(Game.this) {
@@ -397,13 +396,13 @@ public abstract class Game extends Applet implements Runnable {
 				exc.printStackTrace();
 			}
 			
-			if(System.nanoTime()-time >= ONE_SECOND_L) {
+			frames++;
+			
+			if(System.nanoTime()-time >= ONE_SECOND) {
 				time = System.nanoTime();
 				currentFPS = frames;
 				frames = 0;
 			}
-			
-			frames++;
 			
 			try{
 				if(FPS > 0) {
@@ -423,9 +422,77 @@ public abstract class Game extends Applet implements Runnable {
 			catch(Exception exc) {
 				exc.printStackTrace();
 			}
+			
+			processEvents();
 		}
 		
 		stopGame();
+	}
+	
+	private void processEvents() {
+		synchronized(events) {
+			for(Event e : events) {
+				switch(e.id) {
+					case 0:
+						for(InputListener l : currentScreen.listeners)
+							l.keyTyped((KeyEvent)e.event,getScreen());
+						break;
+					case 1:
+						for(InputListener l : currentScreen.listeners)
+							l.keyPressed((KeyEvent)e.event,getScreen());
+						break;
+					case 2:
+						for(InputListener l : currentScreen.listeners)
+							l.keyReleased((KeyEvent)e.event,getScreen());
+						break;
+					case 3:
+						for(InputListener l : currentScreen.listeners)
+							l.mouseClicked((MouseEvent)e.event,getScreen());
+						break;
+					case 4:
+						for(InputListener l : currentScreen.listeners)
+							l.mouseEntered((MouseEvent)e.event,getScreen());
+						break;
+					case 5:
+						for(InputListener l : currentScreen.listeners)
+							l.mouseExited((MouseEvent)e.event,getScreen());
+						break;
+					case 6:
+						for(InputListener l : currentScreen.listeners)
+							l.mousePressed((MouseEvent)e.event,getScreen());
+						break;
+					case 7:
+						for(InputListener l : currentScreen.listeners)
+							l.mouseReleased((MouseEvent)e.event,getScreen());
+						break;
+					case 8:
+						for(InputListener l : currentScreen.listeners)
+							l.mouseDragged((MouseEvent)e.event,getScreen());
+						break;
+					case 9:
+						for(InputListener l : currentScreen.listeners)
+							l.mouseMoved((MouseEvent)e.event,getScreen());
+						break;
+					case 10:
+						for(InputListener l : currentScreen.listeners)
+							l.mouseWheelMoved((MouseWheelEvent)e.event,getScreen());
+						break;
+					case 11:
+						resized(getWidth(),getHeight());
+						break;
+					case 12:
+						if(isPaused() && isActive())
+							resume();
+						break;
+					case 13:
+						if(!isPaused() && isActive())
+							pause();
+						break;
+				}
+			}
+			
+			events.clear();
+		}
 	}
 	
 	public final void init() {
@@ -438,24 +505,22 @@ public abstract class Game extends Applet implements Runnable {
 		
 		canvas.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent ce) {
-				resized(getWidth(),getHeight());
+				synchronized(events) {
+					events.add(new Event(11,ce));
+				}
 			}
 		});
 		
 		canvas.addFocusListener(new FocusListener() {
-			private boolean focusLost;
-			
 			public void focusGained(FocusEvent fe) {
-				if(focusLost && isPaused() && isActive()) {
-					focusLost = false;
-					resume();
+				synchronized(events) {
+					events.add(new Event(12,fe));
 				}
 			}
 			
 			public void focusLost(FocusEvent fe) {
-				if(!isPaused() && isActive()) {
-					focusLost = true;
-					pause();
+				synchronized(events) {
+					events.add(new Event(13,fe));
 				}
 			}
 		});
@@ -487,25 +552,31 @@ public abstract class Game extends Applet implements Runnable {
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	protected void update(long deltaTime) {
-		screenInfo.screen.update(deltaTime);
+		getScreen().update(deltaTime);
 	}
 	
 	/**
 	 * Called when this game loses focus.
 	 */
-	protected abstract void paused();
+	protected void paused() {
+		getScreen().paused();
+	}
 	
 	/**
 	 * Called when this game regains focus.
 	 */
-	protected abstract void resumed();
+	protected void resumed() {
+		getScreen().resumed();
+	}
 	
 	/**
 	 * called when the game is resized.
 	 * @param width The new width.
 	 * @param height The new height.
 	 */
-	protected abstract void resized(int width, int height);
+	protected void resized(int width, int height) {
+		getScreen().resized(width, height);
+	}
 	
 	/**
 	 * Called when this game is stopped.
@@ -518,7 +589,7 @@ public abstract class Game extends Applet implements Runnable {
 	 */
 	protected void paint(Graphics2D g) {
 		g.clearRect(0, 0, getWidth(), getHeight());
-		screenInfo.screen.draw((Graphics2D)g.create());
+		getScreen().draw((Graphics2D)g.create());
 	}
 	
 	/**
@@ -541,7 +612,7 @@ public abstract class Game extends Applet implements Runnable {
 	 * @return The current screen.
 	 */
 	public Screen getScreen() {
-		return screenInfo.screen;
+		return currentScreen.screen;
 	}
 	
 	/**
@@ -609,9 +680,9 @@ public abstract class Game extends Applet implements Runnable {
 		if(screenInfo == null || !screens.containsValue(screenInfo))
 			throw new IllegalArgumentException("Screen has not been added.");
 		
-		this.screenInfo.screen.hide();
-		this.screenInfo = screenInfo;
-		this.screenInfo.screen.show();
+		this.currentScreen.screen.hide();
+		this.currentScreen = screenInfo;
+		this.currentScreen.screen.show();
 	}
 	
 	private ScreenInfo getScreenInfo(Screen screen) {
@@ -846,15 +917,33 @@ public abstract class Game extends Applet implements Runnable {
 		}
 	}
 	
+	private static class Event {
+		int id;
+		AWTEvent event;
+		
+		public Event(int id, AWTEvent event) {
+			this.id = id;
+			this.event = event;
+		}
+	}
+	
 	private class Listener implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
 		public void keyTyped(KeyEvent key) {
-			for(InputListener l : screenInfo.listeners)
-				l.keyTyped(key,getScreen());
+			synchronized(events) {
+				events.add(new Event(0,key));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.keyTyped(key,getScreen());
 		}
 		
 		public void keyPressed(KeyEvent key) {
-			for(InputListener l : screenInfo.listeners)
-				l.keyPressed(key,getScreen());
+			synchronized(events) {
+				events.add(new Event(1,key));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.keyPressed(key,getScreen());
 			
 			if(isStandardKeysEnabled()) {
 				switch(key.getKeyCode()) {
@@ -866,48 +955,84 @@ public abstract class Game extends Applet implements Runnable {
 		}
 		
 		public void keyReleased(KeyEvent key) {
-			for(InputListener l : screenInfo.listeners)
-				l.keyReleased(key,getScreen());
+			synchronized(events) {
+				events.add(new Event(2,key));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.keyReleased(key,getScreen());
 		}
 		
 		public void mouseClicked(MouseEvent me) {
-			for(InputListener l : screenInfo.listeners)
-				l.mouseClicked(me,getScreen());
+			synchronized(events) {
+				events.add(new Event(3,me));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.mouseClicked(me,getScreen());
 		}
 		
 		public void mouseEntered(MouseEvent me) {
-			for(InputListener l : screenInfo.listeners)
-				l.mouseEntered(me,getScreen());
+			synchronized(events) {
+				events.add(new Event(4,me));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.mouseEntered(me,getScreen());
 		}
 		
 		public void mouseExited(MouseEvent me) {
-			for(InputListener l : screenInfo.listeners)
-				l.mouseExited(me,getScreen());
+			synchronized(events) {
+				events.add(new Event(5,me));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.mouseExited(me,getScreen());
 		}
 		
 		public void mousePressed(MouseEvent me) {
-			for(InputListener l : screenInfo.listeners)
-				l.mousePressed(me,getScreen());
+			synchronized(events) {
+				events.add(new Event(6,me));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.mousePressed(me,getScreen());
 		}
 		
 		public void mouseReleased(MouseEvent me) {
-			for(InputListener l : screenInfo.listeners)
-				l.mouseReleased(me,getScreen());
+			synchronized(events) {
+				events.add(new Event(7,me));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.mouseReleased(me,getScreen());
 		}
 		
 		public void mouseDragged(MouseEvent me) {
-			for(InputListener l : screenInfo.listeners)
-				l.mouseDragged(me,getScreen());
+			synchronized(events) {
+				events.add(new Event(8,me));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.mouseDragged(me,getScreen());
 		}
 		
 		public void mouseMoved(MouseEvent me) {
-			for(InputListener l : screenInfo.listeners)
-				l.mouseMoved(me,getScreen());
+			synchronized(events) {
+				events.add(new Event(9,me));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.mouseMoved(me,getScreen());
 		}
 		
 		public void mouseWheelMoved(MouseWheelEvent mwe) {
-			for(InputListener l : screenInfo.listeners)
-				l.mouseWheelMoved(mwe,getScreen());
+			synchronized(events) {
+				events.add(new Event(10,mwe));
+			}
+			
+			//for(InputListener l : currentScreen.listeners)
+			//	l.mouseWheelMoved(mwe,getScreen());
 		}
 	}
 }

@@ -110,6 +110,12 @@ public class Menus implements Screen {
 	
 	public void hide() {}
 	
+	public void paused() {}
+	
+	public void resumed() {}
+	
+	public void resized(int width, int height) {}
+	
 	/**
 	 * Throws an exception.
 	 * @throws UnsupportedOperationException

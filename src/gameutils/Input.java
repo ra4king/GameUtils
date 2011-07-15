@@ -57,7 +57,7 @@ public class Input {
 	}
 	
 	/**
-	 * Returns the last mouse click. Then it is set to null.
+	 * Returns the last mouse click. Then it is consumed.
 	 * @return The latest mouse click.
 	 */
 	public Point getLastMouseClick() {

@@ -42,7 +42,7 @@ public class GameWorld implements Screen {
 	/**
 	 * Calls each Entity's <code>show()</code> method in z-index order.
 	 */
-	public void show() {
+	public synchronized void show() {
 		for(Bag<Entity> bag : entities)
 			for(Entity e : bag)
 				e.show();
@@ -51,11 +51,25 @@ public class GameWorld implements Screen {
 	/**
 	 * Calls each Entity's <code>hide()</code> method in z-index order.
 	 */
-	public void hide() {
+	public synchronized void hide() {
 		for(Bag<Entity> bag : entities)
 			for(Entity e : bag)
 				e.hide();
 	}
+	
+	public synchronized void paused() {
+		for(Bag<Entity> bag : entities)
+			for(Entity e: bag)
+				e.paused();
+	}
+	
+	public synchronized void resumed() {
+		for(Bag<Entity> bag : entities)
+			for(Entity e : bag)
+				e.resumed();
+	}
+	
+	public synchronized void resized(int width, int height) {}
 	
 	/**
 	 * Calls each Entity's <code>update(long)</code> method in z-index order.

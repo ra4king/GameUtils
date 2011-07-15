@@ -47,6 +47,10 @@ public abstract class Widget implements Element {
 	
 	public void hide() {}
 	
+	public void paused() {}
+	
+	public void resumed() {}
+	
 	/**
 	 * Updates this Widget.
 	 * @param deltaTime The time passed since the last call to it.

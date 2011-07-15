@@ -24,6 +24,16 @@ public interface Element {
 	public void hide();
 	
 	/**
+	 * Called when the parent Screen is paused.
+	 */
+	public void paused();
+	
+	/**
+	 * Called when the parent Screen is resumed.
+	 */
+	public void resumed();
+	
+	/**
 	 * Updates this Element.
 	 * @param deltaTime The time passed since the last call to it.
 	 */

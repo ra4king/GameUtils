@@ -152,8 +152,8 @@ public abstract class PacketIO {
 	}
 	
 	/**
-	 * Returns the IP address of the remote connection.
-	 * @return The IP address of the remote connection.
+	 * Returns the SocketAddress of the remote connection.
+	 * @return The SocketAddress of the remote connection.
 	 */
 	public abstract SocketAddress getSocketAddress();
 	

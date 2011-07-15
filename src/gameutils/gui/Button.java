@@ -163,8 +163,8 @@ public class Button extends Widget {
 		Graphics2D g = (Graphics2D)new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB).getGraphics();
 		FontMetrics fm = g.getFontMetrics(font);
 		int width = fm.stringWidth(text);
-		super.setWidth((int)(width+40));
-		super.setHeight((int)(fm.getHeight()+10));
+		super.setWidth(width+40);
+		super.setHeight(fm.getHeight()+10);
 		if(isCentered) {
 			super.setX(centerX-getWidth()/2);
 			super.setY(centerY-getHeight()/2);
@@ -173,8 +173,8 @@ public class Button extends Widget {
 			super.setX(centerX);
 			super.setY(centerY);
 		}
-		textX = (int)FastMath.round(getX()+(getWidth()-width)/2);
-		textY = (int)FastMath.round(getY()+getHeight()/2+fm.getHeight()/2-fm.getDescent());
+		textX = FastMath.round(getX()+(getWidth()-width)/2);
+		textY = FastMath.round(getY()+getHeight()/2+fm.getHeight()/2-fm.getDescent());
 	}
 	
 	/**
@@ -481,6 +481,10 @@ public class Button extends Widget {
 	public void setDisabledBorder(Paint paint) {
 		disabledBorder = paint;
 	}
+	
+	public void paused() {}
+	
+	public void resumed() {}
 	
 	public void update(long deltaTime) {}
 	

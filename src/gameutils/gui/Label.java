@@ -8,14 +8,14 @@ import java.awt.Paint;
 import java.awt.image.BufferedImage;
 
 /**
- * A Label extends Widget and just draws a String. If you are confused with the usage of Paint, remember Color implements Paint so you can still a Color if you wish.
+ * A Label extends Widget and just draws a String. If you are confused with the usage of Paint, remember Color implements Paint so you can still use a Color if you wish.
  * @author Roi Atalla
  */
 public class Label extends Widget {
 	private String text;
 	private Paint background, textPaint;
 	private Font font;
-	private int textX, textY;
+	private int textX, textY, centerX, centerY;
 	private boolean isCentered;
 	
 	/**
@@ -45,10 +45,16 @@ public class Label extends Widget {
 		else
 			this.font = font;
 		
-		textX = x;
-		textY = y;
-		
 		isCentered = centered;
+		
+		if(isCentered) {
+			centerX = x;
+			centerY = y;
+		}
+		else {
+			textX = x;
+			textY = y;
+		}
 		
 		recalcCoords();
 	}
@@ -119,18 +125,19 @@ public class Label extends Widget {
 		FontMetrics fm = g.getFontMetrics(font);
 		int width = fm.stringWidth(text);
 		int height = fm.getHeight();
+		int x, y;
 		
 		if(isCentered) {
-			textX -= width/2;
-			textY += fm.getHeight()/2;
-			super.setX(textX);
-			super.setY(textY-fm.getAscent());
+			textX = x = centerX - width/2;
+			textY = y = centerY + fm.getHeight()/2;
 		}
 		else {
-			super.setX(textX);
-			super.setY(textY-fm.getAscent());
+			x = textX;
+			y = textY;
 		}
 		
+		super.setX(x);
+		super.setY(y-fm.getAscent());
 		super.setWidth(width);
 		super.setHeight(height);
 	}
@@ -139,7 +146,10 @@ public class Label extends Widget {
 	 * Calls MenuItem's setX method and recalculates all the coordinates.
 	 */
 	public void setX(int x) {
-		super.setX(x);
+		if(isCentered)
+			centerX = x;
+		else
+			textX = x;
 		recalcCoords();
 	}
 	
@@ -147,8 +157,28 @@ public class Label extends Widget {
 	 * Calls MenuItem's setY method and recalculates all the coordinates.
 	 */
 	public void setY(int y) {
-		super.setY(y);
+		if(isCentered)
+			centerY = y;
+		else
+			textY = y;
 		recalcCoords();
+	}
+	
+	/**
+	 * Sets whether the X and Y are the center of the text or not.
+	 * @param isCentered If true, the X and Y are the center of the text, else they are absolute positions.
+	 */
+	public void setCentered(boolean isCentered) {
+		this.isCentered = isCentered;
+		recalcCoords();
+	}
+	
+	/**
+	 * Returns whether the X and Y are the center of the text or not.
+	 * @return True if the X and Y are the center of the text, false otherwise.
+	 */
+	public boolean isCentered() {
+		return isCentered;
 	}
 	
 	/**
@@ -182,6 +212,10 @@ public class Label extends Widget {
 	public void setBackground(Paint paint) {
 		background = paint;
 	}
+	
+	public void paused() {}
+	
+	public void resumed() {}
 	
 	public void update(long deltaTime) {}
 	

@@ -65,6 +65,18 @@ public class MenuPage implements Screen {
 			w.hide();
 	}
 	
+	public synchronized void paused() {
+		for(Widget w : widgets)
+			w.paused();
+	}
+	
+	public synchronized void resumed() {
+		for(Widget w : widgets)
+			w.resumed();
+	}
+	
+	public synchronized void resized(int width, int height) {}
+	
 	/**
 	 * Calls all added Widget's update(long) method.
 	 */

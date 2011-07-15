@@ -221,6 +221,10 @@ public abstract class Entity implements Element {
 	
 	public void hide() {}
 	
+	public void paused() {}
+	
+	public void resumed() {}
+	
 	/**
 	 * Called by the parent a set number of times a second.
 	 * @param deltaTime The time passed since the last call to it.

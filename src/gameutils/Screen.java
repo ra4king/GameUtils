@@ -30,6 +30,21 @@ public interface Screen {
 	public void hide();
 	
 	/**
+	 * Called when this Screen is paused.
+	 */
+	public void paused();
+	
+	/**
+	 * Called when this Screen is resumed.
+	 */
+	public void resumed();
+	
+	/**
+	 * Called when this Screen is resized.
+	 */
+	public void resized(int width, int height);
+	
+	/**
 	 * Updates this Screen.
 	 * @param deltaTime The time passed since the last call to it.
 	 */

@@ -10,6 +10,10 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
+/**
+ * A blocking or non-blocking UDP wrapper that uses NIO.
+ * @author Roi Atalla
+ */
 public class NBDatagramPacketIO extends PacketIO {
 	private DatagramChannel channel;
 	private SocketAddress address;

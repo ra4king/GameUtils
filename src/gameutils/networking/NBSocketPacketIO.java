@@ -10,6 +10,10 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+/**
+ * A Non-Blocking TCP wrapper.
+ * @author Roi Atalla
+ */
 public class NBSocketPacketIO extends PacketIO {
 	private SocketChannel channel;
 	private ByteBuffer in, out;
