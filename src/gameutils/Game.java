@@ -501,6 +501,9 @@ public abstract class Game extends Applet implements Runnable {
 		}
 		
 		stopGame();
+		
+		if(!isApplet() && ((JFrame)getRootParent()).getDefaultCloseOperation() == JFrame.EXIT_ON_CLOSE)
+			System.exit(0);
 	}
 	
 	private void processEvents() {
