@@ -11,6 +11,8 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
@@ -193,6 +195,8 @@ public abstract class Game extends Applet implements Runnable {
 			public void draw(Graphics2D g) {}
 		});
 		
+		screens.put("Default", currentScreen);
+		
 		canvas = new Canvas();
 		input = new Input(canvas);
 		
@@ -236,6 +240,14 @@ public abstract class Game extends Applet implements Runnable {
 		if(isApplet())
 			return this;
 		return getParent().getParent().getParent().getParent();
+	}
+	
+	public int getWidth() {
+		return canvas.getWidth();
+	}
+	
+	public int getHeight() {
+		return canvas.getHeight();
 	}
 	
 	/**
@@ -308,6 +320,65 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
+	 * Sets the game to full screen.
+	 * @param setFullScreen If true, it is set to full screen, else it is returned to windowed mode.
+	 * @throws IllegalStateException If setFullScreen is true and isFullScreen() returns true.
+	 */
+	public void setFullScreen(boolean setFullScreen) {
+		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		
+		if(setFullScreen) {
+			if(isFullScreen())
+				throw new IllegalStateException("A full screen window is already open.");
+			
+			JFrame frame = new JFrame();
+			frame.setResizable(false);
+			frame.setUndecorated(true);
+			frame.setIgnoreRepaint(true);
+			
+			remove(canvas);
+			invalidate();
+			validate();
+			
+			frame.add(canvas);
+			
+			frame.addWindowListener(new WindowAdapter() {
+				public void windowClosing(WindowEvent we) {
+					setFullScreen(false);
+				}
+			});
+			
+			if(!isApplet())
+				getRootParent().setVisible(false);
+			
+			gd.setFullScreenWindow(frame);
+		}
+		else {
+			if(!isFullScreen())
+				return;
+			
+			gd.getFullScreenWindow().dispose();
+			gd.setFullScreenWindow(null);
+			add(canvas);
+			invalidate();
+			validate();
+			
+			if(!isApplet())
+				getRootParent().setVisible(true);
+		}
+		
+		canvas.requestFocus();
+	}
+	
+	/**
+	 * Returns true if this game is running full screen.
+	 * @return True if this game is running full screen, false otherwise.
+	 */
+	public boolean isFullScreen() {
+		return GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getFullScreenWindow() != null;
+	}
+	
+	/**
 	 * Game loop.
 	 */
 	public final void run() {
@@ -331,7 +402,10 @@ public abstract class Game extends Applet implements Runnable {
 		canvas.addMouseMotionListener(listener);
 		canvas.addMouseWheelListener(listener);
 		
+		canvas.createBufferStrategy(2);
 		BufferStrategy strategy = canvas.getBufferStrategy();
+		
+		Font fpsFont = new Font(Font.SANS_SERIF,Font.TRUETYPE_FONT,10);
 		
 		int frames = 0;
 		int currentFPS = 0;
@@ -382,8 +456,8 @@ public abstract class Game extends Applet implements Runnable {
 						
 						if(showFPS) {
 							g.setColor(Color.black);
-							g.setFont(new Font(Font.SANS_SERIF,Font.TRUETYPE_FONT,10));
-							g.drawString("Version " + version + "    " + currentFPS + " FPS",2,canvas.getHeight()-2);
+							g.setFont(fpsFont);
+							g.drawString("Version " + version + "    " + currentFPS + " FPS",2,getHeight()-2);
 						}
 						
 						g.dispose();
@@ -500,8 +574,8 @@ public abstract class Game extends Applet implements Runnable {
 		setLayout(new BorderLayout());
 		
 		add(canvas);
+		canvas.setSize(super.getWidth(),super.getHeight());
 		canvas.setIgnoreRepaint(true);
-		canvas.createBufferStrategy(2);
 		
 		canvas.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent ce) {
@@ -680,9 +754,9 @@ public abstract class Game extends Applet implements Runnable {
 		if(screenInfo == null || !screens.containsValue(screenInfo))
 			throw new IllegalArgumentException("Screen has not been added.");
 		
-		this.currentScreen.screen.hide();
-		this.currentScreen = screenInfo;
-		this.currentScreen.screen.show();
+		currentScreen.screen.hide();
+		currentScreen = screenInfo;
+		currentScreen.screen.show();
 	}
 	
 	private ScreenInfo getScreenInfo(Screen screen) {
