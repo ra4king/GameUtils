@@ -37,6 +37,7 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 /**
@@ -387,11 +388,6 @@ public abstract class Game extends Applet implements Runnable {
 		
 		Thread.currentThread().setName("Game Loop Thread");
 		
-		try{
-			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
-		}
-		catch(Exception exc) {}
-		
 		synchronized(Game.this) {
 			initGame();
 		}
@@ -573,6 +569,12 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	public final void init() {
+		try{
+			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+			SwingUtilities.updateComponentTreeUI(getRootParent());
+		}
+		catch(Exception exc) {}
+		
 		setIgnoreRepaint(true);
 		setLayout(new BorderLayout());
 		
