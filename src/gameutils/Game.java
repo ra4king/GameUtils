@@ -571,7 +571,8 @@ public abstract class Game extends Applet implements Runnable {
 	public final void init() {
 		try{
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
-			SwingUtilities.updateComponentTreeUI(getRootParent());
+			if(!isApplet())
+				SwingUtilities.updateComponentTreeUI(((JFrame)getRootParent()).getContentPane());
 		}
 		catch(Exception exc) {}
 		
