@@ -37,7 +37,6 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 /**
@@ -92,6 +91,13 @@ import javax.swing.UIManager;
  */
 public abstract class Game extends Applet implements Runnable {
 	private static final long serialVersionUID = -1870725768768871166L;
+	
+	static {
+		try{
+			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+		}
+		catch(Exception exc) {}
+	}
 	
 	/**
 	 * Initializes and displays the window.
@@ -569,13 +575,6 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	public final void init() {
-		try{
-			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
-			if(!isApplet())
-				SwingUtilities.updateComponentTreeUI(((JFrame)getRootParent()).getContentPane());
-		}
-		catch(Exception exc) {}
-		
 		setIgnoreRepaint(true);
 		setLayout(new BorderLayout());
 		
