@@ -68,6 +68,14 @@ public abstract class BasicScreen implements Screen {
 		return game;
 	}
 	
+	public int getWidth() {
+		return game.getWidth();
+	}
+	
+	public int getHeight() {
+		return game.getHeight();
+	}
+	
 	public void show() {}
 	
 	public void hide() {}
