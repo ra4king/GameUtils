@@ -422,7 +422,12 @@ public abstract class Game extends Applet implements Runnable {
 			long diffTime = System.nanoTime()-lastTime;
 			lastTime += diffTime;
 			
-			processEvents();
+			try{
+				processEvents();
+			}
+			catch(Exception exc) {
+				exc.printStackTrace();
+			}
 			
 			int updateCount = 0;
 			
