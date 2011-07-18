@@ -422,6 +422,8 @@ public abstract class Game extends Applet implements Runnable {
 			long diffTime = System.nanoTime()-lastTime;
 			lastTime += diffTime;
 			
+			processEvents();
+			
 			int updateCount = 0;
 			
 			while(diffTime > 0 && (maxUpdates <= 0 || updateCount < maxUpdates) && !isPaused()) {
@@ -498,8 +500,6 @@ public abstract class Game extends Applet implements Runnable {
 			catch(Exception exc) {
 				exc.printStackTrace();
 			}
-			
-			processEvents();
 		}
 		
 		stopGame();
