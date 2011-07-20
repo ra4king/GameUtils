@@ -115,7 +115,10 @@ public abstract class Game extends Applet implements Runnable {
 		
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
-				stop();
+				synchronized(Game.this) {
+					stopGame();
+				}
+				System.exit(0);
 			}
 		});
 		
