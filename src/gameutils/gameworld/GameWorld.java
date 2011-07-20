@@ -22,6 +22,7 @@ public class GameWorld implements Screen {
 	private ArrayList<Entity> allEntities;
 	private Image bg;
 	private String bgImage;
+	private boolean hasShown;
 	
 	/**
 	 * Initializes this object.
@@ -43,6 +44,8 @@ public class GameWorld implements Screen {
 	 * Calls each Entity's <code>show()</code> method in z-index order.
 	 */
 	public synchronized void show() {
+		hasShown = true;
+		
 		for(Bag<Entity> bag : entities)
 			for(Entity e : bag)
 				e.show();
@@ -52,6 +55,8 @@ public class GameWorld implements Screen {
 	 * Calls each Entity's <code>hide()</code> method in z-index order.
 	 */
 	public synchronized void hide() {
+		hasShown = false;
+		
 		for(Bag<Entity> bag : entities)
 			for(Entity e : bag)
 				e.hide();
@@ -136,6 +141,9 @@ public class GameWorld implements Screen {
 		
 		e.init(this);
 		
+		if(hasShown)
+			e.show();
+		
 		return e;
 	}
 	
@@ -152,6 +160,11 @@ public class GameWorld implements Screen {
 		int zindex = getZIndex(old);
 		if(zindex < 0)
 			return false;
+		
+		if(getZIndex(e) < 0)
+			return false;
+		
+		remove(e);
 		
 		Bag<Entity> bag = entities.get(zindex);
 		bag.set(bag.indexOf(old),e);

@@ -27,8 +27,14 @@ public class Bag<T> extends ArrayList<T> {
 	}
 	
 	public boolean remove(Object o) {
-		if(o == null)
-			return super.remove(o);
+		if(o == null) {
+			int i = indexOf(o);
+			if(i < 0)
+				return false;
+			super.set(i, get(size()-1));
+			super.remove(size()-1);
+			return true;
+		}
 		
 		int idx = indexOf(o);
 		if(idx == -1)
