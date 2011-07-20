@@ -42,6 +42,8 @@ public class Menus implements Screen {
 	 * @return The MenuPage that was added.
 	 */
 	public synchronized MenuPage addPage(String name, MenuPage page) {
+		if(game == null)
+			throw new IllegalStateException("You have to set this Menus as the Screen before adding MenuPages to it.");
 		if(name == null)
 			throw new IllegalArgumentException("Name cannot be null");
 		if(page == null)
