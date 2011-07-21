@@ -158,6 +158,7 @@ public abstract class Game extends Applet implements Runnable {
 	private final Canvas canvas;
 	private final Input input;
 	private ArrayList<Event> events;
+	private ArrayList<Event> tempEvents;
 	private Object quality;
 	private int maxUpdates;
 	private int FPS;
@@ -166,6 +167,7 @@ public abstract class Game extends Applet implements Runnable {
 	private boolean useYield;
 	private boolean standardKeysEnabled = true;
 	private boolean isApplet = true;
+	private volatile boolean isProcessingEvents;
 	private volatile boolean isActive;
 	private volatile boolean isPaused;
 	
@@ -517,6 +519,8 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	private void processEvents() {
+		isProcessingEvents = true;
+		
 		synchronized(events) {
 			for(Event e : events) {
 				switch(e.id) {
@@ -579,7 +583,11 @@ public abstract class Game extends Applet implements Runnable {
 			}
 			
 			events.clear();
+			events.addAll(tempEvents);
+			tempEvents.clear();
 		}
+		
+		isProcessingEvents = false;
 	}
 	
 	public final void init() {
@@ -592,22 +600,37 @@ public abstract class Game extends Applet implements Runnable {
 		
 		canvas.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent ce) {
-				synchronized(events) {
-					events.add(new Event(11,ce));
+				if(isProcessingEvents) {
+					tempEvents.add(new Event(11,ce));
+				}
+				else {
+					synchronized(events) {
+						events.add(new Event(11,ce));
+					}
 				}
 			}
 		});
 		
 		canvas.addFocusListener(new FocusListener() {
 			public void focusGained(FocusEvent fe) {
-				synchronized(events) {
-					events.add(new Event(12,fe));
+				if(isProcessingEvents) {
+					tempEvents.add(new Event(12,fe));
+				}
+				else {
+					synchronized(events) {
+						events.add(new Event(12,fe));
+					}
 				}
 			}
 			
 			public void focusLost(FocusEvent fe) {
-				synchronized(events) {
-					events.add(new Event(13,fe));
+				if(isProcessingEvents) {
+					tempEvents.add(new Event(13,fe));
+				}
+				else {
+					synchronized(events) {
+						events.add(new Event(13,fe));
+					}
 				}
 			}
 		});
@@ -1016,14 +1039,24 @@ public abstract class Game extends Applet implements Runnable {
 	
 	private class Listener implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
 		public void keyTyped(KeyEvent key) {
-			synchronized(events) {
-				events.add(new Event(0,key));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(0,key));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(0,key));
+				}
 			}
 		}
 		
 		public void keyPressed(KeyEvent key) {
-			synchronized(events) {
-				events.add(new Event(1,key));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(1,key));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(1,key));
+				}
 			}
 			
 			if(isStandardKeysEnabled()) {
@@ -1036,56 +1069,101 @@ public abstract class Game extends Applet implements Runnable {
 		}
 		
 		public void keyReleased(KeyEvent key) {
-			synchronized(events) {
-				events.add(new Event(2,key));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(2,key));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(2,key));
+				}
 			}
 		}
 		
 		public void mouseClicked(MouseEvent me) {
-			synchronized(events) {
-				events.add(new Event(3,me));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(3,me));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(3,me));
+				}
 			}
 		}
 		
 		public void mouseEntered(MouseEvent me) {
-			synchronized(events) {
-				events.add(new Event(4,me));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(4,me));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(4,me));
+				}
 			}
 		}
 		
 		public void mouseExited(MouseEvent me) {
-			synchronized(events) {
-				events.add(new Event(5,me));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(5,me));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(5,me));
+				}
 			}
 		}
 		
 		public void mousePressed(MouseEvent me) {
-			synchronized(events) {
-				events.add(new Event(6,me));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(6,me));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(6,me));
+				}
 			}
 		}
 		
 		public void mouseReleased(MouseEvent me) {
-			synchronized(events) {
-				events.add(new Event(7,me));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(7,me));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(7,me));
+				}
 			}
 		}
 		
 		public void mouseDragged(MouseEvent me) {
-			synchronized(events) {
-				events.add(new Event(8,me));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(8,me));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(8,me));
+				}
 			}
 		}
 		
 		public void mouseMoved(MouseEvent me) {
-			synchronized(events) {
-				events.add(new Event(9,me));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(9,me));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(9,me));
+				}
 			}
 		}
 		
 		public void mouseWheelMoved(MouseWheelEvent mwe) {
-			synchronized(events) {
-				events.add(new Event(10,mwe));
+			if(isProcessingEvents) {
+				tempEvents.add(new Event(10,mwe));
+			}
+			else {
+				synchronized(events) {
+					events.add(new Event(10,mwe));
+				}
 			}
 		}
 	}
