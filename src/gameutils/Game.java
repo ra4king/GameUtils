@@ -213,6 +213,7 @@ public abstract class Game extends Applet implements Runnable {
 		input = new Input(canvas);
 		
 		events = new ArrayList<Event>();
+		tempEvents = new ArrayList<Event>();
 		
 		this.FPS = FPS;
 		this.version = version;
