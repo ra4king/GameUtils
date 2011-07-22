@@ -1,4 +1,6 @@
-package gameutils;
+package gameutils.util;
+
+import gameutils.Art;
 
 import java.awt.Image;
 import java.util.ArrayList;

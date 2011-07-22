@@ -1,6 +1,5 @@
-package gameutils;
+package gameutils.util;
 
-import gameutils.util.FastMath;
 
 /**
  * Stores the score and high score.
