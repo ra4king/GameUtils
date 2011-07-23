@@ -38,8 +38,8 @@ public class FastMath {
 		
 		for(int i = 0; i < ATAN2_DIM; i++) {
 			for (int j = 0; j < ATAN2_DIM; j++) {
-				float x0 = i/ATAN2_DIM;
-				float y0 = j/ATAN2_DIM;
+				float x0 = (float)i/ATAN2_DIM;
+				float y0 = (float)j/ATAN2_DIM;
 				
 				atan2[j * ATAN2_DIM + i] = (float)Math.atan2(y0, x0);
 			}
@@ -149,8 +149,8 @@ public class FastMath {
 	public static final float atan2(float y, float x) {
 		float add, mul;
 		
-		if(x < 0.0f) {
-			if(y < 0.0f) {
+		if (x < 0.0f) {
+			if (y < 0.0f) {
 				x = -x;
 				y = -y;
 				
@@ -164,21 +164,20 @@ public class FastMath {
 			add = -PI;
 		}
 		else {
-			if(y < 0.0f) {
+			if (y < 0.0f) {
 				y = -y;
 				mul = -1.0f;
 			}
-			else {
+			else
 				mul = 1.0f;
-			}
 			
 			add = 0.0f;
 		}
 		
 		float invDiv = (ATAN2_DIM-1) / ((x < y) ? y : x);
 		
-		int xi = (int)(x * invDiv);
-		int yi = (int)(y * invDiv);
+		int xi = (int) (x * invDiv);
+		int yi = (int) (y * invDiv);
 		
 		return (atan2[yi * ATAN2_DIM + xi] + add) * mul;
 	}
