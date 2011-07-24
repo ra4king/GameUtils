@@ -1,12 +1,8 @@
 package gameutils;
 
-import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,18 +12,12 @@ import java.util.Set;
  * @author Roi Atalla
  */
 public class Input {
-	private Set<Integer> keys = Collections.synchronizedSet(new HashSet<Integer>());
-	private Point currentMouseLoc, lastMouseClick, mouseDown;
+	private Set<Integer> keys;
+	private Point currentMouseLocation;
+	private MouseEvent lastMousePressed, currentMousePressed;
 	
-	/**
-	 * Initializes the listeners on the specified component.
-	 * @param comp
-	 */
-	public Input(Component comp) {
-		Listener l = new Listener();
-		comp.addKeyListener(l);
-		comp.addMouseListener(l);
-		comp.addMouseMotionListener(l);
+	Input() {
+		keys = Collections.synchronizedSet(new HashSet<Integer>());
 	}
 	
 	/**
@@ -53,25 +43,25 @@ public class Input {
 	 * @return The current mouse location.
 	 */
 	public Point getCurrentMouseLocation() {
-		return currentMouseLoc;
+		return currentMouseLocation;
 	}
 	
 	/**
-	 * Returns the last mouse click. Then it is set to null.
+	 * Returns the last mouse pressed event since the last call to this method.
 	 * @return The latest mouse click.
 	 */
-	public Point getLastMouseClick() {
-		Point p = lastMouseClick;
-		lastMouseClick = null;
-		return p;
+	public MouseEvent getLastMousePressed() {
+		MouseEvent m = lastMousePressed;
+		lastMousePressed = null;
+		return m;
 	}
 	
 	/**
 	 * Returns the current position of the mouse if it is down. If the mouse has been released, returns null.
 	 * @return The current position of the mouse if it is down, else null.
 	 */
-	public Point isMouseDown() {
-		return mouseDown;
+	public MouseEvent isMouseDown() {
+		return currentMousePressed;
 	}
 	
 	/**
@@ -79,41 +69,32 @@ public class Input {
 	 */
 	public void reset() {
 		keys.clear();
-		currentMouseLoc = lastMouseClick = mouseDown = null;
+		currentMouseLocation = null;
+		lastMousePressed = currentMousePressed = null;
 	}
 	
-	private class Listener implements KeyListener, MouseListener, MouseMotionListener {
-		public void keyPressed(KeyEvent key) {
-			if(isKeyUp(key.getKeyCode()))
-				keys.add(key.getKeyCode());
-		}
-		
-		public void keyReleased(KeyEvent key) {
-			keys.remove(key.getKeyCode());
-		}
-		
-		public void keyTyped(KeyEvent key) {}
-		
-		public void mouseClicked(MouseEvent me) {}
-		
-		public void mouseEntered(MouseEvent me) {}
-		
-		public void mouseExited(MouseEvent me) {}
-		
-		public void mousePressed(MouseEvent me) {
-			lastMouseClick = mouseDown = me.getPoint();
-		}
-		
-		public void mouseReleased(MouseEvent me) {
-			mouseDown = null;
-		}
-		
-		public void mouseMoved(MouseEvent me) {
-			currentMouseLoc = me.getPoint();
-		}
-		
-		public void mouseDragged(MouseEvent me) {
-			currentMouseLoc = me.getPoint();
-		}
+	void keyPressed(KeyEvent key) {
+		if(isKeyUp(key.getKeyCode()))
+			keys.add(key.getKeyCode());
+	}
+	
+	void keyReleased(KeyEvent key) {
+		keys.remove(key.getKeyCode());
+	}
+	
+	void mousePressed(MouseEvent me) {
+		lastMousePressed = currentMousePressed = me;
+	}
+	
+	void mouseReleased(MouseEvent me) {
+		currentMousePressed = null;
+	}
+	
+	void mouseMoved(MouseEvent me) {
+		currentMouseLocation = me.getPoint();
+	}
+	
+	void mouseDragged(MouseEvent me) {
+		currentMouseLocation = me.getPoint();
 	}
 }

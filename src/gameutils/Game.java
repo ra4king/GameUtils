@@ -89,7 +89,7 @@ import javax.swing.UIManager;
  * </code>
  * @author Roi Atalla
  */
-public abstract class Game extends Applet implements Runnable {
+public abstract class Game extends Applet {
 	private static final long serialVersionUID = -1870725768768871166L;
 	
 	static {
@@ -109,16 +109,13 @@ public abstract class Game extends Applet implements Runnable {
 	 */
 	protected final JFrame setupFrame(String title, int width, int height, boolean resizable) {
 		final JFrame frame = new JFrame(title);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setIgnoreRepaint(true);
 		frame.setResizable(resizable);
 		
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
-				synchronized(Game.this) {
-					stopGame();
-				}
-				System.exit(0);
+				stop();
 			}
 		});
 		
@@ -210,7 +207,7 @@ public abstract class Game extends Applet implements Runnable {
 		screens.put("Default", currentScreen);
 		
 		canvas = new Canvas();
-		input = new Input(canvas);
+		input = new Input();
 		
 		events = new ArrayList<Event>();
 		tempEvents = new ArrayList<Event>();
@@ -391,10 +388,7 @@ public abstract class Game extends Applet implements Runnable {
 		return GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getFullScreenWindow() != null;
 	}
 	
-	/**
-	 * Game loop.
-	 */
-	public final void run() {
+	final void gameLoop() {
 		if(isActive())
 			return;
 		
@@ -513,9 +507,7 @@ public abstract class Game extends Applet implements Runnable {
 			}
 		}
 		
-		stopGame();
-		
-		if(!isApplet() && ((JFrame)getRootParent()).getDefaultCloseOperation() == JFrame.EXIT_ON_CLOSE)
+		if(stopGame() && !isApplet())
 			System.exit(0);
 	}
 	
@@ -530,10 +522,14 @@ public abstract class Game extends Applet implements Runnable {
 							l.keyTyped((KeyEvent)e.event,getScreen());
 						break;
 					case 1:
+						input.keyPressed((KeyEvent)e.event);
+						
 						for(InputListener l : currentScreen.listeners)
 							l.keyPressed((KeyEvent)e.event,getScreen());
 						break;
 					case 2:
+						input.keyReleased((KeyEvent)e.event);
+						
 						for(InputListener l : currentScreen.listeners)
 							l.keyReleased((KeyEvent)e.event,getScreen());
 						break;
@@ -550,18 +546,26 @@ public abstract class Game extends Applet implements Runnable {
 							l.mouseExited((MouseEvent)e.event,getScreen());
 						break;
 					case 6:
+						input.mousePressed((MouseEvent)e.event);
+						
 						for(InputListener l : currentScreen.listeners)
 							l.mousePressed((MouseEvent)e.event,getScreen());
 						break;
 					case 7:
+						input.mouseReleased((MouseEvent)e.event);
+						
 						for(InputListener l : currentScreen.listeners)
 							l.mouseReleased((MouseEvent)e.event,getScreen());
 						break;
 					case 8:
+						input.mouseDragged((MouseEvent)e.event);
+						
 						for(InputListener l : currentScreen.listeners)
 							l.mouseDragged((MouseEvent)e.event,getScreen());
 						break;
 					case 9:
+						input.mouseMoved((MouseEvent)e.event);
+						
 						for(InputListener l : currentScreen.listeners)
 							l.mouseMoved((MouseEvent)e.event,getScreen());
 						break;
@@ -638,15 +642,19 @@ public abstract class Game extends Applet implements Runnable {
 	}
 	
 	/**
-	 * Automatically called if this game is an Applet, otherwise it has to be manually called.
+	 * Automatically called if this game is an Applet, otherwise it has to be manually called. This method starts the game loop thread.
 	 */
 	public final void start() {
 		if(!isActive())
-			new Thread(this).start();
+			new Thread() {
+				public void run() {
+					gameLoop();
+				}
+			}.start();
 	}
 	
 	/**
-	 * Called when this game is stopped. Calling this method stops the game loop. stopGame() is then called.
+	 * Called when the window is closed. Calling this method stops the game loop. stopGame() is then called on the game loop thread.
 	 */
 	public final void stop() {
 		sound.setOn(false);
@@ -691,8 +699,9 @@ public abstract class Game extends Applet implements Runnable {
 	
 	/**
 	 * Called when this game is stopped.
+	 * @return true if the window should be closed, false otherwise.
 	 */
-	protected abstract void stopGame();
+	protected abstract boolean stopGame();
 	
 	/**
 	 * Called the set FPS times a second. Clears the window using the Graphics2D's background color then draws the current screen.
