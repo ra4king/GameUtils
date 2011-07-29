@@ -43,24 +43,6 @@ public abstract class PacketIO {
 				case 7: packet.writeBoolean(in.readBoolean()); break;
 				case 8: packet.writeString(in.readUTF()); break;
 				case 9:
-					try {
-						String alias = in.readUTF();
-						Class<?> clazz = AliasManager.getClass(alias);
-						if(clazz == null)
-							throw new IOException("Class not found!");
-						
-						Serializable s = (Serializable)clazz.newInstance();
-						s.deserialize(read(in));
-						packet.writeObject(s);
-						break;
-					}
-					catch(InstantiationException exc) {
-						throw new IOException("No default constructor!");
-					}
-					catch(Exception exc) {
-						throw new IOException(exc.toString());
-					}
-				case 10:
 					try{
 						packet.writeObject(in.readUnshared());
 						break;
@@ -130,20 +112,8 @@ public abstract class PacketIO {
 				out.writeByte(8);
 				out.writeUTF((String)o);
 			}
-			else if(o instanceof Serializable) {
-				out.writeByte(9);
-				
-				String alias = AliasManager.getAlias(o.getClass());
-				if(alias == null)
-					alias = AliasManager.register((Serializable)o);
-				
-				out.writeUTF(alias);
-				Packet p = new Packet();
-				((Serializable)o).serialize(p);
-				write(p,out);
-			}
 			else {
-				out.writeByte(10);
+				out.writeByte(9);
 				out.writeUnshared(o);
 			}
 			

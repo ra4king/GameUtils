@@ -251,7 +251,7 @@ public class Packet {
 	 * @return Returns this.
 	 */
 	public Packet writeObject(Object o) {
-		if(o instanceof java.io.Serializable || o instanceof Serializable)
+		if(o instanceof java.io.Serializable)
 			messages.add(o);
 		else
 			throw new IllegalArgumentException("Object not serializable.");
