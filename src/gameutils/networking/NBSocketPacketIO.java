@@ -103,8 +103,8 @@ public class NBSocketPacketIO extends PacketIO {
 		}
 	}
 	
-	public SocketAddress getSocketAddress() {
-		return channel.socket().getRemoteSocketAddress();
+	public InetSocketAddress getSocketAddress() {
+		return (InetSocketAddress)channel.socket().getRemoteSocketAddress();
 	}
 	
 	private byte[] adjustSize(byte array[]) {

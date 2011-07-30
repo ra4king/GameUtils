@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 
 /**
  * A blocking TCP wrapper.
@@ -75,8 +75,8 @@ public class SocketPacketIO extends PacketIO {
 		return out;
 	}
 	
-	public SocketAddress getSocketAddress() {
-		return socket.getRemoteSocketAddress();
+	public InetSocketAddress getSocketAddress() {
+		return (InetSocketAddress)socket.getRemoteSocketAddress();
 	}
 	
 	public String getHostAddress() {

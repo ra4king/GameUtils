@@ -7,7 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 
 /**
  * A blocking UDP wrapper.
@@ -90,8 +90,8 @@ public class DatagramPacketIO extends PacketIO {
 		this.bufferSize = bufferSize;
 	}
 	
-	public SocketAddress getSocketAddress() {
-		return socket.getRemoteSocketAddress();
+	public InetSocketAddress getSocketAddress() {
+		return (InetSocketAddress)socket.getRemoteSocketAddress();
 	}
 	
 	public void close() throws IOException {

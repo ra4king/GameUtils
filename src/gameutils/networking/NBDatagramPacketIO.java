@@ -16,7 +16,7 @@ import java.nio.channels.DatagramChannel;
  */
 public class NBDatagramPacketIO extends PacketIO {
 	private DatagramChannel channel;
-	private SocketAddress address;
+	private InetSocketAddress address;
 	private ByteBuffer in, out;
 	
 	public NBDatagramPacketIO(String address, int port, boolean isBlocking) throws IOException {
@@ -27,11 +27,11 @@ public class NBDatagramPacketIO extends PacketIO {
 		this(new InetSocketAddress(address,port),isBlocking,bufferSize);
 	}
 	
-	public NBDatagramPacketIO(SocketAddress address, boolean isBlocking) throws IOException {
+	public NBDatagramPacketIO(InetSocketAddress address, boolean isBlocking) throws IOException {
 		this(address,isBlocking,8192);
 	}
 	
-	public NBDatagramPacketIO(SocketAddress address, boolean isBlocking, int bufferSize) throws IOException {
+	public NBDatagramPacketIO(InetSocketAddress address, boolean isBlocking, int bufferSize) throws IOException {
 		this(DatagramChannel.open(),address,bufferSize);
 		
 		channel.configureBlocking(isBlocking);
@@ -45,11 +45,11 @@ public class NBDatagramPacketIO extends PacketIO {
 		this(channel,null,bufferSize);
 	}
 	
-	public NBDatagramPacketIO(DatagramChannel channel, SocketAddress address) {
+	public NBDatagramPacketIO(DatagramChannel channel, InetSocketAddress address) {
 		this(channel,address,8192);
 	}
 	
-	public NBDatagramPacketIO(DatagramChannel channel, SocketAddress address, int bufferSize) {
+	public NBDatagramPacketIO(DatagramChannel channel, InetSocketAddress address, int bufferSize) {
 		if(!channel.isOpen())
 			throw new IllegalStateException("channel is not open.");
 		this.channel = channel;
@@ -110,11 +110,11 @@ public class NBDatagramPacketIO extends PacketIO {
 		out = ByteBuffer.allocateDirect(bufferSize);
 	}
 	
-	public void setAddress(SocketAddress address) {
+	public void setAddress(InetSocketAddress address) {
 		this.address = address;
 	}
 	
-	public SocketAddress getSocketAddress() {
+	public InetSocketAddress getSocketAddress() {
 		return address;
 	}
 	
