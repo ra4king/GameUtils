@@ -63,7 +63,7 @@ public class Sound {
 			return add(clip,name);
 		}
 		catch(Exception exc) {
-			throw new IllegalArgumentException("Error loading clip: " + url + " with name: " + name);
+			throw new IllegalArgumentException("Error loading clip: " + url + " with name: " + name + ": " + exc);
 		}
 	}
 	
