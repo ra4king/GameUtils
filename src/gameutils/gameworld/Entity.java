@@ -183,6 +183,21 @@ public abstract class Entity implements Element {
 		return bounds;
 	}
 	
+	public void setBounds(double x, double y, double width, double height) {
+		setLocation(x,y);
+		setSize(width,height);
+	}
+	
+	public void setLocation(double x, double y) {
+		this.x = x;
+		this.y = y;
+	}
+	
+	public void setSize(double width, double height) {
+		this.width = width;
+		this.height = height;
+	}
+	
 	/**
 	 * Returns the Area of this Entity. If one is not set, this Entity's bounds enclosed in an Area is returned.
 	 * @return The Area of this Entity. If null, the bounds's Area is returned.
