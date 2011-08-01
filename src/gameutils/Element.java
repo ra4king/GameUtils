@@ -15,6 +15,12 @@ public interface Element {
 	public void init(Screen screen);
 	
 	/**
+	 * Returns the parent Screen.
+	 * @return The parent Screen.
+	 */
+	public Screen getParent();
+	
+	/**
 	 * Returns the bounds of this element.
 	 * @return The bounds of this element.
 	 */
