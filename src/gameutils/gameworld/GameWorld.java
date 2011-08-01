@@ -1,6 +1,7 @@
 package gameutils.gameworld;
 
 import gameutils.Art;
+import gameutils.Element;
 import gameutils.Game;
 import gameutils.Screen;
 import gameutils.util.Bag;
@@ -18,8 +19,8 @@ import java.util.ArrayList;
  */
 public class GameWorld implements Screen {
 	private Game parent;
-	private ArrayList<Bag<Entity>> entities;
-	private ArrayList<Entity> allEntities;
+	private ArrayList<Bag<Element>> entities;
+	private ArrayList<Element> allEntities;
 	private Image bg;
 	private String bgImage;
 	private boolean hasShown;
@@ -29,10 +30,10 @@ public class GameWorld implements Screen {
 	 * Initializes this object.
 	 */
 	public GameWorld() {
-		entities = new ArrayList<Bag<Entity>>();
-		entities.add(new Bag<Entity>());
+		entities = new ArrayList<Bag<Element>>();
+		entities.add(new Bag<Element>());
 		
-		allEntities = new ArrayList<Entity>();
+		allEntities = new ArrayList<Element>();
 		
 		setBackground(Color.lightGray);
 		
@@ -44,47 +45,47 @@ public class GameWorld implements Screen {
 	}
 	
 	/**
-	 * Calls each Entity's <code>show()</code> method in z-index order.
+	 * Calls each Element's <code>show()</code> method in z-index order.
 	 */
 	public synchronized void show() {
 		hasShown = true;
 		
-		for(Bag<Entity> bag : entities)
-			for(Entity e : bag)
+		for(Bag<Element> bag : entities)
+			for(Element e : bag)
 				e.show();
 	}
 	
 	/**
-	 * Calls each Entity's <code>hide()</code> method in z-index order.
+	 * Calls each Element's <code>hide()</code> method in z-index order.
 	 */
 	public synchronized void hide() {
 		hasShown = false;
 		
-		for(Bag<Entity> bag : entities)
-			for(Entity e : bag)
+		for(Bag<Element> bag : entities)
+			for(Element e : bag)
 				e.hide();
 	}
 	
 	public synchronized void paused() {
-		for(Bag<Entity> bag : entities)
-			for(Entity e: bag)
+		for(Bag<Element> bag : entities)
+			for(Element e: bag)
 				e.paused();
 	}
 	
 	public synchronized void resumed() {
-		for(Bag<Entity> bag : entities)
-			for(Entity e : bag)
+		for(Bag<Element> bag : entities)
+			for(Element e : bag)
 				e.resumed();
 	}
 	
 	public synchronized void resized(int width, int height) {}
 	
 	/**
-	 * Calls each Entity's <code>update(long)</code> method in z-index order.
+	 * Calls each Element's <code>update(long)</code> method in z-index order.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public synchronized void update(long deltaTime) {
-		for(Entity e : getEntities())
+		for(Element e : getEntities())
 			if(e != null)
 				e.update(deltaTime);
 		flush();
@@ -100,7 +101,7 @@ public class GameWorld implements Screen {
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
 		
-		for(Entity e : getEntities()) {
+		for(Element e : getEntities()) {
 			try{
 				if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
 					e.draw((Graphics2D)g.create());
@@ -119,23 +120,23 @@ public class GameWorld implements Screen {
 	}
 	
 	/**
-	 * Adds the Entity with a z-index of 0.
-	 * @param e The Entity to be added.
-	 * @return The Entity that was added.
+	 * Adds the Element with a z-index of 0.
+	 * @param e The Element to be added.
+	 * @return The Element that was added.
 	 */
-	public synchronized Entity add(Entity e) {
+	public synchronized Element add(Element e) {
 		return add(e,0);
 	}
 	
 	/**
-	 * Adds the Entity with the specified z-index.
-	 * @param e The Entity to be added.
-	 * @param zindex The z-index of this Entity.
-	 * @return The Entity that was added.
+	 * Adds the Element with the specified z-index.
+	 * @param e The Element to be added.
+	 * @param zindex The z-index of this Element.
+	 * @return The Element that was added.
 	 */
-	public synchronized Entity add(Entity e, int zindex) {
+	public synchronized Element add(Element e, int zindex) {
 		while(zindex >= entities.size())
-			entities.add(new Bag<Entity>());
+			entities.add(new Bag<Element>());
 		
 		entities.get(zindex).add(e);
 		
@@ -148,15 +149,15 @@ public class GameWorld implements Screen {
 	}
 	
 	/**
-	 * Returns true if this GameWorld contains this Entity.
-	 * @param e The Entity to search for.
-	 * @return True if this GameWorld contains this Entity, false otherwise.
+	 * Returns true if this GameWorld contains this Element.
+	 * @param e The Element to search for.
+	 * @return True if this GameWorld contains this Element, false otherwise.
 	 */
-	public boolean contains(Entity e) {
+	public boolean contains(Element e) {
 		return getEntities().contains(e);
 	}
 	
-	public boolean replace(Entity old, Entity e) {
+	public boolean replace(Element old, Element e) {
 		int zindex = getZIndex(old);
 		if(zindex < 0)
 			return false;
@@ -166,18 +167,18 @@ public class GameWorld implements Screen {
 		
 		remove(e);
 		
-		Bag<Entity> bag = entities.get(zindex);
+		Bag<Element> bag = entities.get(zindex);
 		bag.set(bag.indexOf(old),e);
 		return true;
 	}
 	
 	/**
-	 * Removes the Entity from the world.
-	 * @param e The Entity to remove.
-	 * @return True if the Entity was found and removed, false if the Entity was not found.
+	 * Removes the Element from the world.
+	 * @param e The Element to remove.
+	 * @return True if the Element was found and removed, false if the Element was not found.
 	 */
-	public boolean remove(Entity e) {
-		for(Bag<Entity> bag : entities) {
+	public boolean remove(Element e) {
+		for(Bag<Element> bag : entities) {
 			if(bag.remove(e)) {
 				e.hide();
 				return true;
@@ -195,16 +196,16 @@ public class GameWorld implements Screen {
 		
 		System.gc();
 		
-		entities.add(new Bag<Entity>());
+		entities.add(new Bag<Element>());
 	}
 	
 	/**
-	 * Changes the z-index of the specified Entity.
-	 * @param e The Entity whose z-index is changed.
+	 * Changes the z-index of the specified Element.
+	 * @param e The Element whose z-index is changed.
 	 * @param newZIndex The new z-index
-	 * @return True if the Entity was found and updated, false otherwise.
+	 * @return True if the Element was found and updated, false otherwise.
 	 */
-	public synchronized boolean changeZIndex(Entity e, int newZIndex) {
+	public synchronized boolean changeZIndex(Element e, int newZIndex) {
 		if(remove(e))
 			return false;
 		
@@ -216,11 +217,11 @@ public class GameWorld implements Screen {
 	}
 	
 	/**
-	 * Returns the z-index of the specified Entity.
-	 * @param e The Entity who's index is returned.
-	 * @return The z-index of the specified Entity, or -1 if the Entity was not found.
+	 * Returns the z-index of the specified Element.
+	 * @param e The Element who's index is returned.
+	 * @return The z-index of the specified Element, or -1 if the Element was not found.
 	 */
-	public synchronized int getZIndex(Entity e) {
+	public synchronized int getZIndex(Element e) {
 		for(int a = 0; a < entities.size(); a++)
 			if(entities.get(a).indexOf(e) >= 0)
 				return a;
@@ -241,7 +242,7 @@ public class GameWorld implements Screen {
 	 * @param zindex The z-index.
 	 * @return A list of all Entities at the specified z-index.
 	 */
-	public synchronized Bag<Entity> getEntities(int zindex) {
+	public synchronized Bag<Element> getEntities(int zindex) {
 		return entities.get(zindex);
 	}
 	
@@ -249,17 +250,17 @@ public class GameWorld implements Screen {
 	 * A list of all Entities in this entire world.
 	 * @return A list of all Entities in this world in z-index order.
 	 */
-	public synchronized ArrayList<Entity> getEntities() {
+	public synchronized ArrayList<Element> getEntities() {
 		allEntities.clear();
 		
-		for(Bag<Entity> bag : entities)
+		for(Bag<Element> bag : entities)
 			allEntities.addAll(bag);
 		
 		return allEntities;
 	}
 	
 	private synchronized void flush() {
-		for(Bag<Entity> bag : entities)
+		for(Bag<Element> bag : entities)
 			while(bag.remove(null)) {}
 	}
 	
@@ -313,7 +314,7 @@ public class GameWorld implements Screen {
 	 */
 	public synchronized int size() {
 		int size = 0;
-		for(Bag<Entity> bag : entities)
+		for(Bag<Element> bag : entities)
 			size += bag.size();
 		return size;
 	}
