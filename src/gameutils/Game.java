@@ -639,6 +639,17 @@ public abstract class Game extends Applet {
 				}
 			}
 		});
+		
+		new Thread() {
+			public void run() {
+				while(true) {
+					try {
+						Thread.sleep(Long.MAX_VALUE);
+					}
+					catch(Exception exc) {}
+				}
+			}
+		}.start();
 	}
 	
 	/**
