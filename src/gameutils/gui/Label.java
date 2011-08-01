@@ -1,5 +1,7 @@
 package gameutils.gui;
 
+import gameutils.util.FastMath;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -17,6 +19,7 @@ public class Label extends Widget {
 	private Font font;
 	private int textX, textY, centerX, centerY;
 	private boolean isCentered;
+	private boolean randomColors;
 	
 	/**
 	 * Initializes this object. Background is set to transparent.
@@ -213,6 +216,14 @@ public class Label extends Widget {
 		background = paint;
 	}
 	
+	public boolean isUsingRandomColors() {
+		return randomColors;
+	}
+	
+	public void useRandomColors(boolean useRandom) {
+		randomColors = useRandom;
+	}
+	
 	public void paused() {}
 	
 	public void resumed() {}
@@ -230,6 +241,18 @@ public class Label extends Widget {
 		g.setPaint(textPaint);
 		g.setFont(font);
 		
-		g.drawString(text,textX,textY);
+		if(randomColors) {
+			char chars[] = new char[text.length()];
+			text.getChars(0, text.length(), chars, 0);
+			int offset = 0;
+			for(char c : chars) {
+				g.setColor(new Color((int)FastMath.round(Math.random()*255),(int)FastMath.round(Math.random()*255),(int)FastMath.round(Math.random()*255)));
+				g.drawString(""+c, textX+offset, textY);
+				offset += g.getFontMetrics().charWidth(c);
+			}
+		}
+		else {
+			g.drawString(text,textX,textY);
+		}
 	}
 }
