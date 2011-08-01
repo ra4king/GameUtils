@@ -84,10 +84,9 @@ public class GameWorld implements Screen {
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public synchronized void update(long deltaTime) {
-		for(Bag<Entity> bag : entities)
-			for(Entity comp : bag)
-				if(comp != null)
-					comp.update(deltaTime);
+		for(Entity e : getEntities())
+			if(e != null)
+				e.update(deltaTime);
 		flush();
 	}
 	
@@ -101,15 +100,13 @@ public class GameWorld implements Screen {
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
 		
-		for(Bag<Entity> bag : entities) {
-			for(Entity comp : bag) {
-				try{
-					if(renderOutOfBoundsEntities || comp.getBounds().intersects(parent.getBounds()))
-						comp.draw((Graphics2D)g.create());
-				}
-				catch(Exception exc) {
-					exc.printStackTrace();
-				}
+		for(Entity e : getEntities()) {
+			try{
+				if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
+					e.draw((Graphics2D)g.create());
+			}
+			catch(Exception exc) {
+				exc.printStackTrace();
 			}
 		}
 	}
