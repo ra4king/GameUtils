@@ -394,8 +394,13 @@ public abstract class Game extends Applet {
 		
 		Thread.currentThread().setName("Game Loop Thread");
 		
-		synchronized(Game.this) {
-			initGame();
+		try {
+			synchronized(Game.this) {
+				initGame();
+			}
+		}
+		catch(Exception exc) {
+			exc.printStackTrace();
 		}
 		
 		Listener listener = new Listener();
