@@ -85,7 +85,7 @@ public class GameWorld implements Screen {
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public synchronized void update(long deltaTime) {
-		for(Element e : getEntities())
+		for(Element e : getElements())
 			if(e != null)
 				e.update(deltaTime);
 		flush();
@@ -101,7 +101,7 @@ public class GameWorld implements Screen {
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
 		
-		for(Element e : getEntities()) {
+		for(Element e : getElements()) {
 			try{
 				if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
 					e.draw((Graphics2D)g.create());
@@ -154,7 +154,7 @@ public class GameWorld implements Screen {
 	 * @return True if this GameWorld contains this Element, false otherwise.
 	 */
 	public boolean contains(Element e) {
-		return getEntities().contains(e);
+		return getElements().contains(e);
 	}
 	
 	public boolean replace(Element old, Element e) {
@@ -242,7 +242,7 @@ public class GameWorld implements Screen {
 	 * @param zindex The z-index.
 	 * @return A list of all Entities at the specified z-index.
 	 */
-	public synchronized Bag<Element> getEntities(int zindex) {
+	public synchronized Bag<Element> getElementsAt(int zindex) {
 		return entities.get(zindex);
 	}
 	
@@ -250,7 +250,7 @@ public class GameWorld implements Screen {
 	 * A list of all Entities in this entire world.
 	 * @return A list of all Entities in this world in z-index order.
 	 */
-	public synchronized ArrayList<Element> getEntities() {
+	public synchronized ArrayList<Element> getElements() {
 		allEntities.clear();
 		
 		for(Bag<Element> bag : entities)
