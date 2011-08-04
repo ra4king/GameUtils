@@ -6,7 +6,6 @@ import java.applet.Applet;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -478,7 +477,6 @@ public abstract class Game extends Applet {
 						}
 						
 						if(showFPS) {
-							g.setColor(Color.black);
 							g.setFont(fpsFont);
 							g.drawString("Version " + version + "    " + currentFPS + " FPS",2,getHeight()-2);
 						}
