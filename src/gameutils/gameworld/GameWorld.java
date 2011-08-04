@@ -85,9 +85,18 @@ public class GameWorld implements Screen {
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public synchronized void update(long deltaTime) {
-		for(Element e : getElements())
-			if(e != null)
-				e.update(deltaTime);
+		Element em = null;
+		try {
+			for(Element e : getElements()) {
+				em = e;
+				if(e != null)
+					e.update(deltaTime);
+			}
+		}
+		catch(RuntimeException exc) {
+			System.out.println(em);
+			throw exc;
+		}
 		flush();
 	}
 	
@@ -110,6 +119,8 @@ public class GameWorld implements Screen {
 				exc.printStackTrace();
 			}
 		}
+		
+		flush();
 	}
 	
 	/**
@@ -177,7 +188,7 @@ public class GameWorld implements Screen {
 	 * @param e The Element to remove.
 	 * @return True if the Element was found and removed, false if the Element was not found.
 	 */
-	public boolean remove(Element e) {
+	public synchronized boolean remove(Element e) {
 		for(Bag<Element> bag : entities) {
 			if(bag.remove(e)) {
 				e.hide();

@@ -162,7 +162,6 @@ public abstract class Game extends Applet {
 	private double version;
 	private boolean showFPS;
 	private boolean useYield;
-	private boolean standardKeysEnabled = true;
 	private boolean isApplet = true;
 	private volatile boolean isProcessingEvents;
 	private volatile boolean isActive;
@@ -989,22 +988,6 @@ public abstract class Game extends Applet {
 	}
 	
 	/**
-	 * The standard keys are M for audio on/off, P for pause/resume, and Q for high/low quality.
-	 * @param standardKeysEnabled If true, a key press of the standard keys automatically call the appropriate methods, else this function is disabled.
-	 */
-	public void setStandardKeysEnabled(boolean standardKeysEnabled) {
-		this.standardKeysEnabled = standardKeysEnabled;
-	}
-	
-	/**
-	 * Returns the current state of the standardKeysEnabled property.
-	 * @return If true, a key press of the standard keys automatically call the appropriate methods, else this function is disabled.
-	 */
-	public boolean isStandardKeysEnabled() {
-		return standardKeysEnabled;
-	}
-	
-	/**
 	 * Sets the maximum number of updates before render.
 	 * @param maxUpdates The maximum number of updates before render.
 	 */
@@ -1082,14 +1065,6 @@ public abstract class Game extends Applet {
 			else {
 				synchronized(events) {
 					events.add(new Event(1,key));
-				}
-			}
-			
-			if(isStandardKeysEnabled()) {
-				switch(key.getKeyCode()) {
-					case KeyEvent.VK_P: if(isPaused()) resume(); else pause(); break;
-					case KeyEvent.VK_M: sound.setOn(!sound.isOn()); break;
-					case KeyEvent.VK_Q: setHighQuality(!isHighQuality()); break;
 				}
 			}
 		}

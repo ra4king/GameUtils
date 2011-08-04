@@ -1,7 +1,5 @@
-package gameutils.gameworld;
+package gameutils;
 
-import gameutils.Element;
-import gameutils.Screen;
 import gameutils.util.FastMath;
 
 import java.awt.Graphics2D;
@@ -13,7 +11,7 @@ import java.awt.geom.Rectangle2D;
  * @author Roi Atalla
  */
 public abstract class Entity implements Element {
-	private GameWorld parent;
+	private Screen parent;
 	private Rectangle2D.Double bounds;
 	private Rectangle2D.Double areaBounds;
 	private Area area;
@@ -50,14 +48,14 @@ public abstract class Entity implements Element {
 		return false;
 	}
 	
-	public void init(Screen world) {
-		parent = (GameWorld)world;
+	public void init(Screen screen) {
+		parent = screen;
 	}
 	
 	/**
 	 * @return The parent of this game component.
 	 */
-	public GameWorld getParent() {
+	public Screen getParent() {
 		return parent;
 	}
 	
