@@ -724,7 +724,9 @@ public abstract class Game extends Applet {
 	 * Called when this game is stopped.
 	 * @return true if the window should be closed, false otherwise.
 	 */
-	protected abstract boolean stopGame();
+	protected boolean stopGame() {
+		return true;
+	}
 	
 	/**
 	 * Called the set FPS times a second. Clears the window using the Graphics2D's background color then draws the current screen.
