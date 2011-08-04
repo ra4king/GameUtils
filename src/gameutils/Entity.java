@@ -196,6 +196,11 @@ public abstract class Entity implements Element {
 		this.height = height;
 	}
 	
+	public void translate(double x, double y) {
+		setX(getX()+x);
+		setY(getY()+y);
+	}
+	
 	/**
 	 * Returns the Area of this Entity. If one is not set, this Entity's bounds enclosed in an Area is returned.
 	 * @return The Area of this Entity. If null, the bounds's Area is returned.
