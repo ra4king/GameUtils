@@ -307,10 +307,14 @@ public abstract class Game extends Applet {
 	 * @param height The new height of this game's canvas;
 	 */
 	public void resize(int width, int height) {
+		invalidate();
+			
 		if(isApplet())
 			super.resize(width,height);
 		else
 			setSize(width,height);
+		
+		validate();
 	}
 	
 	/**
@@ -319,6 +323,8 @@ public abstract class Game extends Applet {
 	 * @param height The new height of this game's canvas
 	 */
 	public void setSize(int width, int height) {
+		invalidate();
+		
 		if(isApplet())
 			super.resize(width,height);
 		else {
@@ -326,6 +332,8 @@ public abstract class Game extends Applet {
 			getRootParent().setSize(width+i.right+i.left,height+i.bottom+i.top);
 			((JFrame)getRootParent()).setLocationRelativeTo(null);
 		}
+		
+		validate();
 	}
 	
 	/**
