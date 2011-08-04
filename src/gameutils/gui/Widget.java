@@ -30,7 +30,7 @@ public abstract class Widget extends Entity {
 	 * @param h The height.
 	 */
 	public Widget(double x, double y, double w, double h) {
-		setBounds(x,y,w,h);
+		super(x,y,w,h);
 	}
 	
 	public void init(Screen screen) {
