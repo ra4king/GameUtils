@@ -14,28 +14,54 @@ public class TextField extends Widget {
 	private String text;
 	private Paint border, background, textPaint;
 	private FontMetrics fontMetrics;
+	private boolean isPasswordField;
+	private char passwordChar = '*';
 	
 	public TextField(double x, double y, double width, boolean isCentered) {
 		this((String)null,x,y,width,isCentered);
+	}
+	
+	public TextField(double x, double y, double width, boolean isCentered, boolean isPasswordField) {
+		this((String)null,x,y,width,isCentered,isPasswordField);
 	}
 	
 	public TextField(String text, double x, double y, double width, boolean isCentered) {
 		this(text,null,null,x,y,width,isCentered);
 	}
 	
+	public TextField(String text, double x, double y, double width, boolean isCentered, boolean isPasswordField) {
+		this(text,null,null,x,y,width,isCentered,isPasswordField);
+	}
+	
 	public TextField(Font font, double x, double y, double width, boolean isCentered) {
 		this(null,font,x,y,width,isCentered);
+	}
+	
+	public TextField(Font font, double x, double y, double width, boolean isCentered, boolean isPasswordField) {
+		this(null,font,x,y,width,isCentered,isPasswordField);
 	}
 	
 	public TextField(Paint paint, double x, double y, double width, boolean isCentered) {
 		this(paint,null,x,y,width,isCentered);
 	}
 	
+	public TextField(Paint paint, double x, double y, double width, boolean isCentered, boolean isPasswordField) {
+		this(paint,null,x,y,width,isCentered,isPasswordField);
+	}
+	
 	public TextField(Paint paint, Font font, double x, double y, double width, boolean isCentered) {
 		this(null,paint,font,x,y,width,isCentered);
 	}
 	
+	public TextField(Paint paint, Font font, double x, double y, double width, boolean isCentered, boolean isPasswordField) {
+		this(null,paint,font,x,y,width,isCentered,isPasswordField);
+	}
+	
 	public TextField(String text, Paint paint, Font font, double x, double y, double width, boolean isCentered) {
+		this(text,paint,font,x,y,width,isCentered,false);
+	}
+	
+	public TextField(String text, Paint paint, Font font, double x, double y, double width, boolean isCentered, boolean isPasswordField) {
 		if(text == null)
 			text = "";
 		this.text = text;
@@ -62,6 +88,8 @@ public class TextField extends Widget {
 			setX(x);
 			setY(y);
 		}
+		
+		this.isPasswordField = isPasswordField;
 	}
 	
 	public void setBorder(Paint paint) {
@@ -102,6 +130,22 @@ public class TextField extends Widget {
 		g.dispose();
 	}
 	
+	public void setPasswordField(boolean isPasswordField) {
+		this.isPasswordField = isPasswordField;
+	}
+	
+	public boolean isPasswordField() {
+		return isPasswordField;
+	}
+	
+	public void setPasswordChar(char pwChar) {
+		passwordChar = pwChar;
+	}
+	
+	public char getPasswordChar() {
+		return passwordChar;
+	}
+	
 	public Font getFont() {
 		return fontMetrics.getFont();
 	}
@@ -122,7 +166,19 @@ public class TextField extends Widget {
 		
 		g.setFont(getFont());
 		g.setPaint(textPaint);
-		g.drawString(text,getIntX()+5,getIntY()+getIntHeight()-10);
+		
+		String s;
+		
+		if(isPasswordField) {
+			String pw = "";
+			for(int a = 0; a < text.length(); a++)
+				pw += passwordChar;
+			s = pw;
+		}
+		else
+			s = text;
+		
+		g.drawString(s,getIntX()+5,getIntY()+getIntHeight()-10);
 	}
 	
 	public void keyPressed(KeyEvent key) {
