@@ -1,7 +1,6 @@
 package gameutils;
 
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
 
 /**
  * An Element that can be added to a Screen.
@@ -19,12 +18,6 @@ public interface Element {
 	 * @return The parent Screen.
 	 */
 	public Screen getParent();
-	
-	/**
-	 * Returns the bounds of this element.
-	 * @return The bounds of this element.
-	 */
-	public Rectangle2D.Double getBounds();
 	
 	/**
 	 * Called when this Element is shown.
