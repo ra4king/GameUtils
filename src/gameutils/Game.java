@@ -397,6 +397,8 @@ public abstract class Game extends Applet {
 			synchronized(Game.this) {
 				initGame();
 			}
+			
+			getScreen().show();
 		}
 		catch(Exception exc) {
 			exc.printStackTrace();
@@ -817,7 +819,9 @@ public abstract class Game extends Applet {
 		
 		currentScreen.screen.hide();
 		currentScreen = screenInfo;
-		currentScreen.screen.show();
+		
+		if(isActive)
+			currentScreen.screen.show();
 	}
 	
 	private ScreenInfo getScreenInfo(Screen screen) {
