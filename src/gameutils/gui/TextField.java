@@ -129,7 +129,7 @@ public class TextField extends Widget {
 		if(Character.isLetterOrDigit(key.getKeyChar()) || key.getKeyCode() == KeyEvent.VK_SPACE) {
 			text += key.getKeyChar();
 			
-			while(fontMetrics.stringWidth(text) >= getWidth()-6)
+			while(fontMetrics.stringWidth(text) >= getWidth()-5)
 				text = text.substring(0,text.length()-1);
 		}
 		else if(text.length() > 0 && key.getKeyCode() == KeyEvent.VK_BACK_SPACE)
