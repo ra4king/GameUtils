@@ -530,71 +530,166 @@ public abstract class Game extends Applet {
 			for(Event e : events) {
 				switch(e.id) {
 					case 0:
-						for(InputListener l : currentScreen.listeners)
-							l.keyTyped((KeyEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.keyTyped((KeyEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 1:
 						input.keyPressed((KeyEvent)e.event);
 						
-						for(InputListener l : currentScreen.listeners)
-							l.keyPressed((KeyEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.keyPressed((KeyEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 2:
 						input.keyReleased((KeyEvent)e.event);
 						
-						for(InputListener l : currentScreen.listeners)
-							l.keyReleased((KeyEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.keyReleased((KeyEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 3:
-						for(InputListener l : currentScreen.listeners)
-							l.mouseClicked((MouseEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.mouseClicked((MouseEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 4:
-						for(InputListener l : currentScreen.listeners)
-							l.mouseEntered((MouseEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.mouseEntered((MouseEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 5:
-						for(InputListener l : currentScreen.listeners)
-							l.mouseExited((MouseEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.mouseExited((MouseEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 6:
 						input.mousePressed((MouseEvent)e.event);
 						
-						for(InputListener l : currentScreen.listeners)
-							l.mousePressed((MouseEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.mousePressed((MouseEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 7:
 						input.mouseReleased((MouseEvent)e.event);
 						
-						for(InputListener l : currentScreen.listeners)
-							l.mouseReleased((MouseEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.mouseReleased((MouseEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 8:
 						input.mouseDragged((MouseEvent)e.event);
 						
-						for(InputListener l : currentScreen.listeners)
-							l.mouseDragged((MouseEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.mouseDragged((MouseEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 9:
 						input.mouseMoved((MouseEvent)e.event);
 						
-						for(InputListener l : currentScreen.listeners)
-							l.mouseMoved((MouseEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.mouseMoved((MouseEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 10:
-						for(InputListener l : currentScreen.listeners)
-							l.mouseWheelMoved((MouseWheelEvent)e.event,getScreen());
+						for(InputListener l : currentScreen.listeners) {
+							try {
+								l.mouseWheelMoved((MouseWheelEvent)e.event,getScreen());
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+						}
+						
 						break;
 					case 11:
-						resized(getWidth(),getHeight());
+						try {
+							resized(getWidth(),getHeight());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+						
 						break;
 					case 12:
 						if(isPaused() && isActive())
-							resume();
+							try {
+								resume();
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+							
 						break;
 					case 13:
 						if(!isPaused() && isActive())
-							pause();
+							try {
+								pause();
+							}
+							catch(Exception exc) {
+								exc.printStackTrace();
+							}
+							
 						break;
 				}
 			}

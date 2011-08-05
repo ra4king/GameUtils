@@ -14,7 +14,7 @@ public class TextField extends Widget {
 	private String text;
 	private Paint border, background, textPaint;
 	private FontMetrics fontMetrics;
-	private boolean isPasswordField;
+	private boolean isPasswordField, showCursor;
 	private char passwordChar = '*';
 	
 	public TextField(double x, double y, double width, boolean isCentered) {
@@ -154,11 +154,10 @@ public class TextField extends Widget {
 		super.init(screen);
 	}
 	
-	public void update(long deltaTime) {
-	}
+	public void update(long deltaTime) {}
 	
 	public void draw(Graphics2D g) {
-		g.setPaint(border);
+		g.setPaint(hasFocus() ? Color.cyan : border);
 		g.draw(getBounds());
 		
 		g.setPaint(background);
@@ -179,27 +178,57 @@ public class TextField extends Widget {
 			s = text;
 		
 		g.drawString(s,getIntX()+5,getIntY()+getIntHeight()-10);
+		
+		if(hasFocus() && (System.currentTimeMillis()/500%2 == 0 || showCursor)) {
+			int x = getIntX()+5+fontMetrics.stringWidth(s.substring(0,cursor));
+			g.drawLine(x, getIntY()+5, x, getIntY()+getIntHeight()-5);
+		}
 	}
+	
+	private int cursor;
 	
 	public void keyPressed(KeyEvent key) {
-		if(Character.isLetterOrDigit(key.getKeyChar()) || key.getKeyCode() == KeyEvent.VK_SPACE) {
-			text += key.getKeyChar();
+		showCursor = true;
+		
+		if(key.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+			if(text.length() == 0)
+				return;
 			
-			while(fontMetrics.stringWidth(text) >= getWidth()-5)
-				text = text.substring(0,text.length()-1);
+			text = text.substring(0,cursor-1) + text.substring(cursor);
+			cursor--;
 		}
-		else if(text.length() > 0 && key.getKeyCode() == KeyEvent.VK_BACK_SPACE)
-			text = text.substring(0,text.length()-1);
+		else if(key.getKeyCode() == KeyEvent.VK_DELETE) {
+			if(cursor == text.length())
+				return;
+			
+			text = text.substring(0,cursor) + text.substring(cursor+1);
+		}
+		else if(key.getKeyCode() == KeyEvent.VK_LEFT) {
+			cursor--;
+			
+			if(cursor < 0)
+				cursor = 0;
+		}
+		else if(key.getKeyCode() == KeyEvent.VK_RIGHT) {
+			cursor++;
+			
+			if(cursor > text.length())
+				cursor = text.length();
+		}
+		else if(Character.isDefined(key.getKeyChar())) {//Character.isLetterOrDigit(key.getKeyChar()) || key.getKeyCode() == KeyEvent.VK_SPACE) {
+			String old = text;
+			text = text.substring(0,cursor) + key.getKeyChar() + text.substring(cursor);
+			
+			cursor++;
+			
+			if(fontMetrics.stringWidth(text) >= getWidth()-5) {
+				text = old;
+				cursor--;
+			}
+		}
 	}
 	
-	private Paint oldBorder;
-	
-	public void focusGained() {
-		oldBorder = border;
-		border = Color.cyan;
-	}
-	
-	public void focusLost() {
-		border = oldBorder;
+	public void keyReleased(KeyEvent key) {
+		showCursor = false;
 	}
 }

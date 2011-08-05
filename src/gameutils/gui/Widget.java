@@ -104,6 +104,21 @@ public abstract class Widget extends Entity {
 		});
 	}
 	
+	public void setHasFocus(boolean hasFocus) {
+		boolean isFocused = this.hasFocus;
+		
+		this.hasFocus = hasFocus;
+		
+		if(hasFocus && !isFocused)
+			focusGained();
+		else if(!hasFocus && isFocused)
+			focusLost();
+	}
+	
+	public boolean hasFocus() {
+		return hasFocus;
+	}
+	
 	public void keyPressed(KeyEvent key) {}
 	
 	public void keyReleased(KeyEvent key) {}
