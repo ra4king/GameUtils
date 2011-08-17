@@ -20,7 +20,6 @@ import java.util.ArrayList;
 public class GameWorld implements Screen {
 	private Game parent;
 	private ArrayList<Bag<Entity>> entities;
-	private ArrayList<Entity> allEntities;
 	private Image bg;
 	private String bgImage;
 	private boolean hasInited, hasShown;
@@ -33,8 +32,6 @@ public class GameWorld implements Screen {
 		entities = new ArrayList<Bag<Entity>>();
 		entities.add(new Bag<Entity>());
 		
-		allEntities = new ArrayList<Entity>();
-		
 		setBackground(Color.lightGray);
 		
 		renderOutOfBoundsEntities = true;
@@ -43,8 +40,10 @@ public class GameWorld implements Screen {
 	public void init(Game game) {
 		parent = game;
 		
-		for(Entity e : getEntities())
-			e.init(this);
+		for(Bag<Entity> b : entities)
+			for(Entity e : b)
+				if(e != null)
+					e.init(this);
 		
 		hasInited = true;
 	}
@@ -55,8 +54,10 @@ public class GameWorld implements Screen {
 	public synchronized void show() {
 		hasShown = true;
 		
-		for(Entity e : getEntities())
-			e.show();
+		for(Bag<Entity> b : entities)
+			for(Entity e : b)
+				if(e != null)
+					e.show();
 	}
 	
 	/**
@@ -65,18 +66,24 @@ public class GameWorld implements Screen {
 	public synchronized void hide() {
 		hasShown = false;
 		
-		for(Entity e : getEntities())
-			e.hide();
+		for(Bag<Entity> b : entities)
+			for(Entity e : b)
+				if(e != null)
+					e.hide();
 	}
 	
 	public synchronized void paused() {
-		for(Entity e: getEntities())
-			e.paused();
+		for(Bag<Entity> b : entities)
+			for(Entity e : b)
+				if(e != null)
+					e.paused();
 	}
 	
 	public synchronized void resumed() {
-		for(Entity e : getEntities())
-			e.resumed();
+		for(Bag<Entity> b : entities)
+			for(Entity e : b)
+				if(e != null)
+					e.resumed();
 	}
 	
 	public synchronized void resized(int width, int height) {}
@@ -86,18 +93,15 @@ public class GameWorld implements Screen {
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public synchronized void update(long deltaTime) {
-		Entity em = null;
-		try {
-			for(Entity e : getEntities()) {
-				em = e;
+		for(Bag<Entity> b : entities)
+			for(Entity e : b)
 				if(e != null)
-					e.update(deltaTime);
-			}
-		}
-		catch(RuntimeException exc) {
-			System.out.println(em);
-			throw exc;
-		}
+					try{
+						e.update(deltaTime);
+					}
+					catch(Exception exc) {
+						exc.printStackTrace();
+					}
 		flush();
 	}
 	
@@ -111,15 +115,15 @@ public class GameWorld implements Screen {
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
 		
-		for(Entity e : getEntities()) {
-			try{
-				if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
-					e.draw((Graphics2D)g.create());
-			}
-			catch(Exception exc) {
-				exc.printStackTrace();
-			}
-		}
+		for(Bag<Entity> b : entities)
+			for(Entity e : b)
+				try{
+					if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
+						e.draw((Graphics2D)g.create());
+				}
+				catch(Exception exc) {
+					exc.printStackTrace();
+				}
 		
 		flush();
 	}
@@ -167,7 +171,10 @@ public class GameWorld implements Screen {
 	 * @return True if this GameWorld contains this Entity, false otherwise.
 	 */
 	public boolean contains(Entity e) {
-		return getEntities().contains(e);
+		for(Bag<Entity> b : entities)
+			if(b.contains(e))
+				return true;
+		return false;
 	}
 	
 	public boolean replace(Entity old, Entity e) {
@@ -264,7 +271,7 @@ public class GameWorld implements Screen {
 	 * @return A list of all Entities in this world in z-index order.
 	 */
 	public synchronized ArrayList<Entity> getEntities() {
-		allEntities.clear();
+		ArrayList<Entity> allEntities = new ArrayList<Entity>();
 		
 		for(Bag<Entity> bag : entities)
 			allEntities.addAll(bag);
