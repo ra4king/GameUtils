@@ -1,8 +1,8 @@
 package gameutils.networking;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
@@ -56,11 +56,20 @@ public class NBSocketPacketIO extends PacketIO {
 		
 		in.flip();
 		
-		byte array[] = new byte[in.limit()];
-		for(int a = 0; a < array.length; a++)
-			array[a] = in.get();
+		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
+			public int read() throws IOException {
+				if(!in.hasRemaining())
+					return -1;
+				
+				int b = in.get();
+				if(b < 0) {
+					b &= 255;
+					b |= 128;
+				}
+				return b;
+			}
+		});
 		
-		ObjectInputStream oin = new ObjectInputStream(new ByteArrayInputStream(array));
 		Packet packet = read(oin);
 		packet.setAddress(getSocketAddress());
 		return packet;
