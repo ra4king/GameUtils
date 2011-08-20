@@ -40,10 +40,9 @@ public class GameWorld implements Screen {
 	public void init(Game game) {
 		parent = game;
 		
-		for(Bag<Entity> b : entities)
-			for(Entity e : b)
-				if(e != null)
-					e.init(this);
+		for(Entity e : getEntities())
+			if(e != null)
+				e.init(this);
 		
 		hasInited = true;
 	}
@@ -54,10 +53,9 @@ public class GameWorld implements Screen {
 	public synchronized void show() {
 		hasShown = true;
 		
-		for(Bag<Entity> b : entities)
-			for(Entity e : b)
-				if(e != null)
-					e.show();
+		for(Entity e : getEntities())
+			if(e != null)
+				e.show();
 	}
 	
 	/**
@@ -66,24 +64,21 @@ public class GameWorld implements Screen {
 	public synchronized void hide() {
 		hasShown = false;
 		
-		for(Bag<Entity> b : entities)
-			for(Entity e : b)
-				if(e != null)
-					e.hide();
+		for(Entity e : getEntities())
+			if(e != null)
+				e.hide();
 	}
 	
 	public synchronized void paused() {
-		for(Bag<Entity> b : entities)
-			for(Entity e : b)
-				if(e != null)
-					e.paused();
+		for(Entity e : getEntities())
+			if(e != null)
+				e.paused();
 	}
 	
 	public synchronized void resumed() {
-		for(Bag<Entity> b : entities)
-			for(Entity e : b)
-				if(e != null)
-					e.resumed();
+		for(Entity e : getEntities())
+			if(e != null)
+				e.resumed();
 	}
 	
 	public synchronized void resized(int width, int height) {}
@@ -93,15 +88,14 @@ public class GameWorld implements Screen {
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public synchronized void update(long deltaTime) {
-		for(Bag<Entity> b : entities)
-			for(Entity e : b)
-				if(e != null)
-					try{
-						e.update(deltaTime);
-					}
-					catch(Exception exc) {
-						exc.printStackTrace();
-					}
+		for(Entity e : getEntities())
+			if(e != null)
+				try{
+					e.update(deltaTime);
+				}
+				catch(Exception exc) {
+					exc.printStackTrace();
+				}
 		flush();
 	}
 	
@@ -115,15 +109,14 @@ public class GameWorld implements Screen {
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
 		
-		for(Bag<Entity> b : entities)
-			for(Entity e : b)
-				try{
-					if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
-						e.draw((Graphics2D)g.create());
-				}
-				catch(Exception exc) {
-					exc.printStackTrace();
-				}
+		for(Entity e : getEntities())
+			try{
+				if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
+					e.draw((Graphics2D)g.create());
+			}
+			catch(Exception exc) {
+				exc.printStackTrace();
+			}
 		
 		flush();
 	}
@@ -171,10 +164,7 @@ public class GameWorld implements Screen {
 	 * @return True if this GameWorld contains this Entity, false otherwise.
 	 */
 	public boolean contains(Entity e) {
-		for(Bag<Entity> b : entities)
-			if(b.contains(e))
-				return true;
-		return false;
+		return getEntities().contains(e);
 	}
 	
 	public boolean replace(Entity old, Entity e) {
@@ -333,10 +323,7 @@ public class GameWorld implements Screen {
 	 * @return The total number of Entities in this world.
 	 */
 	public synchronized int size() {
-		int size = 0;
-		for(Bag<Entity> bag : entities)
-			size += bag.size();
-		return size;
+		return getEntities().size();
 	}
 	
 	/**
