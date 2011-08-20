@@ -26,8 +26,8 @@ public class Button extends Widget {
 	private Paint background, backgroundHighlight, backgroundPressed;
 	private Paint border, borderHighlight, borderPressed;
 	private Paint disabledBackground, disabledBorder;
-	private int textX, textY;
-	private int centerX, centerY;
+	private double textX, textY;
+	private double centerX, centerY;
 	private int arcwidth, archeight;
 	private boolean isCentered;
 	private boolean isHighlighted;
@@ -54,7 +54,7 @@ public class Button extends Widget {
 	 * @param centered If true, the X and Y are the center of the text, else they are the top left corner of the text.
 	 * @param action The action to be called when this button is pressed.
 	 */
-	public Button(String text, int fontSize, int x, int y, int arcwidth, int archeight, boolean centered, Action action) {
+	public Button(String text, int fontSize, double x, double y, int arcwidth, int archeight, boolean centered, Action action) {
 		this.action = action;
 		this.text = text;
 		
@@ -519,7 +519,7 @@ public class Button extends Widget {
 		g.draw(getButtonBounds());
 		
 		g.setPaint(textPaint);
-		g.drawString(text,textX,textY);
+		g.drawString(text,(int)Math.round(textX),(int)Math.round(textY));
 		
 		if(!isEnabled) {
 			g.setPaint(disabledBackground);

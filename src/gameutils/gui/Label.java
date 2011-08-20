@@ -15,23 +15,23 @@ public class Label extends Widget {
 	private String text;
 	private Paint background, textPaint;
 	private Font font;
-	private int textX, textY, centerX, centerY;
+	private double textX, textY, centerX, centerY;
 	private boolean isCentered;
 	private boolean randomColors;
 	
-	public Label(String text, int x, int y) {
+	public Label(String text, double x, double y) {
 		this(text,x,y,false);
 	}
 	
-	public Label(String text, int x, int y, boolean centered) {
+	public Label(String text, double x, double y, boolean centered) {
 		this(text,null,null,x,y,centered);
 	}
 	
-	public Label(String text, Paint paint, int x, int y, boolean centered) {
+	public Label(String text, Paint paint, double x, double y, boolean centered) {
 		this(text,paint,null,x,y,centered);
 	}
 	
-	public Label(String text, Font font, int x, int y, boolean centered) {
+	public Label(String text, Font font, double x, double y, boolean centered) {
 		this(text,null,font,x,y,centered);
 	}
 	
@@ -44,7 +44,7 @@ public class Label extends Widget {
 	 * @param y The Y position of the text.
 	 * @param centered If true, the X and Y are the center of the text, else they are the top left corner of the text.
 	 */
-	public Label(String text, Paint paint, Font font, int x, int y, boolean centered) {
+	public Label(String text, Paint paint, Font font, double x, double y, boolean centered) {
 		if(text == null)
 			this.text = "";
 		else
@@ -142,7 +142,7 @@ public class Label extends Widget {
 		FontMetrics fm = g.getFontMetrics(font);
 		int width = fm.stringWidth(text);
 		int height = fm.getHeight();
-		int x, y;
+		double x, y;
 		
 		if(isCentered) {
 			textX = x = centerX - width/2;
@@ -261,12 +261,12 @@ public class Label extends Widget {
 			int offset = 0;
 			for(char c : chars) {
 				g.setColor(new Color((int)Math.round(Math.random()*255),(int)Math.round(Math.random()*255),(int)Math.round(Math.random()*255)));
-				g.drawString(""+c, textX+offset, textY);
+				g.drawString(""+c, (int)Math.round(textX+offset), (int)Math.round(textY));
 				offset += g.getFontMetrics().charWidth(c);
 			}
 		}
 		else {
-			g.drawString(text,textX,textY);
+			g.drawString(text,(int)Math.round(textX),(int)Math.round(textY));
 		}
 	}
 }
