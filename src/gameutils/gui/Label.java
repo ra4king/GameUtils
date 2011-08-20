@@ -162,7 +162,7 @@ public class Label extends Widget {
 	/**
 	 * Calls MenuItem's setX method and recalculates all the coordinates.
 	 */
-	public void setX(int x) {
+	public void setX(double x) {
 		if(isCentered)
 			centerX = x;
 		else
@@ -173,7 +173,7 @@ public class Label extends Widget {
 	/**
 	 * Calls MenuItem's setY method and recalculates all the coordinates.
 	 */
-	public void setY(int y) {
+	public void setY(double y) {
 		if(isCentered)
 			centerY = y;
 		else

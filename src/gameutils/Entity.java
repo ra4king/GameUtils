@@ -185,13 +185,13 @@ public abstract class Entity implements Element {
 	}
 	
 	public void setLocation(double x, double y) {
-		this.x = x;
-		this.y = y;
+		setX(x);
+		setY(y);
 	}
 	
 	public void setSize(double width, double height) {
-		this.width = width;
-		this.height = height;
+		setWidth(width);
+		setHeight(height);
 	}
 	
 	public void translate(double x, double y) {
