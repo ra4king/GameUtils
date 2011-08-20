@@ -17,6 +17,10 @@ public class TextField extends Widget {
 	private boolean isPasswordField, showCursor;
 	private char passwordChar = '*';
 	
+	public TextField(double x, double y, double width) {
+		this(x,y,width,false);
+	}
+	
 	public TextField(double x, double y, double width, boolean isCentered) {
 		this((String)null,x,y,width,isCentered);
 	}

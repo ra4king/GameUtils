@@ -19,6 +19,22 @@ public class Label extends Widget {
 	private boolean isCentered;
 	private boolean randomColors;
 	
+	public Label(String text, int x, int y) {
+		this(text,x,y,false);
+	}
+	
+	public Label(String text, int x, int y, boolean centered) {
+		this(text,null,null,x,y,centered);
+	}
+	
+	public Label(String text, Paint paint, int x, int y, boolean centered) {
+		this(text,paint,null,x,y,centered);
+	}
+	
+	public Label(String text, Font font, int x, int y, boolean centered) {
+		this(text,null,font,x,y,centered);
+	}
+	
 	/**
 	 * Initializes this object. Background is set to transparent.
 	 * @param text The text to show. If this is null, an empty string is set.

@@ -19,7 +19,7 @@ public abstract class Widget extends Entity {
 	 * Sets X, Y, width and height to 0.
 	 */
 	public Widget() {
-		this(0,0,0,0);
+		super();
 	}
 	
 	/**
