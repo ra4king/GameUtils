@@ -1,7 +1,5 @@
 package gameutils.gui;
 
-import gameutils.util.FastMath;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -246,7 +244,7 @@ public class Label extends Widget {
 			text.getChars(0, text.length(), chars, 0);
 			int offset = 0;
 			for(char c : chars) {
-				g.setColor(new Color((int)FastMath.round(Math.random()*255),(int)FastMath.round(Math.random()*255),(int)FastMath.round(Math.random()*255)));
+				g.setColor(new Color((int)Math.round(Math.random()*255),(int)Math.round(Math.random()*255),(int)Math.round(Math.random()*255)));
 				g.drawString(""+c, textX+offset, textY);
 				offset += g.getFontMetrics().charWidth(c);
 			}

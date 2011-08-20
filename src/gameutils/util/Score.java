@@ -53,7 +53,7 @@ public class Score {
 	 * @return The score rounded to a long.
 	 */
 	public long getLong() {
-		return FastMath.round(get());
+		return Math.round(get());
 	}
 	
 	/**

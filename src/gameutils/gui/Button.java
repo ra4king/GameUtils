@@ -2,7 +2,6 @@ package gameutils.gui;
 
 import gameutils.InputAdapter;
 import gameutils.Screen;
-import gameutils.util.FastMath;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -173,8 +172,8 @@ public class Button extends Widget {
 			super.setX(centerX);
 			super.setY(centerY);
 		}
-		textX = FastMath.round(getX()+(getWidth()-width)/2);
-		textY = FastMath.round(getY()+getHeight()/2+fm.getHeight()/2-fm.getDescent());
+		textX = (int)Math.round(getX()+(getWidth()-width)/2);
+		textY = (int)Math.round(getY()+getHeight()/2+fm.getHeight()/2-fm.getDescent());
 	}
 	
 	/**

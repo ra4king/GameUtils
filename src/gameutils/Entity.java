@@ -1,7 +1,5 @@
 package gameutils;
 
-import gameutils.util.FastMath;
-
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -70,7 +68,7 @@ public abstract class Entity implements Element {
 	 * @return The nearest integer of the leftmost X position.
 	 */
 	public int getIntX() {
-		return (int)FastMath.round(getX());
+		return (int)Math.round(getX());
 	}
 	
 	/**
@@ -92,7 +90,7 @@ public abstract class Entity implements Element {
 	 * @return The nearest integer of the topmost Y position.
 	 */
 	public int getIntY() {
-		return (int)FastMath.round(getY());
+		return (int)Math.round(getY());
 	}
 	
 	/**
@@ -111,7 +109,7 @@ public abstract class Entity implements Element {
 	}
 	
 	public int getIntWidth() {
-		return (int)FastMath.round(getWidth());
+		return (int)Math.round(getWidth());
 	}
 	
 	/**
@@ -130,7 +128,7 @@ public abstract class Entity implements Element {
 	}
 	
 	public int getIntHeight() {
-		return (int)FastMath.round(getHeight());
+		return (int)Math.round(getHeight());
 	}
 	
 	/**
@@ -154,7 +152,7 @@ public abstract class Entity implements Element {
 	 * @return The nearest integer of the center X position.
 	 */
 	public int getIntCenterX() {
-		return (int)FastMath.round(getCenterX());
+		return (int)Math.round(getCenterX());
 	}
 	
 	/**
@@ -170,7 +168,7 @@ public abstract class Entity implements Element {
 	 * @return The nearest integer of the center Y position.
 	 */
 	public int getIntCenterY() {
-		return (int)FastMath.round(getCenterY());
+		return (int)Math.round(getCenterY());
 	}
 	
 	/**

@@ -1,7 +1,5 @@
 package gameutils;
 
-import gameutils.util.FastMath;
-
 import java.applet.Applet;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -501,7 +499,7 @@ public abstract class Game extends Applet {
 			
 			try{
 				if(FPS > 0) {
-					long sleepTime = FastMath.round((ONE_SECOND/FPS)-(System.nanoTime()-lastTime));
+					long sleepTime = Math.round((ONE_SECOND/FPS)-(System.nanoTime()-lastTime));
 					if(sleepTime <= 0)
 						continue;
 					
