@@ -749,6 +749,8 @@ public abstract class Game extends Applet {
 						events.add(new Event(13,fe));
 					}
 				}
+				
+				input.reset();
 			}
 		});
 		
