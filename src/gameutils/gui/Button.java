@@ -26,13 +26,13 @@ public class Button extends Widget {
 	private Paint background, backgroundHighlight, backgroundPressed;
 	private Paint border, borderHighlight, borderPressed;
 	private Paint disabledBackground, disabledBorder;
-	private double textX, textY;
-	private double centerX, centerY;
+	private double textX, textY, centerX, centerY;
 	private int arcwidth, archeight;
 	private boolean isCentered;
 	private boolean isHighlighted;
 	private boolean isPressed;
 	private boolean isEnabled;
+	private boolean useTextWidth, useTextHeight;
 	
 	/**
 	 * Initializes this Button. The defaults are:<br>
@@ -66,6 +66,8 @@ public class Button extends Widget {
 		this.archeight = archeight;
 		
 		isCentered = centered;
+		
+		useTextWidth = useTextHeight = true;
 		
 		recalcCoords();
 		
@@ -162,8 +164,12 @@ public class Button extends Widget {
 		Graphics2D g = (Graphics2D)new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB).getGraphics();
 		FontMetrics fm = g.getFontMetrics(font);
 		int width = fm.stringWidth(text);
-		super.setWidth(width+40);
-		super.setHeight(fm.getHeight()+10);
+		
+		if(useTextWidth)
+			super.setWidth(width+40);
+		if(useTextHeight)
+			super.setHeight(fm.getHeight()+10);
+		
 		if(isCentered) {
 			super.setX(centerX-getWidth()/2);
 			super.setY(centerY-getHeight()/2);
@@ -172,6 +178,7 @@ public class Button extends Widget {
 			super.setX(centerX);
 			super.setY(centerY);
 		}
+		
 		textX = (int)Math.round(getX()+(getWidth()-width)/2);
 		textY = (int)Math.round(getY()+getHeight()/2+fm.getHeight()/2-fm.getDescent());
 	}
@@ -179,33 +186,51 @@ public class Button extends Widget {
 	/**
 	 * Calls MenuItem's setX method and recalculates all the coordinates.
 	 */
-	public void setX(int x) {
-		super.setX(x);
+	public void setX(double x) {
+		centerX = x;
 		recalcCoords();
 	}
 	
 	/**
 	 * Calls MenuItem's setY method and recalculates all the coordinates.
 	 */
-	public void setY(int y) {
-		super.setY(y);
+	public void setY(double y) {
+		centerY = y;
 		recalcCoords();
 	}
 	
 	/**
-	 * Calls MenuItem's setWidth method and recalculates all the coordinates.
+	 * Calls MenuItem's setWidth method and recalculates all the coordinates. This also sets useTextWidth to false.
 	 */
 	public void setWidth(int width) {
 		super.setWidth(width);
+		useTextWidth(false);
 		recalcCoords();
 	}
 	
 	/**
-	 * Calls MenuItem's setHeight method and recalculates all the coordinates.
+	 * Calls MenuItem's setHeight method and recalculates all the coordinates. This also sets useTextHeight to false.
 	 */
 	public void setHeight(int height) {
 		super.setHeight(height);
+		useTextHeight(false);
 		recalcCoords();
+	}
+	
+	public boolean isUsingTextWidth() {
+		return useTextWidth;
+	}
+	
+	public void useTextWidth(boolean useTextWidth) {
+		this.useTextWidth = useTextWidth;
+	}
+	
+	public boolean isUsingTextHeight() {
+		return useTextHeight;
+	}
+	
+	public void useTextHeight(boolean useTextHeight) {
+		this.useTextHeight = useTextHeight;
 	}
 	
 	/**

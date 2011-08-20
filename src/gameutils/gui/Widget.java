@@ -64,17 +64,13 @@ public abstract class Widget extends Entity {
 			
 			public void mousePressed(MouseEvent me, Screen screen) {
 				if(getBounds().contains(me.getPoint())) {
-					if(!hasFocus) {
-						hasFocus = true;
-						focusGained();
-					}
+					if(!hasFocus)
+						getFocus();
 					
 					Widget.this.mousePressed(me);
 				}
-				else {
-					hasFocus = false;
-					focusLost();
-				}
+				else if(hasFocus)
+					loseFocus();
 			}
 			
 			public void mouseReleased(MouseEvent me, Screen screen) {
@@ -104,15 +100,14 @@ public abstract class Widget extends Entity {
 		});
 	}
 	
-	public void setHasFocus(boolean hasFocus) {
-		boolean isFocused = this.hasFocus;
-		
-		this.hasFocus = hasFocus;
-		
-		if(hasFocus && !isFocused)
-			focusGained();
-		else if(!hasFocus && isFocused)
-			focusLost();
+	public void getFocus() {
+		this.hasFocus = true;
+		focusGained();
+	}
+	
+	public void loseFocus() {
+		this.hasFocus = false;
+		focusLost();
 	}
 	
 	public boolean hasFocus() {

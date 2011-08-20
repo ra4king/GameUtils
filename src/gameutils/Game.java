@@ -104,7 +104,7 @@ public abstract class Game extends Applet {
 	 * @param resizable If true, the window will be resizable, else it will not be resizable.
 	 * @return The JFrame that was initialized by this method.
 	 */
-	protected final JFrame setupFrame(String title, int width, int height, boolean resizable) {
+	protected final JFrame setupFrame(String title, boolean resizable) {
 		final JFrame frame = new JFrame(title);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setIgnoreRepaint(true);
@@ -147,19 +147,25 @@ public abstract class Game extends Applet {
 	
 	private final Art art;
 	private final Sound sound;
+	
 	private final Map<String,ScreenInfo> screens;
 	private ScreenInfo currentScreen;
+	
 	private final Canvas canvas;
+	
 	private final Input input;
 	private ArrayList<Event> events;
 	private ArrayList<Event> tempEvents;
+	
+	private boolean isApplet = true;
+	private int width, height;
+	
 	private Object quality;
 	private int maxUpdates;
 	private int FPS;
 	private double version;
 	private boolean showFPS;
 	private boolean useYield;
-	private boolean isApplet = true;
 	private volatile boolean isProcessingEvents;
 	private volatile boolean isActive;
 	private volatile boolean isPaused;
@@ -174,7 +180,7 @@ public abstract class Game extends Applet {
 	 * - standardKeysEnabled = true
 	 */
 	public Game() {
-		this(60,1.0);
+		this(0,0);
 	}
 	
 	/**
@@ -182,7 +188,7 @@ public abstract class Game extends Applet {
 	 * @param FPS The FPS to achieve.
 	 * @param version The version of this game.
 	 */
-	public Game(int FPS, double version) {
+	public Game(int width, int height) {
 		art = new Art();
 		sound = new Sound();
 		
@@ -208,8 +214,8 @@ public abstract class Game extends Applet {
 		events = new ArrayList<Event>();
 		tempEvents = new ArrayList<Event>();
 		
-		this.FPS = FPS;
-		this.version = version;
+		this.width = width;
+		this.height = height;
 		showFPS = true;
 		
 		quality = RenderingHints.VALUE_ANTIALIAS_ON;
@@ -249,11 +255,11 @@ public abstract class Game extends Applet {
 	}
 	
 	public int getWidth() {
-		return canvas.getWidth();
+		return width;
 	}
 	
 	public int getHeight() {
-		return canvas.getHeight();
+		return height;
 	}
 	
 	/**
@@ -304,14 +310,7 @@ public abstract class Game extends Applet {
 	 * @param height The new height of this game's canvas;
 	 */
 	public void resize(int width, int height) {
-		invalidate();
-			
-		if(isApplet())
-			super.resize(width,height);
-		else
-			setSize(width,height);
-		
-		validate();
+		setSize(width,height);
 	}
 	
 	/**
@@ -330,6 +329,10 @@ public abstract class Game extends Applet {
 			((JFrame)getRootParent()).setLocationRelativeTo(null);
 		}
 		
+		this.width = width;
+		this.height = height;
+		
+		invalidate();
 		validate();
 	}
 	
@@ -399,6 +402,8 @@ public abstract class Game extends Applet {
 		Thread.currentThread().setName("Game Loop Thread");
 		
 		try {
+			resize(width,height);
+			
 			synchronized(Game.this) {
 				initGame();
 			}
