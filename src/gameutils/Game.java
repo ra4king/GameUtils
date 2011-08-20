@@ -216,6 +216,8 @@ public abstract class Game extends Applet {
 		
 		this.width = width;
 		this.height = height;
+		FPS = 60;
+		version = 1.0;
 		showFPS = true;
 		
 		quality = RenderingHints.VALUE_ANTIALIAS_ON;
