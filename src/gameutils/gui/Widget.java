@@ -65,7 +65,7 @@ public abstract class Widget extends Entity {
 			public void mousePressed(MouseEvent me, Screen screen) {
 				if(getBounds().contains(me.getPoint())) {
 					if(!hasFocus)
-						getFocus();
+						gainFocus();
 					
 					Widget.this.mousePressed(me);
 				}
@@ -100,7 +100,7 @@ public abstract class Widget extends Entity {
 		});
 	}
 	
-	public void getFocus() {
+	public void gainFocus() {
 		this.hasFocus = true;
 		focusGained();
 	}
