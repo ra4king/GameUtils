@@ -219,7 +219,7 @@ public class TextField extends Widget {
 			if(cursor > text.length())
 				cursor = text.length();
 		}
-		else if(Character.isDefined(key.getKeyChar())) {//Character.isLetterOrDigit(key.getKeyChar()) || key.getKeyCode() == KeyEvent.VK_SPACE) {
+		else if(key.getKeyCode() != KeyEvent.VK_TAB && Character.isDefined(key.getKeyChar())) {
 			String old = text;
 			text = text.substring(0,cursor) + key.getKeyChar() + text.substring(cursor);
 			

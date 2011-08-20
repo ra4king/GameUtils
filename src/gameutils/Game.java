@@ -714,6 +714,7 @@ public abstract class Game extends Applet {
 		add(canvas);
 		canvas.setSize(super.getWidth(),super.getHeight());
 		canvas.setIgnoreRepaint(true);
+		canvas.setFocusTraversalKeysEnabled(false);
 		
 		canvas.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent ce) {
