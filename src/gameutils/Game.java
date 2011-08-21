@@ -171,22 +171,9 @@ public abstract class Game extends Applet {
 	private volatile boolean isPaused;
 	
 	/**
-	 * Default constructor. The defaults are:<br>
-	 * - MAX_UPDATES is set
-	 * - 60FPS<br>
-	 * - Version 1.0<br>
-	 * - showFPS = true<br>
-	 * - quality = high<br>
-	 * - standardKeysEnabled = true
-	 */
-	public Game() {
-		this(0,0);
-	}
-	
-	/**
-	 * Sets defaults and the FPS and version.
-	 * @param FPS The FPS to achieve.
-	 * @param version The version of this game.
+	 * Sets the width and height of the game.
+	 * @param width
+	 * @param height
 	 */
 	public Game(int width, int height) {
 		art = new Art();
