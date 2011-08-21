@@ -34,6 +34,7 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 /**
@@ -741,6 +742,15 @@ public abstract class Game extends Applet {
 				input.reset();
 			}
 		});
+		
+		try {
+			SwingUtilities.invokeAndWait(new Runnable() {
+				public void run() {
+					Thread.currentThread().setPriority(7);
+				}
+			});
+		}
+		catch(Exception exc) {}
 		
 		new Thread() {
 			public void run() {
