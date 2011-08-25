@@ -240,21 +240,36 @@ public class GameWorld implements Screen {
 	 * @return True if this GameWorld contains this Entity, false otherwise.
 	 */
 	public boolean contains(Entity e) {
+		if(isLooping && temp.contains(e))
+			return true;
 		return getEntities().contains(e);
 	}
 	
 	public boolean replace(Entity old, Entity e) {
+		if(isLooping) {
+			int i = temp.indexOf(old);
+			if(i >= 0) {
+				temp.get(i).e = e;
+				return true;
+			}
+		}
+		
 		int zindex = getZIndex(old);
 		if(zindex < 0)
 			return false;
 		
-		if(getZIndex(e) < 0)
-			return false;
+		boolean isNew = getZIndex(e) < 0;
 		
 		remove(e);
 		
 		Bag<Entity> bag = entities.get(zindex);
 		bag.set(bag.indexOf(old),e);
+		
+		if(isNew) {
+			e.init(this);
+			e.show();
+		}
+		
 		return true;
 	}
 	
@@ -280,6 +295,7 @@ public class GameWorld implements Screen {
 	 */
 	public synchronized void clear() {
 		entities.clear();
+		temp.clear();
 		
 		System.gc();
 		
@@ -293,7 +309,15 @@ public class GameWorld implements Screen {
 	 * @return True if the Entity was found and updated, false otherwise.
 	 */
 	public synchronized boolean changeZIndex(Entity e, int newZIndex) {
-		if(remove(e))
+		if(isLooping) {
+			int i = temp.indexOf(e);
+			if(i >= 0) {
+				temp.get(i).zIndex = newZIndex;
+				return true;
+			}
+		}
+		
+		if(!remove(e))
 			return false;
 		
 		add(newZIndex,e);
@@ -309,6 +333,12 @@ public class GameWorld implements Screen {
 	 * @return The z-index of the specified Entity, or -1 if the Entity was not found.
 	 */
 	public synchronized int getZIndex(Entity e) {
+		if(isLooping) {
+			int i = temp.indexOf(e);
+			if(i >= 0)
+				return temp.get(i).zIndex;
+		}
+		
 		for(int a = 0; a < entities.size(); a++)
 			if(entities.get(a).indexOf(e) >= 0)
 				return a;
@@ -329,7 +359,7 @@ public class GameWorld implements Screen {
 	 * @param zindex The z-index.
 	 * @return A list of all Entities at the specified z-index.
 	 */
-	public synchronized Bag<Entity> getEntitiesAt(int zindex) {
+	public synchronized ArrayList<Entity> getEntitiesAt(int zindex) {
 		return entities.get(zindex);
 	}
 	
