@@ -20,9 +20,11 @@ import java.util.ArrayList;
 public class GameWorld implements Screen {
 	private Game parent;
 	private ArrayList<Bag<Entity>> entities;
+	private ArrayList<Temp> temp;
 	private Image bg;
 	private String bgImage;
 	private boolean hasInited, hasShown;
+	private volatile boolean isLooping;
 	private boolean renderOutOfBoundsEntities;
 	
 	/**
@@ -32,6 +34,8 @@ public class GameWorld implements Screen {
 		entities = new ArrayList<Bag<Entity>>();
 		entities.add(new Bag<Entity>());
 		
+		temp = new ArrayList<Temp>();
+		
 		setBackground(Color.lightGray);
 		
 		renderOutOfBoundsEntities = true;
@@ -40,9 +44,19 @@ public class GameWorld implements Screen {
 	public void init(Game game) {
 		parent = game;
 		
-		for(Entity e : getEntities())
-			if(e != null)
-				e.init(this);
+		//for(Entity e : getEntities())
+		
+		preLoop();
+		
+		try{
+			for(Bag<Entity> b : entities)
+				for(Entity e : b)
+					if(e != null)
+						e.init(this);
+		}
+		finally {
+			postLoop();
+		}
 		
 		hasInited = true;
 	}
@@ -53,9 +67,19 @@ public class GameWorld implements Screen {
 	public synchronized void show() {
 		hasShown = true;
 		
-		for(Entity e : getEntities())
-			if(e != null)
-				e.show();
+		//for(Entity e : getEntities())
+		
+		preLoop();
+		
+		try{
+			for(Bag<Entity> b : entities)
+				for(Entity e : b)
+					if(e != null)
+						e.show();
+		}
+		finally {
+			postLoop();
+		}
 	}
 	
 	/**
@@ -64,21 +88,51 @@ public class GameWorld implements Screen {
 	public synchronized void hide() {
 		hasShown = false;
 		
-		for(Entity e : getEntities())
-			if(e != null)
-				e.hide();
+		//for(Entity e : getEntities())
+		
+		preLoop();
+		
+		try{
+			for(Bag<Entity> b : entities)
+				for(Entity e : b)
+					if(e != null)
+						e.hide();
+		}
+		finally {
+			postLoop();
+		}
 	}
 	
 	public synchronized void paused() {
-		for(Entity e : getEntities())
-			if(e != null)
-				e.paused();
+		//for(Entity e : getEntities())
+		
+		preLoop();
+		
+		try{
+			for(Bag<Entity> b : entities)
+				for(Entity e : b)
+					if(e != null)
+						e.paused();
+		}
+		finally {
+			postLoop();
+		}
 	}
 	
 	public synchronized void resumed() {
-		for(Entity e : getEntities())
-			if(e != null)
-				e.resumed();
+		//for(Entity e : getEntities())
+		
+		preLoop();
+		
+		try{
+			for(Bag<Entity> b : entities)
+				for(Entity e : b)
+					if(e != null)
+						e.resumed();
+		}
+		finally {
+			postLoop();
+		}
 	}
 	
 	public synchronized void resized(int width, int height) {}
@@ -88,15 +142,24 @@ public class GameWorld implements Screen {
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	public synchronized void update(long deltaTime) {
-		for(Entity e : getEntities())
-			if(e != null)
-				try{
-					e.update(deltaTime);
-				}
-				catch(Exception exc) {
-					exc.printStackTrace();
-				}
-		flush();
+		//for(Entity e : getEntities())
+		
+		preLoop();
+		
+		try {
+			for(Bag<Entity> b : entities)
+				for(Entity e : b)
+					if(e != null)
+						try{
+							e.update(deltaTime);
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+		}
+		finally {
+			postLoop();
+		}
 	}
 	
 	/**
@@ -109,16 +172,24 @@ public class GameWorld implements Screen {
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
 		
-		for(Entity e : getEntities())
-			try{
-				if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
-					e.draw((Graphics2D)g.create());
-			}
-			catch(Exception exc) {
-				exc.printStackTrace();
-			}
+		//for(Entity e : getEntities())
 		
-		flush();
+		preLoop();
+		
+		try{
+			for(Bag<Entity> b : entities)
+				for(Entity e : b)
+					try{
+						if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
+							e.draw((Graphics2D)g.create());
+					}
+					catch(Exception exc) {
+						exc.printStackTrace();
+					}
+		}
+		finally {
+			postLoop();
+		}
 	}
 	
 	/**
@@ -134,7 +205,7 @@ public class GameWorld implements Screen {
 	 * @return The Entity that was added.
 	 */
 	public synchronized Entity add(Entity e) {
-		return add(e,0);
+		return add(0,e);
 	}
 	
 	/**
@@ -143,17 +214,22 @@ public class GameWorld implements Screen {
 	 * @param zindex The z-index of this Entity.
 	 * @return The Entity that was added.
 	 */
-	public synchronized Entity add(Entity e, int zindex) {
-		while(zindex >= entities.size())
-			entities.add(new Bag<Entity>());
-		
-		entities.get(zindex).add(e);
-		
-		if(hasInited)
-			e.init(this);
-		
-		if(hasShown)
-			e.show();
+	public synchronized Entity add(int zindex, Entity e) {
+		if(isLooping) {
+			temp.add(new Temp(zindex,e));
+		}
+		else {
+			while(zindex >= entities.size())
+				entities.add(new Bag<Entity>());
+			
+			entities.get(zindex).add(e);
+			
+			if(hasInited)
+				e.init(this);
+			
+			if(hasShown)
+				e.show();
+		}
 		
 		return e;
 	}
@@ -188,14 +264,15 @@ public class GameWorld implements Screen {
 	 * @return True if the Entity was found and removed, false if the Entity was not found.
 	 */
 	public synchronized boolean remove(Entity e) {
-		for(Bag<Entity> bag : entities) {
-			if(bag.remove(e)) {
-				e.hide();
-				return true;
-			}
-		}
+		boolean removed = false;
 		
-		return false;
+		for(Bag<Entity> bag : entities)
+			removed |= bag.remove(e);
+		
+		if(removed)
+			e.hide();
+		
+		return removed;
 	}
 	
 	/**
@@ -219,7 +296,7 @@ public class GameWorld implements Screen {
 		if(remove(e))
 			return false;
 		
-		add(e,newZIndex);
+		add(newZIndex,e);
 		
 		e.show();
 		
@@ -267,11 +344,6 @@ public class GameWorld implements Screen {
 			allEntities.addAll(bag);
 		
 		return allEntities;
-	}
-	
-	private synchronized void flush() {
-		for(Bag<Entity> bag : entities)
-			while(bag.remove(null)) {}
 	}
 	
 	/**
@@ -356,5 +428,38 @@ public class GameWorld implements Screen {
 	 */
 	public boolean isRenderingOutOfBoundsEntities() {
 		return renderOutOfBoundsEntities;
+	}
+	
+	public void preLoop() {
+		if(isLooping)
+			return;
+		
+		temp.clear();
+		isLooping = true;
+	}
+	
+	public void postLoop() {
+		if(!isLooping)
+			return;
+		
+		isLooping = false;
+		
+		for(Temp p : temp)
+			add(p.zIndex,p.e);
+		
+		temp.clear();
+		
+		for(Bag<Entity> bag : entities)
+			bag.remove(null);
+	}
+	
+	private class Temp {
+		private Entity e;
+		private int zIndex;
+		
+		Temp(int zIndex, Entity e) {
+			this.zIndex = zIndex;
+			this.e = e;
+		}
 	}
 }

@@ -38,14 +38,6 @@ public abstract class Entity implements Element {
 		height = h;
 	}
 	
-	public boolean equals(Object o) {
-		if(o instanceof Entity) {
-			Entity e = (Entity)o;
-			return e.getBounds().equals(getBounds());
-		}
-		return false;
-	}
-	
 	public void init(Screen screen) {
 		parent = screen;
 	}

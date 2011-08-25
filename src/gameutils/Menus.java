@@ -51,7 +51,7 @@ public class Menus implements Screen {
 		
 		menuPages.put(name,page);
 		
-		game.addScreen(page, name);
+		game.addScreen(name,page);
 		
 		return page;
 	}

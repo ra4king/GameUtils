@@ -336,7 +336,7 @@ public abstract class Game extends Applet {
 		
 		if(setFullScreen) {
 			if(isFullScreen())
-				throw new IllegalStateException("A full screen window is already open.");
+				return;
 			
 			JFrame frame = new JFrame();
 			frame.setResizable(false);
@@ -375,6 +375,9 @@ public abstract class Game extends Applet {
 		}
 		
 		canvas.requestFocus();
+		
+		width = canvas.getWidth();
+		height = canvas.getHeight();
 	}
 	
 	/**
@@ -714,6 +717,9 @@ public abstract class Game extends Applet {
 						events.add(new Event(11,ce));
 					}
 				}
+				
+				width = canvas.getWidth();
+				height = canvas.getHeight();
 			}
 		});
 		
@@ -842,7 +848,7 @@ public abstract class Game extends Applet {
 	 * @param screen The Screen to add.
 	 * @param name The name of the screen.
 	 */
-	public synchronized void addScreen(Screen screen, String name) {
+	public synchronized void addScreen(String name, Screen screen) {
 		if(screen == null)
 			throw new IllegalArgumentException("Screen cannot be null.");
 		if(name == null)
@@ -894,8 +900,8 @@ public abstract class Game extends Applet {
 	 * @param screen The Screen to be added and set.
 	 * @param name The name assigned to the Screen.
 	 */
-	public synchronized void setScreen(Screen screen, String name) {
-		addScreen(screen,name);
+	public synchronized void setScreen(String name, Screen screen) {
+		addScreen(name,screen);
 		setScreen(name);
 	}
 	

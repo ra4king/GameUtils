@@ -7,6 +7,7 @@ public class Bag<T> extends ArrayList<T> {
 	
 	public boolean add(T t) {
 		checkIfNull(t);
+		modCount--;
 		return super.add(t);
 	}
 	
@@ -21,19 +22,17 @@ public class Bag<T> extends ArrayList<T> {
 	}
 	
 	public T remove(int idx) {
-		checkRange(idx);
-		
 		return super.set(idx,null);
 	}
 	
 	public boolean remove(Object o) {
 		if(o == null) {
-			int i = indexOf(o);
-			if(i < 0)
+			int idx = indexOf(o);
+			if(idx == -1)
 				return false;
-			super.set(i, get(size()-1));
+			super.set(idx, get(size()-1));
 			super.remove(size()-1);
-			return true;
+			return remove(null);
 		}
 		
 		int idx = indexOf(o);
@@ -42,12 +41,7 @@ public class Bag<T> extends ArrayList<T> {
 		
 		remove(idx);
 		
-		return true;
-	}
-	
-	private void checkRange(int idx) {
-		if(idx < 0 || idx >= size())
-			throw new IndexOutOfBoundsException("Index: " + idx + ", Size: " + size());
+		return remove(o);
 	}
 	
 	private void checkIfNull(Object o) {
