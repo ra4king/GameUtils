@@ -19,6 +19,7 @@ public class MenuPage implements Screen {
 	private ArrayList<Widget> widgets;
 	private Image bg;
 	private String bgImage;
+	private boolean hasInited;
 	
 	/**
 	 * Initializes this object.
@@ -39,6 +40,11 @@ public class MenuPage implements Screen {
 	
 	public void init(Game game) {
 		this.game = game;
+		
+		hasInited = true;
+		
+		for(Widget w : widgets)
+			w.init(this);
 	}
 	
 	/**
@@ -117,7 +123,8 @@ public class MenuPage implements Screen {
 		
 		widgets.add(widget);
 		
-		widget.init(this);
+		if(hasInited)
+			widget.init(this);
 		
 		return widget;
 	}

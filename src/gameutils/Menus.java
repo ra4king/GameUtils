@@ -14,6 +14,7 @@ public class Menus implements Screen {
 	private Game game;
 	private Map<String,MenuPage> menuPages;
 	private MenuPage currentPage;
+	private boolean hasInited;
 	
 	/**
 	 * Initializes this object.
@@ -25,6 +26,14 @@ public class Menus implements Screen {
 	
 	public void init(Game game) {
 		this.game = game;
+		
+		hasInited = true;
+		
+		for(String s : menuPages.keySet())
+			game.addScreen(s,menuPages.get(s));
+		
+		if(currentPage != null)
+			game.setScreen(currentPage);
 	}
 	
 	/**
@@ -42,8 +51,6 @@ public class Menus implements Screen {
 	 * @return The MenuPage that was added.
 	 */
 	public synchronized MenuPage addPage(String name, MenuPage page) {
-		if(game == null)
-			throw new IllegalStateException("You have to set this Menus as the Screen before adding MenuPages to it.");
 		if(name == null)
 			throw new IllegalArgumentException("Name cannot be null");
 		if(page == null)
@@ -51,7 +58,11 @@ public class Menus implements Screen {
 		
 		menuPages.put(name,page);
 		
-		game.addScreen(name,page);
+		if(currentPage == null)
+			currentPage = page;
+		
+		if(hasInited)
+			game.addScreen(name,page);
 		
 		return page;
 	}
@@ -100,14 +111,21 @@ public class Menus implements Screen {
 		game.setScreen(currentPage);
 	}
 	
+	public void setMenuPageShown(MenuPage page) {
+		if(!menuPages.containsValue(page))
+			throw new IllegalArgumentException("MenuPage hasn't been added to this Menus.");
+		
+		currentPage = page;
+		
+		game.setScreen(currentPage);
+	}
+	
 	/**
 	 * Sets the Game's Screen to the current MenuPage.
 	 */
 	public void show() {
-		if(currentPage == null)
-			return;
-		
-		game.setScreen(currentPage);
+		if(currentPage != null)
+			game.setScreen(currentPage);
 	}
 	
 	public void hide() {}
