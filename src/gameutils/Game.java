@@ -171,12 +171,20 @@ public abstract class Game extends Applet {
 	private volatile boolean isActive;
 	private volatile boolean isPaused;
 	
+	public Game(int width, int height) {
+		this(width,height,60,1.0);
+	}
+	
+	public Game(int width, int height, int FPS) {
+		this(width,height,FPS,1.0);
+	}
+	
 	/**
 	 * Sets the width and height of the game.
 	 * @param width
 	 * @param height
 	 */
-	public Game(int width, int height) {
+	public Game(int width, int height, int FPS, double version) {
 		art = new Art();
 		sound = new Sound();
 		
@@ -204,8 +212,9 @@ public abstract class Game extends Applet {
 		
 		this.width = width;
 		this.height = height;
-		FPS = 60;
-		version = 1.0;
+		this.FPS = FPS;
+		this.version = version;
+		
 		showFPS = true;
 		
 		quality = RenderingHints.VALUE_ANTIALIAS_ON;
@@ -441,7 +450,8 @@ public abstract class Game extends Applet {
 			int updateCount = 0;
 			
 			while(diffTime > 0 && (maxUpdates <= 0 || updateCount < maxUpdates) && !isPaused()) {
-				long deltaTime = FPS > 0 ? deltaTime = Math.min(diffTime,ONE_SECOND/FPS) : diffTime;
+				int fps = FPS > 0 ? FPS : 60;
+				long deltaTime = Math.min(diffTime,ONE_SECOND/fps);
 				
 				try{
 					synchronized(Game.this) {
