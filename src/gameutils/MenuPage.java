@@ -28,8 +28,6 @@ public class MenuPage implements Screen {
 	public MenuPage(Menus menus) {
 		if(menus == null)
 			throw new IllegalArgumentException("Menus cannot be null.");
-		if(menus.getGame() == null)
-			throw new IllegalStateException("Menus has to be added to a Game.");
 		
 		this.menus = menus;
 		
