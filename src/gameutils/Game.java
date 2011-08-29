@@ -521,6 +521,8 @@ public abstract class Game extends Applet {
 							Thread.sleep(1);
 					}
 				}
+				else
+					Thread.yield();
 			}
 			catch(Exception exc) {
 				exc.printStackTrace();
