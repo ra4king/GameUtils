@@ -328,8 +328,10 @@ public abstract class Game extends Applet {
 			((JFrame)getRootParent()).setLocationRelativeTo(null);
 		}
 		
-		this.width = width;
-		this.height = height;
+		if(isActive) {
+			this.width = width;
+			this.height = height;
+		}
 		
 		invalidate();
 		validate();
@@ -404,7 +406,7 @@ public abstract class Game extends Applet {
 		Thread.currentThread().setName("Game Loop Thread");
 		
 		try {
-			resize(width,height);
+			setSize(width,height);
 			
 			synchronized(Game.this) {
 				initGame();
@@ -728,8 +730,10 @@ public abstract class Game extends Applet {
 					}
 				}
 				
-				width = canvas.getWidth();
-				height = canvas.getHeight();
+				if(isActive) {
+					width = canvas.getWidth();
+					height = canvas.getHeight();
+				}
 			}
 		});
 		
