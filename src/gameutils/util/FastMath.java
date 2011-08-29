@@ -4,7 +4,8 @@ public class FastMath {
 	public static final double PI = Math.PI;
 	public static final double E = Math.E;
 	
-	private static final double RAD,DEG;
+	private static final double RAD = PI/180.0;
+	private static final double DEG = 180.0/PI;
 	private static final double radToIndex, degToIndex;
 	private static final int SIN_MASK = ~(-1 << 12);
 	private static final double[] sin, cos;
@@ -14,9 +15,6 @@ public class FastMath {
 	private static final double[] atan2 = new double[ATAN2_COUNT];
 	
 	static {
-		RAD = (Math.PI/180.0);
-		DEG = (180.0/Math.PI);
-		
 		final int SIN_COUNT = SIN_MASK + 1;
 		
 		final double radFull    = PI * 2.0;
@@ -38,8 +36,8 @@ public class FastMath {
 		
 		for(int i = 0; i < ATAN2_DIM; i++) {
 			for (int j = 0; j < ATAN2_DIM; j++) {
-				double x0 = i/ATAN2_DIM;
-				double y0 = j/ATAN2_DIM;
+				double x0 = (double)i/ATAN2_DIM;
+				double y0 = (double)j/ATAN2_DIM;
 				
 				atan2[j * ATAN2_DIM + i] = Math.atan2(y0, x0);
 			}
