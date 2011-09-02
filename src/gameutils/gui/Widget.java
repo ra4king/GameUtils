@@ -74,7 +74,7 @@ public abstract class Widget extends Entity {
 			}
 			
 			public void mouseReleased(MouseEvent me, Screen screen) {
-				if(getBounds().contains(me.getPoint()))
+				if(hasFocus)
 					Widget.this.mouseReleased(me);
 			}
 			
