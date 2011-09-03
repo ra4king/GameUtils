@@ -279,7 +279,7 @@ public abstract class Game extends Applet {
 	 * Manually pauses the game loop. paused() will be called
 	 */
 	public void pause() {
-		if(isActive()) {
+		if(isActive() && !isPaused()) {
 			isPaused = true;
 			paused();
 		}
@@ -682,24 +682,22 @@ public abstract class Game extends Applet {
 						
 						break;
 					case 12:
-						if(isPaused() && isActive())
-							try {
-								resume();
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-							
+						try {
+							focusGained();
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+						
 						break;
 					case 13:
-						if(!isPaused() && isActive())
-							try {
-								pause();
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-							
+						try {
+							focusLost();
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+						
 						break;
 				}
 			}
@@ -768,7 +766,7 @@ public abstract class Game extends Applet {
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
 				public void run() {
-					Thread.currentThread().setPriority(7);
+					Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 				}
 			});
 		}
@@ -832,6 +830,16 @@ public abstract class Game extends Applet {
 	protected void resumed() {
 		getScreen().resumed();
 	}
+	
+	/**
+	 * Called when the focus is gained.
+	 */
+	protected void focusGained() {}
+	
+	/**
+	 * Called when the focus is lost.
+	 */
+	protected void focusLost() {}
 	
 	/**
 	 * called when the game is resized.
