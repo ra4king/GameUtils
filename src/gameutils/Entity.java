@@ -1,7 +1,6 @@
 package gameutils;
 
 import java.awt.Graphics2D;
-import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -11,8 +10,6 @@ import java.awt.geom.Rectangle2D;
 public abstract class Entity implements Element {
 	private Screen parent;
 	private Rectangle2D.Double bounds;
-	private Rectangle2D.Double areaBounds;
-	private Area area;
 	private double x, y, width, height;
 	
 	/**
@@ -191,38 +188,16 @@ public abstract class Entity implements Element {
 		setY(getY()+y);
 	}
 	
-	/**
-	 * Returns the Area of this Entity. If one is not set, this Entity's bounds enclosed in an Area is returned.
-	 * @return The Area of this Entity. If null, the bounds's Area is returned.
-	 */
-	public Area getArea() {
-		return area == null ? new Area(getBounds()) : area;
+	public boolean contains(double x, double y) {
+		return getBounds().contains(x,y);
 	}
 	
-	/**
-	 * Returns the bounds of the area. If one is not set, the normal bounds is returned.
-	 * @return The bounds of the area. If one is not set, the normal bounds is returned.
-	 */
-	public Rectangle2D.Double getAreaBounds() {
-		if(area == null)
-			return bounds;
-		
-		areaBounds.setFrame(area.getBounds2D());
-		return areaBounds;
+	public boolean intersects(Rectangle2D.Double r) {
+		return getBounds().intersects(r);
 	}
 	
-	/**
-	 * Sets the Shape of this Entity.
-	 * @param shape The new Shape of this Entity. The bounds of this Entity is updated with Rectangle2D returned from the Shape's getBounds2D() method.
-	 */
-	public void setArea(Area area) {
-		Rectangle2D r = area.getBounds2D();
-		bounds = new Rectangle2D.Double(r.getX(),r.getY(),r.getWidth(),r.getHeight());
-		
-		this.area = area;
-		
-		areaBounds = new Rectangle2D.Double();
-		areaBounds.setFrame(area.getBounds2D());
+	public boolean intersects(double x, double y, double width, double height) {
+		return getBounds().intersects(x, y, width, height);
 	}
 	
 	public void show() {}
