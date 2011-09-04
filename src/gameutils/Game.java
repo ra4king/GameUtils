@@ -424,7 +424,7 @@ public abstract class Game extends Applet {
 		canvas.addMouseMotionListener(listener);
 		canvas.addMouseWheelListener(listener);
 		
-		canvas.createBufferStrategy(2);
+		canvas.createBufferStrategy(3);
 		BufferStrategy strategy = canvas.getBufferStrategy();
 		
 		Font fpsFont = new Font(Font.SANS_SERIF,Font.TRUETYPE_FONT,10);
