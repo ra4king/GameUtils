@@ -766,7 +766,7 @@ public abstract class Game extends Applet {
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
 				public void run() {
-					Thread.currentThread().setPriority(7);
+					Thread.currentThread().setPriority(8);
 				}
 			});
 		}
