@@ -195,7 +195,7 @@ public class TextField extends Widget {
 		showCursor = true;
 		
 		if(key.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-			if(text.length() == 0)
+			if(cursor == 0)
 				return;
 			
 			text = text.substring(0,cursor-1) + text.substring(cursor);
@@ -219,7 +219,10 @@ public class TextField extends Widget {
 			if(cursor > text.length())
 				cursor = text.length();
 		}
-		else if(key.getKeyCode() != KeyEvent.VK_TAB && Character.isDefined(key.getKeyChar())) {
+		else if((key.getModifiersEx()&KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK) {
+			
+		}
+		else if(Character.isLetterOrDigit(key.getKeyCode()) || isSymbol(key.getKeyCode())) {
 			String old = text;
 			text = text.substring(0,cursor) + key.getKeyChar() + text.substring(cursor);
 			
@@ -234,5 +237,24 @@ public class TextField extends Widget {
 	
 	public void keyReleased(KeyEvent key) {
 		showCursor = false;
+	}
+	
+	private boolean isSymbol(int keyCode) {
+		switch(keyCode) {
+			case KeyEvent.VK_BACK_QUOTE:
+			case KeyEvent.VK_SLASH:
+			case KeyEvent.VK_PERIOD:
+			case KeyEvent.VK_COMMA:
+			case KeyEvent.VK_SEMICOLON:
+			case KeyEvent.VK_QUOTE:
+			case KeyEvent.VK_OPEN_BRACKET:
+			case KeyEvent.VK_CLOSE_BRACKET:
+			case KeyEvent.VK_BACK_SLASH:
+			case KeyEvent.VK_MINUS:
+			case KeyEvent.VK_EQUALS:
+				return true;
+			default:
+				return false;
+		}
 	}
 }
