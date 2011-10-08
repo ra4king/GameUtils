@@ -62,8 +62,6 @@ public class SocketPacketIO extends PacketIO {
 		
 		channel.configureBlocking(isBlocking);
 		
-		System.out.println("Blocking? " + isBlocking);
-		
 		try{
 			channel.socket().setTcpNoDelay(true);
 		}
