@@ -90,50 +90,54 @@ public class DatagramPacketIO extends PacketIO {
 		setBufferSize(bufferSize);
 	}
 	
-	public synchronized Packet read() throws IOException {
-		in.clear();
-		
-		SocketAddress address = channel.receive(in);
-		
-		if(address == null)
-			return null;
-		
-		in.flip();
-		
-		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
-			public int read() throws IOException {
-				if(!in.hasRemaining())
-					return -1;
-				
-				return in.get() & 0xff;
-			}
-		});
-		
-		Packet packet = read(oin);
-		packet.setAddress(address);
-		return packet;
+	public Packet read() throws IOException {
+		synchronized(in) {
+			in.clear();
+			
+			SocketAddress address = channel.receive(in);
+			
+			if(address == null)
+				return null;
+			
+			in.flip();
+			
+			ObjectInputStream oin = new ObjectInputStream(new InputStream() {
+				public int read() throws IOException {
+					if(!in.hasRemaining())
+						return -1;
+					
+					return in.get() & 0xff;
+				}
+			});
+			
+			Packet packet = read(oin);
+			packet.setAddress(address);
+			return packet;
+		}
 	}
 	
 	public synchronized boolean write(Packet packet) throws IOException {
-		out.clear();
-		
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		write(packet,new ObjectOutputStream(bout));
-		
-		out.put(adjustSize(bout.toByteArray()));
-		out.flip();
-		
-		SocketAddress sa = (packet.getAddress() == null ? address : packet.getAddress());
-		
-		if(sa == null)
-			throw new IOException("No address specified.");
-		
-		channel.send(out, sa);
-		
-		return out.remaining() == 0;
+		synchronized(out) {
+			out.clear();
+			
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			write(packet,new ObjectOutputStream(bout));
+			
+			out.put(adjustSize(bout.toByteArray()));
+			out.flip();
+			
+			SocketAddress sa = (packet.getAddress() == null ? address : packet.getAddress());
+			
+			if(sa == null)
+				throw new IOException("No address specified.");
+			
+			channel.send(out, sa);
+			
+			return out.remaining() == 0;
+		}
 	}
 	
-	public synchronized void write(Packet packet, SocketAddress address) throws IOException {
+	public void write(Packet packet, SocketAddress address) throws IOException {
 		write(packet.setAddress(address));
 	}
 	
@@ -141,12 +145,17 @@ public class DatagramPacketIO extends PacketIO {
 		return in.capacity();
 	}
 	
-	public synchronized void setBufferSize(int bufferSize) {
-		in = ByteBuffer.allocateDirect(bufferSize);
-		out = ByteBuffer.allocateDirect(bufferSize);
+	public void setBufferSize(int bufferSize) {
+		synchronized(in) {
+			in = ByteBuffer.allocateDirect(bufferSize);
+		}
+		
+		synchronized(out) {
+			out = ByteBuffer.allocateDirect(bufferSize);
+		}
 	}
 	
-	public synchronized void setAddress(InetSocketAddress address) {
+	public void setAddress(InetSocketAddress address) {
 		this.address = address;
 	}
 	
