@@ -73,58 +73,58 @@ public class SocketPacketIO extends PacketIO {
 	}
 	
 	public Packet read() throws IOException {
-		synchronized(in) {
-			channel.read(in);
-			
-			if(in.position() <= 2)
-				return null;
-			
-			if(in.remaining()+2 < in.getShort(0))
-				return read();
-			
-			in.flip();
-			
-			if(in.remaining()+2 < in.getShort())
-				throw new IOException("Internal Error!!");
-			
-			ObjectInputStream oin = new ObjectInputStream(new InputStream() {
-				public int read() throws IOException {
-					if(!in.hasRemaining())
-						return -1;
-					
-					return in.get() & 0xff;
-				}
-			});
-			
-			Packet packet = read(oin);
-			packet.setAddress(getSocketAddress());
-			
-			if(in.remaining() > 0)
-				in.compact();
-			else
-				in.clear();
-			
-			return packet;
-		}
+		final ByteBuffer in = this.in;
+		
+		channel.read(in);
+		
+		if(in.position() <= 2)
+			return null;
+		
+		if(in.remaining()+2 < in.getShort(0))
+			return read();
+		
+		in.flip();
+		
+		if(in.remaining()+2 < in.getShort())
+			throw new IOException("Internal Error!!");
+		
+		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
+			public int read() throws IOException {
+				if(!in.hasRemaining())
+					return -1;
+				
+				return in.get() & 0xff;
+			}
+		});
+		
+		Packet packet = read(oin);
+		packet.setAddress(getSocketAddress());
+		
+		if(in.remaining() > 0)
+			in.compact();
+		else
+			in.clear();
+		
+		return packet;
 	}
 	
 	public boolean write(Packet packet) throws IOException {
-		synchronized(out) {
-			out.clear();
-			
-			ByteArrayOutputStream bout = new ByteArrayOutputStream();
-			write(packet,new ObjectOutputStream(bout));
-			
-			byte[] array = adjustSize(bout.toByteArray());
-			
-			out.putShort((short)array.length);
-			out.put(array);
-			out.flip();
-			
-			channel.write(out);
-			
-			return out.remaining() == 0;
-		}
+		ByteBuffer out = this.out;
+		
+		out.clear();
+		
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		write(packet,new ObjectOutputStream(bout));
+		
+		byte[] array = adjustSize(bout.toByteArray());
+		
+		out.putShort((short)array.length);
+		out.put(array);
+		out.flip();
+		
+		channel.write(out);
+		
+		return out.remaining() == 0;
 	}
 	
 	public int getBufferSize() {
@@ -132,13 +132,8 @@ public class SocketPacketIO extends PacketIO {
 	}
 	
 	public void setBufferSize(int bufferSize) {
-		synchronized(in) {
-			in = ByteBuffer.allocateDirect(bufferSize);
-		}
-		
-		synchronized(out) {
-			out = ByteBuffer.allocateDirect(bufferSize);
-		}
+		in = ByteBuffer.allocateDirect(bufferSize);
+		out = ByteBuffer.allocateDirect(bufferSize);
 	}
 	
 	public boolean isBlocking() {
