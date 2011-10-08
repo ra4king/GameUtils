@@ -18,6 +18,10 @@ public class SocketPacketIO extends PacketIO {
 	private SocketChannel channel;
 	private ByteBuffer in, out;
 	
+	public SocketPacketIO(String address, int port) throws IOException {
+		this(address,port,true);
+	}
+	
 	public SocketPacketIO(String address, int port, boolean isBlocking) throws IOException {
 		this(new InetSocketAddress(address,port),isBlocking);
 	}
