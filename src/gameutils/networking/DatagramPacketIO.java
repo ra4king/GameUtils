@@ -1,100 +1,168 @@
 package gameutils.networking;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 
 /**
- * A blocking UDP wrapper.
+ * A blocking or non-blocking UDP wrapper that uses NIO.
  * @author Roi Atalla
  */
 public class DatagramPacketIO extends PacketIO {
-	private DatagramSocket socket;
-	private int bufferSize;
+	private DatagramChannel channel;
+	private InetSocketAddress address;
+	private ByteBuffer in, out;
 	
-	/**
-	 * Initializes this object. Default buffer size is 8192 bytes.
-	 * @param socket The connection.
-	 */
-	public DatagramPacketIO(DatagramSocket socket) {
-		this(socket,8192);
+	public DatagramPacketIO(String address, int port, boolean isBlocking) throws IOException {
+		this(new InetSocketAddress(address,port),isBlocking);
 	}
 	
-	/**
-	 * Initializes this object.
-	 * @param socket The connection.
-	 * @param bufferSize The buffer size.
-	 */
-	public DatagramPacketIO(DatagramSocket socket, int bufferSize) {
-		this.socket = socket;
-		this.bufferSize = bufferSize;
+	public DatagramPacketIO(String address, int port, int bufferSize) throws IOException {
+		this(new InetSocketAddress(address,port),true,bufferSize);
 	}
 	
-	/*private int toInt(byte data[]) {
-		if(data.length != 4)
-			throw new IllegalArgumentException("Size of data array is not 4");
-		
-		int value = 0;
-		for(int a = 0; a < 4; a++)
-			value = (value << 8) + (data[a] & 0xff);
-		
-		return value;
+	public DatagramPacketIO(String address, int port, boolean isBlocking, int bufferSize) throws IOException {
+		this(new InetSocketAddress(address,port),isBlocking,bufferSize);
 	}
 	
-	private byte[] toByteArray(int data) {
-		return new byte[] {
-				(byte)(data >>> 24),
-				(byte)(data >>> 16),
-				(byte)(data >>> 8),
-				(byte) data };
-	}*/
+	public DatagramPacketIO(InetSocketAddress address) throws IOException {
+		this(address,true);
+	}
 	
-	public Packet read() throws IOException {
-		DatagramPacket datagram = new DatagramPacket(new byte[bufferSize],bufferSize);
-		socket.receive(datagram);
+	public DatagramPacketIO(InetSocketAddress address, boolean isBlocking) throws IOException {
+		this(address,isBlocking,1024);
+	}
+	
+	public DatagramPacketIO(InetSocketAddress address, int bufferSize) throws IOException {
+		this(address,true,bufferSize);
+	}
+	
+	public DatagramPacketIO(InetSocketAddress address, boolean isBlocking, int bufferSize) throws IOException {
+		this(DatagramChannel.open(),address,bufferSize);
+	}
+	
+	public DatagramPacketIO(DatagramChannel channel) throws IOException {
+		this(channel,null);
+	}
+	
+	public DatagramPacketIO(DatagramChannel channel, boolean isBlocking) throws IOException {
+		this(channel,null,isBlocking);
+	}
+	
+	public DatagramPacketIO(DatagramChannel channel, int bufferSize) throws IOException {
+		this(channel,true,bufferSize);
+	}
+	
+	public DatagramPacketIO(DatagramChannel channel, boolean isBlocking, int bufferSize) throws IOException {
+		this(channel,null,isBlocking,bufferSize);
+	}
+	
+	public DatagramPacketIO(DatagramChannel channel, InetSocketAddress address) throws IOException {
+		this(channel,address,true);
+	}
+	
+	public DatagramPacketIO(DatagramChannel channel, InetSocketAddress address, boolean isBlocking) throws IOException {
+		this(channel,address,isBlocking,1024);
+	}
+	
+	public DatagramPacketIO(DatagramChannel channel, InetSocketAddress address, int bufferSize) throws IOException {
+		this(channel,address,true,bufferSize);
+	}
+	
+	public DatagramPacketIO(DatagramChannel channel, InetSocketAddress address, boolean isBlocking, int bufferSize) throws IOException {
+		if(!channel.isOpen())
+			throw new IllegalStateException("channel is not open.");
 		
-		ByteArrayInputStream bin = new ByteArrayInputStream(datagram.getData());
-		ObjectInputStream in = new ObjectInputStream(bin);
+		this.channel = channel;
+		this.address = address;
 		
-		Packet packet = read(in);
-		packet.setAddress(datagram.getSocketAddress());
+		channel.configureBlocking(isBlocking);
+		
+		if(address != null)
+			channel.connect(address);
+		
+		setBufferSize(bufferSize);
+	}
+	
+	public synchronized Packet read() throws IOException {
+		in.clear();
+		
+		SocketAddress address = channel.receive(in);
+		
+		if(address == null)
+			return null;
+		
+		in.flip();
+		
+		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
+			public int read() throws IOException {
+				if(!in.hasRemaining())
+					return -1;
+				
+				return in.get() & 0xff;
+			}
+		});
+		
+		Packet packet = read(oin);
+		packet.setAddress(address);
 		return packet;
 	}
 	
-	public boolean write(Packet packet) throws IOException {
-		if(packet.getAddress() == null)
-			throw new IllegalArgumentException("no address specified!");
+	public synchronized boolean write(Packet packet) throws IOException {
+		out.clear();
 		
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		ObjectOutputStream out = new ObjectOutputStream(bout);
+		write(packet,new ObjectOutputStream(bout));
 		
-		write(packet,out);
+		out.put(adjustSize(bout.toByteArray()));
+		out.flip();
 		
-		byte data[] = bout.toByteArray();
+		SocketAddress sa = (packet.getAddress() == null ? address : packet.getAddress());
 		
-		socket.send(new DatagramPacket(data,bufferSize,packet.getAddress()));
+		if(sa == null)
+			throw new IOException("No address specified.");
 		
-		return true;
+		channel.send(out, sa);
+		
+		return out.remaining() == 0;
+	}
+	
+	public synchronized void write(Packet packet, SocketAddress address) throws IOException {
+		write(packet.setAddress(address));
 	}
 	
 	public int getBufferSize() {
-		return bufferSize;
+		return in.capacity();
 	}
 	
-	public void setBufferSize(int bufferSize) {
-		this.bufferSize = bufferSize;
+	public synchronized void setBufferSize(int bufferSize) {
+		in = ByteBuffer.allocateDirect(bufferSize);
+		out = ByteBuffer.allocateDirect(bufferSize);
+	}
+	
+	public synchronized void setAddress(InetSocketAddress address) {
+		this.address = address;
 	}
 	
 	public InetSocketAddress getSocketAddress() {
-		return (InetSocketAddress)socket.getRemoteSocketAddress();
+		return address;
+	}
+	
+	private byte[] adjustSize(byte array[]) {
+		if(array.length < out.capacity())
+			return array;
+		byte adjust[] = new byte[out.capacity()];
+		System.arraycopy(array, 0, adjust, 0, adjust.length);
+		return adjust;
 	}
 	
 	public void close() throws IOException {
-		socket.close();
+		channel.close();
 	}
 }

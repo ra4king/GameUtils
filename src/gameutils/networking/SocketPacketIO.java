@@ -1,89 +1,165 @@
 package gameutils.networking;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 /**
- * A blocking TCP wrapper.
+ * A Non-Blocking TCP wrapper.
  * @author Roi Atalla
  */
 public class SocketPacketIO extends PacketIO {
-	private ObjectInputStream in;
-	private ObjectOutputStream out;
-	private Socket socket;
+	private SocketChannel channel;
+	private ByteBuffer in, out;
 	
-	public SocketPacketIO(String address, int port) throws IOException {
-		this(new Socket(address,port));
+	public SocketPacketIO(String address, int port, boolean isBlocking) throws IOException {
+		this(new InetSocketAddress(address,port),isBlocking);
 	}
 	
-	/**
-	 * Initializes this object.
-	 * @param socket The connection.
-	 * @throws IOException
-	 */
-	public SocketPacketIO(Socket socket) throws IOException {
-		out = new ObjectOutputStream(socket.getOutputStream());
-		in = new ObjectInputStream(socket.getInputStream());
+	public SocketPacketIO(String address, int port, boolean isBlocking, int bufferSize) throws IOException {
+		this(new InetSocketAddress(address,port),isBlocking,bufferSize);
+	}
+	
+	public SocketPacketIO(String address, int port, int bufferSize) throws IOException {
+		this(address,port,false,bufferSize);
+	}
+	
+	public SocketPacketIO(SocketAddress address, boolean isBlocking) throws IOException {
+		this(SocketChannel.open(address),isBlocking);
+	}
+	
+	public SocketPacketIO(SocketAddress address, boolean isBlocking, int bufferSize) throws IOException {
+		this(SocketChannel.open(address),isBlocking,bufferSize);
+	}
+	
+	public SocketPacketIO(SocketChannel channel) throws IOException {
+		this(channel,true);
+	}
+	
+	public SocketPacketIO(SocketChannel channel, boolean isBlocking) throws IOException {
+		this(channel,isBlocking,8192);
+	}
+	
+	public SocketPacketIO(SocketChannel channel, int bufferSize) throws IOException {
+		this(channel,false,bufferSize);
+	}
+	
+	public SocketPacketIO(SocketChannel channel, boolean isBlocking, int bufferSize) throws IOException {
+		if(!channel.isOpen())
+			throw new IllegalStateException("channel is not open.");
 		
-		this.socket = socket;
+		this.channel = channel;
+		
+		channel.configureBlocking(isBlocking);
+		
+		System.out.println("Blocking? " + isBlocking);
+		
+		try{
+			channel.socket().setTcpNoDelay(true);
+		}
+		catch(Exception exc) {
+			throw new IOException(exc);
+		}
+		
+		setBufferSize(bufferSize);
 	}
 	
-	/**
-	 * Reads a Packet from the underlying connection. The remote SocketAddress is added to the Packet.
-	 */
-	public Packet read() throws IOException {
-		Packet packet = read(in);
-		packet.setAddress(socket.getRemoteSocketAddress());
+	public synchronized Packet read() throws IOException {
+		channel.read(in);
+		
+		if(in.position() <= 2)
+			return null;
+		
+		if(in.remaining()+2 < in.getShort(0))
+			return read();
+		
+		in.flip();
+		
+		if(in.remaining()+2 < in.getShort())
+			throw new IOException("Internal Error!!");
+		
+		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
+			public int read() throws IOException {
+				if(!in.hasRemaining())
+					return -1;
+				
+				return in.get() & 0xff;
+			}
+		});
+		
+		Packet packet = read(oin);
+		packet.setAddress(getSocketAddress());
+		
+		if(in.remaining() > 0)
+			in.compact();
+		else
+			in.clear();
+		
 		return packet;
 	}
 	
-	/**
-	 * Writes a packet to the underlying connection. If an address is specified, it is ignored.
-	 */
-	public boolean write(Packet packet) throws IOException {
-		write(packet,out);
-		return true;
+	public synchronized boolean write(Packet packet) throws IOException {
+		out.clear();
+		
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		write(packet,new ObjectOutputStream(bout));
+		
+		byte[] array = adjustSize(bout.toByteArray());
+		
+		out.putShort((short)array.length);
+		out.put(array);
+		out.flip();
+		
+		channel.write(out);
+		
+		return out.remaining() == 0;
 	}
 	
-	/**
-	 * Returns the Socket used in this connection.
-	 * @return The Socket used in this connection.
-	 */
-	public Socket getSocket() {
-		return socket;
+	public int getBufferSize() {
+		return in.capacity();
 	}
 	
-	/**
-	 * Returns the InputStream used in this connection. In this case it is an ObjectInputStream
-	 * @return The InputStream used in this connection.
-	 * @throws IOException
-	 */
-	public InputStream getInputStream() {
-		return in;
+	public synchronized void setBufferSize(int bufferSize) {
+		in = ByteBuffer.allocateDirect(bufferSize);
+		out = ByteBuffer.allocateDirect(bufferSize);
 	}
 	
-	/**
-	 * Returns the OutputStream used in this connection. In this case it is an ObjectOutputStream.
-	 * @return The OutputStream used in this connection.
-	 */
-	public OutputStream getOutputStream() {
-		return out;
+	public boolean isBlocking() {
+		return channel.isBlocking();
+	}
+	
+	public synchronized void setBlocking(boolean isBlocking) throws IOException {
+		channel.configureBlocking(isBlocking);
+	}
+	
+	public synchronized void setSocketAddress(SocketAddress address) {
+		try {
+			channel.connect(address);
+		} catch (Exception exc) {
+			exc.printStackTrace();
+		}
 	}
 	
 	public InetSocketAddress getSocketAddress() {
-		return (InetSocketAddress)socket.getRemoteSocketAddress();
+		return (InetSocketAddress)channel.socket().getRemoteSocketAddress();
 	}
 	
-	public String getHostAddress() {
-		return socket.getInetAddress().getHostAddress();
+	private byte[] adjustSize(byte array[]) {
+		if(array.length <= out.capacity())
+			return array;
+		
+		byte adjust[] = new byte[out.capacity()];
+		System.arraycopy(array, 0, adjust, 0, adjust.length);
+		return adjust;
 	}
 	
 	public void close() throws IOException {
-		socket.close();
+		channel.close();
 	}
 }
