@@ -74,7 +74,7 @@ public abstract class PacketIO {
 		out.writeInt(packet.size());
 		out.flush();
 		
-		for(int a = 0; a < packet.size(); a++) {
+		while(packet.hasMore()) {
 			Object o = packet.readObject();
 			if(o instanceof Byte) {
 				out.writeByte(0);
