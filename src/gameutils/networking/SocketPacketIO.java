@@ -75,10 +75,10 @@ public class SocketPacketIO extends PacketIO {
 	public Packet read() throws IOException {
 		final ByteBuffer in = this.in;
 		
-		//SORT THIS OUT LATER
 		if(isBlocking()) {
 			do {
-				channel.read(in);
+				if(channel.read(in) <= 0)
+					throw new IOException("Connection is closed.");
 				
 				if(in.position() <= 2)
 					return read();
@@ -91,15 +91,16 @@ public class SocketPacketIO extends PacketIO {
 		
 		in.flip();
 		
-		if(in.remaining()+2 < in.getShort())
+		short length = in.getShort();
+		if(in.remaining() < length)
 			throw new IOException("Internal Error!!");
 		
 		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
-			public int read() throws IOException {
+			public int read() {
 				if(!in.hasRemaining())
 					return -1;
 				
-				return in.get() & 0xff;
+				return (int)in.get() & 0xff;
 			}
 		});
 		
@@ -170,10 +171,12 @@ public class SocketPacketIO extends PacketIO {
 	}
 	
 	public boolean isConnected() {
-		return channel.isConnected();
+		return !channel.socket().isClosed();
 	}
 	
 	public void close() throws IOException {
+		channel.socket().shutdownInput();
+		channel.socket().shutdownOutput();
 		channel.close();
 	}
 }

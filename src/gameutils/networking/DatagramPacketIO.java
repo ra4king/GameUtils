@@ -103,7 +103,7 @@ public class DatagramPacketIO extends PacketIO {
 		in.flip();
 		
 		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
-			public int read() throws IOException {
+			public int read() {
 				if(!in.hasRemaining())
 					return -1;
 				
@@ -165,7 +165,7 @@ public class DatagramPacketIO extends PacketIO {
 	}
 	
 	public boolean isConnected() {
-		return channel.isConnected();
+		return channel.socket().isClosed();
 	}
 	
 	public void close() throws IOException {

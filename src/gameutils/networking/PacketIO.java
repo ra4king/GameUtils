@@ -72,7 +72,6 @@ public abstract class PacketIO {
 	 */
 	protected void write(Packet packet, ObjectOutputStream out) throws IOException {
 		out.writeInt(packet.size());
-		out.flush();
 		
 		while(packet.hasMore()) {
 			Object o = packet.readObject();
@@ -116,9 +115,9 @@ public abstract class PacketIO {
 				out.writeByte(9);
 				out.writeUnshared(o);
 			}
-			
-			out.flush();
 		}
+		
+		out.flush();
 	}
 	
 	/**
