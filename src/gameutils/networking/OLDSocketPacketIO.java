@@ -83,6 +83,10 @@ public class OLDSocketPacketIO extends PacketIO {
 		return socket.getInetAddress().getHostAddress();
 	}
 	
+	public boolean isConnected() {
+		return socket.isConnected();
+	}
+	
 	public void close() throws IOException {
 		socket.close();
 	}

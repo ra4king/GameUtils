@@ -75,6 +75,10 @@ public class OLDDatagramPacketIO extends PacketIO {
 		return (InetSocketAddress)socket.getRemoteSocketAddress();
 	}
 	
+	public boolean isConnected() {
+		return socket.isConnected();
+	}
+	
 	public void close() throws IOException {
 		socket.close();
 	}

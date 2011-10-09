@@ -132,4 +132,10 @@ public abstract class PacketIO {
 	 * @throws IOException
 	 */
 	public abstract void close() throws IOException;
+	
+	/**
+	 * Returns true if there is a connection still available.
+	 * @return true if there is a connection.
+	 */
+	public abstract boolean isConnected();
 }

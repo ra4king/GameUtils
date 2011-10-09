@@ -132,9 +132,7 @@ public class DatagramPacketIO extends PacketIO {
 		if(sa == null)
 			throw new IOException("No address specified.");
 		
-		channel.send(out, sa);
-		
-		return out.remaining() == 0;
+		return channel.send(out, sa) > 0;
 	}
 	
 	public void write(Packet packet, SocketAddress address) throws IOException {
@@ -164,6 +162,10 @@ public class DatagramPacketIO extends PacketIO {
 		byte adjust[] = new byte[out.capacity()];
 		System.arraycopy(array, 0, adjust, 0, adjust.length);
 		return adjust;
+	}
+	
+	public boolean isConnected() {
+		return channel.isConnected();
 	}
 	
 	public void close() throws IOException {

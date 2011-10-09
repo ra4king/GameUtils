@@ -75,13 +75,19 @@ public class SocketPacketIO extends PacketIO {
 	public Packet read() throws IOException {
 		final ByteBuffer in = this.in;
 		
-		channel.read(in);
-		
-		if(in.position() <= 2)
-			return null;
-		
-		if(in.remaining()+2 < in.getShort(0))
-			return read();
+		//SORT THIS OUT LATER
+		if(isBlocking()) {
+			do {
+				channel.read(in);
+				
+				if(in.position() <= 2)
+					return read();
+			}while(in.position()+2 < in.getShort(0));
+		}
+		else {
+			if(channel.read(in) <= 0 || (in.position() >= 2 && in.position()+2 < in.getShort(0)))
+				return null;
+		}
 		
 		in.flip();
 		
@@ -122,9 +128,7 @@ public class SocketPacketIO extends PacketIO {
 		out.put(array);
 		out.flip();
 		
-		channel.write(out);
-		
-		return out.remaining() == 0;
+		return channel.write(out) > 0;
 	}
 	
 	public int getBufferSize() {
@@ -163,6 +167,10 @@ public class SocketPacketIO extends PacketIO {
 		byte adjust[] = new byte[out.capacity()];
 		System.arraycopy(array, 0, adjust, 0, adjust.length);
 		return adjust;
+	}
+	
+	public boolean isConnected() {
+		return channel.isConnected();
 	}
 	
 	public void close() throws IOException {
