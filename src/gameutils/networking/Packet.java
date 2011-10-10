@@ -4,7 +4,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 
 /**
- * A Packet holds is a container of any type of data.
+ * A Packet is a container of any type of data.
  * @author Roi Atalla
  */
 public class Packet {
