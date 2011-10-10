@@ -220,6 +220,24 @@ public abstract class Game extends Applet {
 		quality = RenderingHints.VALUE_ANTIALIAS_ON;
 		
 		maxUpdates = MAX_UPDATES;
+		
+		if(System.getProperty("os.name").startsWith("Win")) {
+			new Thread() {
+				{
+					setDaemon(true);
+					start();
+				}
+				
+				public void run() {
+					while(true) {
+						try {
+							Thread.sleep(Long.MAX_VALUE);
+						}
+						catch(Exception exc) {}
+					}
+				}
+			};
+		}
 	}
 	
 	/**
@@ -771,17 +789,6 @@ public abstract class Game extends Applet {
 			});
 		}
 		catch(Exception exc) {}
-		
-		new Thread() {
-			public void run() {
-				while(true) {
-					try {
-						Thread.sleep(Long.MAX_VALUE);
-					}
-					catch(Exception exc) {}
-				}
-			}
-		}.start();
 	}
 	
 	/**

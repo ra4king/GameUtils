@@ -91,9 +91,10 @@ public class SocketPacketIO extends PacketIO {
 		
 		in.flip();
 		
-		short length = in.getShort();
-		if(in.remaining() < length)
+		if(in.remaining() < in.getShort()) {
+			in.clear();
 			throw new IOException("Internal Error!!");
+		}
 		
 		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
 			public int read() {
