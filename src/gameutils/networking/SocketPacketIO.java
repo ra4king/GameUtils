@@ -17,6 +17,10 @@ import java.nio.channels.SocketChannel;
 public class SocketPacketIO extends PacketIO {
 	private SocketChannel channel;
 	private ByteBuffer in, out;
+	private ByteArrayOutputStream bout;
+	private ObjectOutputStream oout;
+	private ObjectInputStream oin;
+	private boolean isClosed;
 	
 	public SocketPacketIO(String address, int port) throws IOException {
 		this(address,port,true);
@@ -60,6 +64,31 @@ public class SocketPacketIO extends PacketIO {
 		
 		this.channel = channel;
 		
+		setBufferSize(bufferSize);
+		
+		bout = new ByteArrayOutputStream();
+		oout = new ObjectOutputStream(bout);
+		
+		out.put(bout.toByteArray());
+		bout.reset();
+		out.flip();
+		while(channel.write(out) == 0);
+		out.clear();
+		
+		if(channel.read(in) < 0)
+			throw new IOException("Connection is closed.");
+		
+		in.flip();
+		oin = new ObjectInputStream(new InputStream() {
+			public int read() {
+				if(!in.hasRemaining())
+					return -1;
+				
+				return (int)in.get() & 0xff;
+			}
+		});
+		in.clear();
+		
 		channel.configureBlocking(isBlocking);
 		
 		try{
@@ -68,69 +97,68 @@ public class SocketPacketIO extends PacketIO {
 		catch(Exception exc) {
 			throw new IOException(exc);
 		}
-		
-		setBufferSize(bufferSize);
 	}
 	
 	public Packet read() throws IOException {
-		final ByteBuffer in = this.in;
+		if(!isConnected())
+			throw new IOException("Connection is closed.");
 		
-		if(isBlocking()) {
-			do {
-				if(channel.read(in) <= 0)
-					throw new IOException("Connection is closed.");
-				
-				if(in.position() <= 2)
-					return read();
-			}while(in.position()+2 < in.getShort(0));
-		}
-		else {
-			if(channel.read(in) <= 0 || (in.position() >= 2 && in.position()+2 < in.getShort(0)))
-				return null;
-		}
-		
-		in.flip();
-		
-		if(in.remaining() < in.getShort()) {
-			in.clear();
-			throw new IOException("Internal Error!!");
-		}
-		
-		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
-			public int read() {
-				if(!in.hasRemaining())
-					return -1;
-				
-				return (int)in.get() & 0xff;
+		synchronized(in) {
+			if(isBlocking()) {
+				do {
+					if(channel.read(in) <= 0) {
+						isClosed = true;
+						throw new IOException("Connection is closed.");
+					}
+				}while(in.position() < 2 || in.position()+2 < in.getShort(0));
 			}
-		});
-		
-		Packet packet = read(oin);
-		packet.setAddress(getSocketAddress());
-		
-		if(in.remaining() > 0)
-			in.compact();
-		else
-			in.clear();
-		
-		return packet;
+			else {
+				int read = channel.read(in);
+				
+				if(read == -1) {
+					isClosed = true;
+					throw new IOException("Connection is closed.");
+				}
+				
+				if(read == 0 || (in.position() >= 2 && in.position()+2 < in.getShort(0)))
+					return null;
+			}
+			
+			in.flip();
+			
+			if(in.remaining() < in.getShort()) {
+				in.clear();
+				throw new IOException("Internal Error!!");
+			}
+			
+			Packet packet = read(oin);
+			packet.setAddress(getSocketAddress());
+			
+			if(in.remaining() > 0)
+				in.compact();
+			else
+				in.clear();
+			
+			return packet;
+		}
 	}
 	
 	public boolean write(Packet packet) throws IOException {
-		ByteBuffer out = this.out;
-		
-		out.clear();
-		
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		write(packet,new ObjectOutputStream(bout));
-		
-		byte[] array = adjustSize(bout.toByteArray());
-		
-		out.putShort((short)array.length);
-		out.put(array);
-		out.flip();
-		
-		return channel.write(out) > 0;
+		synchronized(out) {
+			out.clear();
+			
+			write(packet,oout);
+			
+			byte[] array = adjustSize(bout.toByteArray());
+			
+			bout.reset();
+			
+			out.putShort((short)array.length);
+			out.put(array);
+			out.flip();
+			
+			return channel.write(out) > 0;
+		}
 	}
 	
 	public int getBufferSize() {
@@ -172,7 +200,7 @@ public class SocketPacketIO extends PacketIO {
 	}
 	
 	public boolean isConnected() {
-		return !channel.socket().isClosed();
+		return !channel.socket().isClosed() && !isClosed;
 	}
 	
 	public void close() throws IOException {
