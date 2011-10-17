@@ -164,6 +164,7 @@ public abstract class Game extends Applet {
 	private Object quality;
 	private int maxUpdates;
 	private int FPS;
+	private int oldFPS;
 	private double version;
 	private boolean showFPS;
 	private boolean useYield;
@@ -212,8 +213,8 @@ public abstract class Game extends Applet {
 		
 		this.width = width;
 		this.height = height;
-		this.FPS = FPS;
-		this.version = version;
+		setFPS(FPS);
+		setVersion(version);
 		
 		showFPS = true;
 		
@@ -1092,6 +1093,7 @@ public abstract class Game extends Applet {
 	 */
 	public void setFPS(int FPS) {
 		this.FPS = FPS;
+		this.oldFPS = FPS;
 	}
 	
 	/**
@@ -1126,10 +1128,15 @@ public abstract class Game extends Applet {
 	 * @param highQuality If true, the graphics are of high quality, else the graphics are of low quality.
 	 */
 	public void setHighQuality(boolean highQuality) {
-		if(highQuality)
+		if(highQuality) {
 			quality = RenderingHints.VALUE_ANTIALIAS_ON;
-		else
+			FPS = oldFPS;
+		}
+		else {
+			oldFPS = FPS;
+			FPS = 60;
 			quality = RenderingHints.VALUE_ANTIALIAS_OFF;
+		}
 	}
 	
 	/**
