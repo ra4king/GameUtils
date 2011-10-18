@@ -35,7 +35,7 @@ public class SocketPacketIO extends PacketIO {
 	}
 	
 	public SocketPacketIO(String address, int port, int bufferSize) throws IOException {
-		this(address,port,false,bufferSize);
+		this(address,port,true,bufferSize);
 	}
 	
 	public SocketPacketIO(SocketAddress address, boolean isBlocking) throws IOException {
@@ -55,7 +55,7 @@ public class SocketPacketIO extends PacketIO {
 	}
 	
 	public SocketPacketIO(SocketChannel channel, int bufferSize) throws IOException {
-		this(channel,false,bufferSize);
+		this(channel,true,bufferSize);
 	}
 	
 	public SocketPacketIO(SocketChannel channel, boolean isBlocking, int bufferSize) throws IOException {
