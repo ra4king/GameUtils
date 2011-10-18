@@ -542,7 +542,7 @@ public abstract class Game extends Applet {
 						}
 					}
 					else
-						Thread.sleep((long)(sleepTime/1e6));
+						Thread.sleep(Math.round(sleepTime/1e6));
 				}
 				else
 					Thread.yield();
