@@ -75,8 +75,11 @@ public class SocketPacketIO extends PacketIO {
 		while(channel.write(out) == 0);
 		out.clear();
 		
-		if(channel.read(in) < 0)
-			throw new IOException("Connection is closed.");
+		int read;
+		while((read = channel.read(in)) <= 0 || in.position() < 4) {
+			if(read < 0)
+				throw new IOException("Connection is closed.");
+		}
 		
 		in.flip();
 		oin = new ObjectInputStream(new InputStream() {
@@ -87,7 +90,7 @@ public class SocketPacketIO extends PacketIO {
 				return (int)in.get() & 0xff;
 			}
 		});
-		in.clear();
+		in.compact();
 		
 		channel.configureBlocking(isBlocking);
 		
