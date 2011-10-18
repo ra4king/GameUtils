@@ -105,12 +105,12 @@ public class SocketPacketIO extends PacketIO {
 		
 		synchronized(in) {
 			if(isBlocking()) {
-				do {
+				while(in.position() < 2 || in.position()-2 < in.getInt(0)) {
 					if(channel.read(in) <= 0) {
 						isClosed = true;
 						throw new IOException("Connection is closed.");
 					}
-				}while(in.position() < 2 || in.position()+2 < in.getShort(0));
+				}
 			}
 			else {
 				int read = channel.read(in);
@@ -120,13 +120,13 @@ public class SocketPacketIO extends PacketIO {
 					throw new IOException("Connection is closed.");
 				}
 				
-				if(read == 0 || (in.position() >= 2 && in.position()+2 < in.getShort(0)))
+				if(read == 0 || (in.position() >= 2 && in.position()-2 < in.getInt(0)))
 					return null;
 			}
 			
 			in.flip();
 			
-			if(in.remaining() < in.getShort()) {
+			if(in.remaining()-2 < in.getInt()) {
 				in.clear();
 				throw new IOException("Internal Error!!");
 			}
@@ -153,7 +153,7 @@ public class SocketPacketIO extends PacketIO {
 			
 			bout.reset();
 			
-			out.putShort((short)array.length);
+			out.putInt(array.length);
 			out.put(array);
 			out.flip();
 			
