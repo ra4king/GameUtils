@@ -160,7 +160,11 @@ public class SocketPacketIO extends PacketIO {
 			out.put(array);
 			out.flip();
 			
-			return channel.write(out) > 0;
+			do {
+				channel.write(out);
+			}while(out.remaining() > 0);
+			
+			return true;
 		}
 	}
 	
