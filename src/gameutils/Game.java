@@ -521,7 +521,7 @@ public abstract class Game extends Applet {
 			frames++;
 			
 			if(System.nanoTime()-time >= ONE_SECOND) {
-				time = System.nanoTime();
+				time += ONE_SECOND;
 				currentFPS = frames;
 				frames = 0;
 			}
