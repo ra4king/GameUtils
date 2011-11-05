@@ -15,6 +15,8 @@ import javax.imageio.ImageIO;
  * @author Roi Atalla
  */
 public class Art extends Assets<Image> {
+	Art() {}
+	
 	public Image add(Image i, String name) {
 		return super.add(createCompatibleImage(i),name);
 	}
@@ -22,8 +24,6 @@ public class Art extends Assets<Image> {
 	public Image extract(URL url) throws IOException {
 		return ImageIO.read(url);
 	}
-	
-	Art() {}
 	
 	/**
 	 * Splits the image with the specified width and height of each quadrant and adds the pieces to the map.
