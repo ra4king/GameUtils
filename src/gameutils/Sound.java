@@ -14,6 +14,8 @@ import javax.sound.sampled.FloatControl;
 public class Sound extends Assets<Clip> {
 	private volatile boolean on = true;
 	
+	Sound() {}
+	
 	public Clip extract(URL url) throws IOException {
 		try{
 			Clip clip = AudioSystem.getClip();
