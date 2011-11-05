@@ -22,7 +22,7 @@ public abstract class Assets<T> {
 	}
 	
 	public T add(String file, String name) throws IOException {
-		return add(getClass().getResource("/"+file),name);
+		return add(getClass().getResource("/res/"+file),name);
 	}
 	
 	public T add(URL url, String name) throws IOException {
