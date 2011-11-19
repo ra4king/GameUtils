@@ -193,7 +193,7 @@ public abstract class Game extends Applet {
 		
 		currentScreen = new ScreenInfo(new Screen() {
 			public void init(Game game) {}
-			public Game getGame() { return null; }
+			public Game getGame() { return Game.this; }
 			public void show() {}
 			public void hide() {}
 			public void paused() {}
