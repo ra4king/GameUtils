@@ -96,6 +96,11 @@ public class Sound extends Assets<Clip> {
 		get(name).setMicrosecondPosition(0);
 	}
 	
+	public void stopAll() {
+		for(String s : assets.keySet())
+			stop(s);
+	}
+	
 	/**
 	 * Sets the sound on/off.
 	 * @param isOn If true, all currently playing Clips are set to the minimum volume, else they are set to default volume.
