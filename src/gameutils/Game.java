@@ -456,7 +456,6 @@ public abstract class Game extends Applet {
 		canvas.addMouseWheelListener(listener);
 		
 		if(strategy == null) {
-			System.out.println("strategy is null!");
 			canvas.createBufferStrategy(3);
 			strategy = canvas.getBufferStrategy();
 		}
