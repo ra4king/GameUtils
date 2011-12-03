@@ -384,7 +384,9 @@ public abstract class Game extends Applet {
 			
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent we) {
-					setFullScreen(false);
+					synchronized(Game.this) {
+						setFullScreen(false);
+					}
 				}
 			});
 			
