@@ -153,6 +153,7 @@ public abstract class Game extends Applet {
 	private ScreenInfo currentScreen;
 	
 	private final Canvas canvas;
+	private BufferStrategy strategy;
 	
 	private final Input input;
 	private ArrayList<Event> events;
@@ -381,6 +382,9 @@ public abstract class Game extends Applet {
 			
 			frame.add(canvas);
 			
+			canvas.createBufferStrategy(3);
+			strategy = canvas.getBufferStrategy();
+			
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent we) {
 					setFullScreen(false);
@@ -401,6 +405,9 @@ public abstract class Game extends Applet {
 			add(canvas);
 			invalidate();
 			validate();
+			
+			canvas.createBufferStrategy(3);
+			strategy = canvas.getBufferStrategy();
 			
 			if(!isApplet())
 				getRootParent().setVisible(true);
@@ -445,8 +452,8 @@ public abstract class Game extends Applet {
 		canvas.addMouseMotionListener(listener);
 		canvas.addMouseWheelListener(listener);
 		
-		canvas.createBufferStrategy(2);
-		BufferStrategy strategy = canvas.getBufferStrategy();
+		canvas.createBufferStrategy(3);
+		strategy = canvas.getBufferStrategy();
 		
 		Font fpsFont = new Font(Font.SANS_SERIF,Font.TRUETYPE_FONT,10);
 		
