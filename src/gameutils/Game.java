@@ -186,6 +186,8 @@ public abstract class Game extends Applet {
 	 * @param height
 	 */
 	public Game(int width, int height, int FPS, double version) {
+		setIgnoreRepaint(true);
+		
 		art = new Art();
 		sound = new Sound();
 		
@@ -734,7 +736,6 @@ public abstract class Game extends Applet {
 	}
 	
 	public final void init() {
-		setIgnoreRepaint(true);
 		setLayout(new BorderLayout());
 		
 		add(canvas);
