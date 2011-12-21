@@ -1,7 +1,6 @@
 package com.ra4king.gameutils.tiledgame;
 
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
@@ -46,13 +45,23 @@ public class TiledMap extends BasicScreen {
 		if(hasShown)
 			e.show();
 		
-		e.setBounds(x*CELL_WIDTH, y*CELL_HEIGHT,CELL_WIDTH,CELL_HEIGHT);
+		e.setLocation(x, y);
 		
 		return e;
 	}
 	
 	public CellEntity get(int x, int y) {
 		return map[x][y];
+	}
+	
+	public void move(int x, int y, int newX, int newY) {
+		set(newX,newY,remove(x,y));
+	}
+	
+	public CellEntity remove(int x, int y) {
+		CellEntity e = map[x][y];
+		map[x][y] = null;
+		return e;
 	}
 	
 	public int getWidth() {
@@ -74,6 +83,11 @@ public class TiledMap extends BasicScreen {
 		catch(ArrayIndexOutOfBoundsException exc) {
 			return 0;
 		}
+	}
+	
+	public void centerCamera(CellEntity ce) {
+		camera.xOffset = -ce.getScreenX()+getWidth()/2-ce.getWidth()/2;
+		camera.yOffset = -ce.getScreenY()+getHeight()/2-ce.getHeight()/2;
 	}
 	
 	public void show() {
@@ -117,7 +131,7 @@ public class TiledMap extends BasicScreen {
 		AffineTransform old = g.getTransform();
 		
 		AffineTransform at = new AffineTransform();
-		at.translate(camera.xOffset*CELL_WIDTH, camera.yOffset*CELL_HEIGHT);
+		at.translate(camera.xOffset, camera.yOffset);
 		g.setTransform(at);
 		
 		for(CellEntity[] ea : map)
@@ -126,8 +140,5 @@ public class TiledMap extends BasicScreen {
 					e.draw((Graphics2D)g.create());
 		
 		g.setTransform(old);
-		
-		g.setColor(Color.black);
-		g.drawString(camera.xOffset + " " + camera.yOffset,200,getHeight()-2);
 	}
 }
