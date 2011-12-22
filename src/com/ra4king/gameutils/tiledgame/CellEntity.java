@@ -39,13 +39,13 @@ public abstract class CellEntity implements Element {
 		if(this.x == x)
 			return;
 		
-		if(parent != null && parent.get(x, y) == this)
-			parent.remove(x, y);
+		if(parent != null && parent.get(this.x, y) == this)
+			parent.remove(this.x, y);
 		
 		this.x = x;
 		
-		if(parent != null && parent.get(x, y) != this)
-			parent.set(x, y, this);
+		if(parent != null && parent.get(this.x, y) != this)
+			parent.set(this.x, y, this);
 	}
 	
 	public int getY() {
@@ -60,13 +60,13 @@ public abstract class CellEntity implements Element {
 		if(this.y == y)
 			return;
 		
-		if(parent != null && parent.get(x, y) == this)
-			parent.remove(x, y);
+		if(parent != null && parent.get(x, this.y) == this)
+			parent.remove(x, this.y);
 		
 		this.y = y;
 		
-		if(parent != null && parent.get(x, y) != this)
-			parent.set(x, y, this);
+		if(parent != null && parent.get(x, this.y) != this)
+			parent.set(x, this.y, this);
 	}
 	
 	public int getWidth() {
