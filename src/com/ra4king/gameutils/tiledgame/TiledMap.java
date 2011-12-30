@@ -16,7 +16,6 @@ public class TiledMap extends BasicScreen {
 	
 	public TiledMap(int xCells, int yCells, int cellWidth, int cellHeight) {
 		map = new CellEntity[xCells][yCells];
-		camera = new Camera(xCells,yCells);
 		
 		CELL_WIDTH = cellWidth;
 		CELL_HEIGHT = cellHeight;
@@ -24,6 +23,8 @@ public class TiledMap extends BasicScreen {
 	
 	public void init(Game game) {
 		super.init(game);
+		
+		camera = new Camera(getWidth(),getHeight());
 		
 		hasInited = true;
 		
@@ -86,8 +87,7 @@ public class TiledMap extends BasicScreen {
 	}
 	
 	public void centerCamera(CellEntity ce) {
-		camera.xOffset = -ce.getScreenX()+getWidth()/2-ce.getWidth()/2;
-		camera.yOffset = -ce.getScreenY()+getHeight()/2-ce.getHeight()/2;
+		camera.centerAt(ce.getScreenX()+ce.getWidth()/2,ce.getScreenY()+ce.getHeight()/2);
 	}
 	
 	public void show() {
