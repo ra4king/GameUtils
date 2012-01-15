@@ -22,4 +22,12 @@ public abstract class GameComponent extends Entity {
 	public GameWorld getParent() {
 		return (GameWorld)super.getParent();
 	}
+	
+	public double getScreenX() {
+		return getX() + getParent().getXOffset();
+	}
+	
+	public double getScreenY() {
+		return getY() + getParent().getYOffset();
+	}
 }
