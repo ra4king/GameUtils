@@ -166,6 +166,8 @@ public class GameWorld implements Screen {
 	 * @param g The Graphics context to draw to the screen.
 	 */
 	public synchronized void draw(Graphics2D g) {
+		g = (Graphics2D)g.create();
+		
 		Image bg = (this.bg == null ? parent.getArt().get(bgImage) : this.bg);
 		
 		if(bg != null)
