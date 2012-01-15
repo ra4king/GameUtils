@@ -24,9 +24,9 @@ public class GameWorld implements Screen {
 	private ArrayList<Temp> temp;
 	private Image bg;
 	private String bgImage;
+	private double xOffset, yOffset;
 	private boolean hasInited, hasShown;
 	private volatile boolean isLooping;
-	private boolean renderOutOfBoundsEntities;
 	
 	/**
 	 * Initializes this object.
@@ -38,8 +38,6 @@ public class GameWorld implements Screen {
 		temp = new ArrayList<Temp>();
 		
 		setBackground(Color.lightGray);
-		
-		renderOutOfBoundsEntities = true;
 	}
 	
 	public void init(Game game) {
@@ -177,11 +175,13 @@ public class GameWorld implements Screen {
 		
 		preLoop();
 		
+		g.translate(xOffset, yOffset);
+		
 		try{
 			for(Bag<Entity> b : entities)
 				for(Entity e : b)
 					try{
-						if(e != null && (renderOutOfBoundsEntities || e.getBounds().intersects(parent.getBounds())))
+						if(e != null)
 							e.draw((Graphics2D)g.create());
 					}
 					catch(Exception exc) {
@@ -445,20 +445,20 @@ public class GameWorld implements Screen {
 		return parent.getHeight();
 	}
 	
-	/**
-	 * Sets whether to render entities whose bounds are outside the screen. Default is true.
-	 * @param render If true, all entities are rendered, else only those whose bounds are inside the screen.
-	 */
-	public void setRenderOutOfBoundsEntities(boolean render) {
-		renderOutOfBoundsEntities = render;
+	public void setXOffset(double xOffset) {
+		this.xOffset = xOffset;
 	}
 	
-	/**
-	 * Returns whether to render entities whose bounds are outside the screen. Default is true.
-	 * @return True if all entities are rendered. false if only those whose bounds are inside the screen.
-	 */
-	public boolean isRenderingOutOfBoundsEntities() {
-		return renderOutOfBoundsEntities;
+	public double getXOffset() {
+		return xOffset;
+	}
+	
+	public void setYOffset(double yOffset) {
+		this.yOffset = yOffset;
+	}
+	
+	public double getYOffset() {
+		return yOffset;
 	}
 	
 	public void preLoop() {
