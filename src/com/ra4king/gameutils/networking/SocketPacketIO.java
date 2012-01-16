@@ -108,7 +108,7 @@ public class SocketPacketIO extends PacketIO {
 		
 		synchronized(in) {
 			if(isBlocking()) {
-				while(in.position() < 2 || in.position()-2 < in.getInt(0)) {
+				while(in.position() < 4 || in.position()-4 < in.getInt(0)) {
 					if(channel.read(in) <= 0) {
 						isClosed = true;
 						throw new IOException("Connection is closed.");
@@ -123,13 +123,13 @@ public class SocketPacketIO extends PacketIO {
 					throw new IOException("Connection is closed.");
 				}
 				
-				if(read == 0 || (in.position() >= 2 && in.position()-2 < in.getInt(0)))
+				if(read == 0 || (in.position() >= 4 && in.position()-4 < in.getInt(0)))
 					return null;
 			}
 			
 			in.flip();
 			
-			if(in.remaining()-2 < in.getInt()) {
+			if(in.remaining()-4 < in.getInt()) {
 				in.clear();
 				throw new IOException("Internal Error!!");
 			}
