@@ -1,4 +1,4 @@
-package com.ra4king.gameutils.tiledgame;
+package com.ra4king.gameutils.tiledmap;
 
 public class Camera {
 	private int screenWidth, screenHeight;

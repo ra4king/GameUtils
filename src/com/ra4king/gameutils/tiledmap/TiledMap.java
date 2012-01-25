@@ -1,4 +1,4 @@
-package com.ra4king.gameutils.tiledgame;
+package com.ra4king.gameutils.tiledmap;
 
 
 import java.awt.Graphics2D;
@@ -8,14 +8,14 @@ import com.ra4king.gameutils.BasicScreen;
 import com.ra4king.gameutils.Game;
 
 public class TiledMap extends BasicScreen {
-	private CellEntity[][] map;
+	private Cell[][] map;
 	private Camera camera;
 	private boolean hasInited, hasShown;
 	
 	public final int CELL_WIDTH, CELL_HEIGHT;
 	
 	public TiledMap(int xCells, int yCells, int cellWidth, int cellHeight) {
-		map = new CellEntity[xCells][yCells];
+		map = new Cell[xCells][yCells];
 		
 		CELL_WIDTH = cellWidth;
 		CELL_HEIGHT = cellHeight;
@@ -28,8 +28,8 @@ public class TiledMap extends BasicScreen {
 		
 		hasInited = true;
 		
-		for(CellEntity[] ea : map)
-			for(CellEntity e : ea)
+		for(Cell[] ea : map)
+			for(Cell e : ea)
 				if(e != null)
 					e.init(this);
 	}
@@ -38,7 +38,7 @@ public class TiledMap extends BasicScreen {
 		return camera;
 	}
 	
-	public CellEntity set(int x, int y, CellEntity e) {
+	public Cell set(int x, int y, Cell e) {
 		map[x][y] = e;
 		
 		if(hasInited)
@@ -51,7 +51,7 @@ public class TiledMap extends BasicScreen {
 		return e;
 	}
 	
-	public CellEntity get(int x, int y) {
+	public Cell get(int x, int y) {
 		return map[x][y];
 	}
 	
@@ -59,8 +59,8 @@ public class TiledMap extends BasicScreen {
 		set(newX,newY,remove(x,y));
 	}
 	
-	public CellEntity remove(int x, int y) {
-		CellEntity e = map[x][y];
+	public Cell remove(int x, int y) {
+		Cell e = map[x][y];
 		map[x][y] = null;
 		return e;
 	}
@@ -86,43 +86,43 @@ public class TiledMap extends BasicScreen {
 		}
 	}
 	
-	public void centerCamera(CellEntity ce) {
+	public void centerCamera(Cell ce) {
 		camera.centerAt(ce.getScreenX()+ce.getWidth()/2,ce.getScreenY()+ce.getHeight()/2);
 	}
 	
 	public void show() {
 		hasShown = true;
 		
-		for(CellEntity[] ea : map)
-			for(CellEntity e : ea)
+		for(Cell[] ea : map)
+			for(Cell e : ea)
 				if(e != null)
 					e.show();
 	}
 	
 	public void hide() {
-		for(CellEntity[] ea : map)
-			for(CellEntity e : ea)
+		for(Cell[] ea : map)
+			for(Cell e : ea)
 				if(e != null)
 					e.hide();
 	}
 	
 	public void paused() {
-		for(CellEntity[] ea : map)
-			for(CellEntity e : ea)
+		for(Cell[] ea : map)
+			for(Cell e : ea)
 				if(e != null)
 					e.paused();
 	}
 	
 	public void resumed() {
-		for(CellEntity[] ea : map)
-			for(CellEntity e : ea)
+		for(Cell[] ea : map)
+			for(Cell e : ea)
 				if(e != null)
 					e.resumed();
 	}
 	
 	public void update(long deltaTime) {
-		for(CellEntity[] ea : map)
-			for(CellEntity e : ea)
+		for(Cell[] ea : map)
+			for(Cell e : ea)
 				if(e != null)
 					e.update(deltaTime);
 	}
@@ -134,8 +134,8 @@ public class TiledMap extends BasicScreen {
 		at.translate(camera.xOffset, camera.yOffset);
 		g.setTransform(at);
 		
-		for(CellEntity[] ea : map)
-			for(CellEntity e : ea)
+		for(Cell[] ea : map)
+			for(Cell e : ea)
 				if(e != null)
 					e.draw((Graphics2D)g.create());
 		

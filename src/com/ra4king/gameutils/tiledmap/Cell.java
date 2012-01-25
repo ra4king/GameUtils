@@ -1,4 +1,4 @@
-package com.ra4king.gameutils.tiledgame;
+package com.ra4king.gameutils.tiledmap;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -6,12 +6,12 @@ import java.awt.Rectangle;
 import com.ra4king.gameutils.Element;
 import com.ra4king.gameutils.Screen;
 
-public abstract class CellEntity implements Element {
+public abstract class Cell implements Element {
 	private TiledMap parent;
 	private int x, y;
 	private Rectangle bounds;
 	
-	public CellEntity() {
+	public Cell() {
 		bounds = new Rectangle();
 	}
 	
@@ -27,7 +27,7 @@ public abstract class CellEntity implements Element {
 		return parent;
 	}
 	
-	public int getX() {
+	public int getCellX() {
 		return x;
 	}
 	
@@ -35,7 +35,7 @@ public abstract class CellEntity implements Element {
 		return x*parent.CELL_WIDTH-(getWidth()-parent.CELL_WIDTH);
 	}
 	
-	public void setX(int x) {
+	public void setCellX(int x) {
 		if(this.x == x)
 			return;
 		
@@ -48,7 +48,7 @@ public abstract class CellEntity implements Element {
 			parent.set(this.x, y, this);
 	}
 	
-	public int getY() {
+	public int getCellY() {
 		return y;
 	}
 	
@@ -56,7 +56,7 @@ public abstract class CellEntity implements Element {
 		return y*parent.CELL_HEIGHT-(getHeight()-parent.CELL_HEIGHT);
 	}
 	
-	public void setY(int y) {
+	public void setCellY(int y) {
 		if(this.y == y)
 			return;
 		
@@ -86,8 +86,8 @@ public abstract class CellEntity implements Element {
 	}
 	
 	public void setLocation(int x, int y) {
-		setX(x);
-		setY(y);
+		setCellX(x);
+		setCellY(y);
 	}
 	
 	public void setSize(int width, int height) {
@@ -101,8 +101,8 @@ public abstract class CellEntity implements Element {
 	}
 	
 	public void setBounds(int x, int y, int width, int height) {
-		setX(x);
-		setY(y);
+		setCellX(x);
+		setCellY(y);
 		setWidth(width);
 		setHeight(height);
 	}
