@@ -64,6 +64,8 @@ public class SocketPacketIO extends PacketIO {
 		
 		this.channel = channel;
 		
+		channel.socket().setTcpNoDelay(true);
+		
 		setBufferSize(bufferSize);
 		
 		bout = new ByteArrayOutputStream();
