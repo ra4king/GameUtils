@@ -18,7 +18,7 @@ public class Art extends Assets<Image> {
 	Art() {}
 	
 	public Image add(Image i, String name) {
-		return super.add(createCompatibleImage(i),name);
+		return super.add(name,createCompatibleImage(i));
 	}
 	
 	public Image extract(URL url) throws IOException {

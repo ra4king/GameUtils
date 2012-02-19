@@ -26,13 +26,14 @@ public abstract class Assets<T> {
 	}
 	
 	public T add(URL url, String name) throws IOException {
-		return add(extract(url),name);
+		return add(name,extract(url));
 	}
 	
 	public abstract T extract(URL url) throws IOException;
 	
-	public synchronized T add(T t, String name) {
-		return assets.put(name,t);
+	public synchronized T add(String name, T t) {
+		assets.put(name,t);
+		return t;
 	}
 	
 	public T get(String name) {
@@ -49,26 +50,23 @@ public abstract class Assets<T> {
 	}
 	
 	public void rename(String oldName, String newName) {
-		add(remove(oldName),newName);
+		add(newName,remove(oldName));
 	}
 	
 	public T replace(String oldName, T t) {
 		if(get(oldName) == null)
 			throw new IllegalArgumentException("Invalid name");
 		
-		return add(t,oldName);
+		return add(oldName,t);
 	}
 	
 	public void swap(String first, String second) {
-		T t = assets.get(first);
-		T t2 = assets.get(second);
-		
-		if(t == null)
+		if(get(first) == null)
 			throw new IllegalArgumentException("First name is invalid.");
-		if(t2 == null)
+		if(get(second) == null)
 			throw new IllegalArgumentException("Second name is invalid");
 		
-		assets.put(second,assets.put(first,assets.get(second)));
+		add(second,assets.put(first,get(second)));
 	}
 	
 	public synchronized T remove(String name) {
