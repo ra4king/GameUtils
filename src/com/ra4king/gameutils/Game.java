@@ -473,7 +473,7 @@ public abstract class Game extends Applet {
 			
 			long diffTime = System.nanoTime()-lastTime;
 			
-			if(FPS <= 0 || diffTime >= ONE_SECOND/FPS) {
+			if(!isPaused && (FPS <= 0 || diffTime >= ONE_SECOND/FPS)) {
 				update(diffTime);
 				
 				lastTime += diffTime;
