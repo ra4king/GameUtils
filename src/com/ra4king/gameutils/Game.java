@@ -162,13 +162,9 @@ public abstract class Game extends Applet {
 	private boolean isApplet = true;
 	private int width, height;
 	
-	private Object quality;
-	private int maxUpdates;
 	private int FPS;
-	private int oldFPS;
 	private double version;
 	private boolean showFPS;
-	private boolean useYield;
 	private volatile boolean isProcessingEvents;
 	private volatile boolean isActive;
 	private volatile boolean isPaused;
@@ -220,10 +216,6 @@ public abstract class Game extends Applet {
 		setVersion(version);
 		
 		showFPS = true;
-		
-		quality = RenderingHints.VALUE_ANTIALIAS_ON;
-		
-		maxUpdates = MAX_UPDATES;
 		
 		if(System.getProperty("os.name").startsWith("Win")) {
 			new Thread() {
@@ -472,9 +464,6 @@ public abstract class Game extends Applet {
 		canvas.requestFocus();
 		
 		while(isActive()) {
-			long diffTime = System.nanoTime()-lastTime;
-			lastTime += diffTime;
-			
 			try{
 				processEvents();
 			}
@@ -482,31 +471,19 @@ public abstract class Game extends Applet {
 				exc.printStackTrace();
 			}
 			
-			int updateCount = 0;
+			long diffTime = System.nanoTime()-lastTime;
 			
-			while(diffTime > 0 && (maxUpdates <= 0 || updateCount < maxUpdates) && !isPaused()) {
-				int fps = FPS > 0 ? FPS : 60;
-				long deltaTime = Math.min(diffTime,ONE_SECOND/fps);
+			if(FPS <= 0 || diffTime >= ONE_SECOND/FPS) {
+				update(diffTime);
 				
-				try{
-					synchronized(Game.this) {
-						update(deltaTime);
-					}
-				}
-				catch(Exception exc) {
-					exc.printStackTrace();
-				}
-				
-				diffTime -= deltaTime;
-				
-				updateCount++;
+				lastTime += diffTime;
 			}
 			
 			try{
 				do{
 					do{
 						Graphics2D g = (Graphics2D)strategy.getDrawGraphics();
-						g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,quality);
+						g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 						
 						try{
 							synchronized(Game.this) {
@@ -540,30 +517,7 @@ public abstract class Game extends Applet {
 				frames = 0;
 			}
 			
-			try{
-				if(FPS > 0) {
-					long sleepTime = Math.round((ONE_SECOND/FPS)-(System.nanoTime()-lastTime));
-					if(sleepTime <= 0)
-						continue;
-					
-					if(isHighQuality()) {
-						long prevTime = System.nanoTime();
-						while(System.nanoTime()-prevTime <= sleepTime) {
-							if(useYield)
-								Thread.yield();
-							else
-								Thread.sleep(1);
-						}
-					}
-					else
-						Thread.sleep(Math.round(sleepTime/1e6));
-				}
-				else
-					Thread.yield();
-			}
-			catch(Exception exc) {
-				exc.printStackTrace();
-			}
+			Thread.yield();
 		}
 		
 		if(stopGame() && !isApplet())
@@ -1106,7 +1060,6 @@ public abstract class Game extends Applet {
 	 */
 	public void setFPS(int FPS) {
 		this.FPS = FPS;
-		this.oldFPS = FPS;
 	}
 	
 	/**
@@ -1115,65 +1068,6 @@ public abstract class Game extends Applet {
 	 */
 	public int getFPS() {
 		return FPS;
-	}
-	
-	/**
-	 * Sets whether the game loop should use Thread.yield() or Thread.sleep(1).<br>
-	 * Thread.yield() produces a smoother game loop but at the expense of a high CPU usage.<br>
-	 * Thread.sleep(1) is less smooth but barely uses any CPU time.<br>
-	 * The default is Thread.sleep(1).
-	 * @param useYield If true, uses Thread.yield(), otherwise uses Thread.sleep(1).
-	 */
-	public void useYield(boolean useYield) {
-		this.useYield = useYield;
-	}
-	
-	/**
-	 * Returns whether the game loop uses Thread.yield() or Thread.sleep(1). The default is Thread.sleep(1).
-	 * @return True if the game loop uses Thread.yield(), false if it uses Thread.sleep(1).
-	 */
-	public boolean usesYield() {
-		return useYield;
-	}
-	
-	/**
-	 * Sets the quality of this game's graphics.
-	 * @param highQuality If true, the graphics are of high quality, else the graphics are of low quality.
-	 */
-	public void setHighQuality(boolean highQuality) {
-		if(highQuality) {
-			quality = RenderingHints.VALUE_ANTIALIAS_ON;
-			FPS = oldFPS;
-		}
-		else {
-			oldFPS = FPS;
-			FPS = 60;
-			quality = RenderingHints.VALUE_ANTIALIAS_OFF;
-		}
-	}
-	
-	/**
-	 * Returns the current state of the quality property.
-	 * @return If true, the graphics are of high quality, else the graphics are of low quality.
-	 */
-	public boolean isHighQuality() {
-		return quality == RenderingHints.VALUE_ANTIALIAS_ON;
-	}
-	
-	/**
-	 * Sets the maximum number of updates before render.
-	 * @param maxUpdates The maximum number of updates before render.
-	 */
-	public void setMaximumUpdatesBeforeRender(int maxUpdates) {
-		this.maxUpdates = maxUpdates;
-	}
-	
-	/**
-	 * Returns the maximum number of updates before render.
-	 * @return The maximum number of updates before render.
-	 */
-	public int getMaximumUpdatesBeforeRender() {
-		return maxUpdates;
 	}
 	
 	/**
