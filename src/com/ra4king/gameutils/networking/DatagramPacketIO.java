@@ -1,10 +1,6 @@
 package com.ra4king.gameutils.networking;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -102,29 +98,20 @@ public class DatagramPacketIO extends PacketIO {
 		
 		in.flip();
 		
-		ObjectInputStream oin = new ObjectInputStream(new InputStream() {
-			public int read() {
-				if(!in.hasRemaining())
-					return -1;
-				
-				return in.get() & 0xff;
-			}
-		});
-		
-		Packet packet = read(oin);
-		packet.setAddress(address);
-		return packet;
+		return new Packet((ByteBuffer)ByteBuffer.allocate(in.remaining()).put(in).flip(),address);
 	}
 	
 	public synchronized boolean write(Packet packet) throws IOException {
-		ByteBuffer out = this.out;
+		final ByteBuffer out = this.out;
 		
 		out.clear();
 		
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		write(packet,new ObjectOutputStream(bout));
+		ByteBuffer data = packet.getData();
 		
-		out.put(adjustSize(bout.toByteArray()));
+		data.flip();
+		out.putInt(data.remaining());
+		out.put(data);
+		
 		out.flip();
 		
 		SocketAddress sa = (packet.getAddress() == null ? address : packet.getAddress());
@@ -154,14 +141,6 @@ public class DatagramPacketIO extends PacketIO {
 	
 	public InetSocketAddress getSocketAddress() {
 		return address;
-	}
-	
-	private byte[] adjustSize(byte array[]) {
-		if(array.length < out.capacity())
-			return array;
-		byte adjust[] = new byte[out.capacity()];
-		System.arraycopy(array, 0, adjust, 0, adjust.length);
-		return adjust;
 	}
 	
 	public boolean isConnected() {

@@ -1,10 +1,6 @@
 package com.ra4king.gameutils.networking;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -17,9 +13,6 @@ import java.nio.channels.SocketChannel;
 public class SocketPacketIO extends PacketIO {
 	private SocketChannel channel;
 	private ByteBuffer in, out;
-	private ByteArrayOutputStream bout;
-	private ObjectOutputStream oout;
-	private ObjectInputStream oin;
 	private boolean isClosed;
 	
 	public SocketPacketIO(String address, int port) throws IOException {
@@ -67,107 +60,72 @@ public class SocketPacketIO extends PacketIO {
 		channel.socket().setTcpNoDelay(true);
 		
 		setBufferSize(bufferSize);
-		
-		bout = new ByteArrayOutputStream();
-		oout = new ObjectOutputStream(bout);
-		
-		out.put(bout.toByteArray());
-		bout.reset();
-		out.flip();
-		while(channel.write(out) == 0);
-		out.clear();
-		
-		int read;
-		while((read = channel.read(in)) <= 0 || in.position() < 4) {
-			if(read < 0)
-				throw new IOException("Connection is closed.");
-		}
-		
-		in.flip();
-		oin = new ObjectInputStream(new InputStream() {
-			public int read() {
-				if(!in.hasRemaining())
-					return -1;
-				
-				return (int)in.get() & 0xff;
-			}
-		});
-		in.compact();
-		
-		channel.configureBlocking(isBlocking);
-		
-		try{
-			channel.socket().setTcpNoDelay(true);
-		}
-		catch(Exception exc) {
-			throw new IOException(exc);
-		}
 	}
 	
 	public Packet read() throws IOException {
+		final ByteBuffer in = this.in;
+		
 		if(!isConnected())
 			throw new IOException("Connection is closed.");
 		
-		synchronized(in) {
-			if(isBlocking()) {
-				while(in.position() < 4 || in.position()-4 < in.getInt(0)) {
-					if(channel.read(in) <= 0) {
-						isClosed = true;
-						throw new IOException("Connection is closed.");
-					}
-				}
-			}
-			else {
-				int read = channel.read(in);
-				
-				if(read == -1) {
+		if(isBlocking()) {
+			while(in.position() < 4 || in.position()-4 < in.getInt(0)) {
+				if(channel.read(in) <= 0) {
 					isClosed = true;
 					throw new IOException("Connection is closed.");
 				}
-				
-				if(read == 0 || (in.position() >= 4 && in.position()-4 < in.getInt(0)))
-					return null;
 			}
-			
-			in.flip();
-			
-			if(in.remaining()-4 < in.getInt()) {
-				in.clear();
-				throw new IOException("Internal Error!!");
-			}
-			
-			Packet packet = read(oin);
-			packet.setAddress(getSocketAddress());
-			
-			if(in.remaining() > 0)
-				in.compact();
-			else
-				in.clear();
-			
-			return packet;
 		}
+		else {
+			int read = channel.read(in);
+			
+			if(read == -1) {
+				isClosed = true;
+				throw new IOException("Connection is closed.");
+			}
+			
+			if(read == 0 || (in.position() >= 4 && in.position()-4 < in.getInt(0)))
+				return null;
+		}
+		
+		in.flip();
+		
+		int len = in.getInt();
+		
+		if(in.remaining() < len) {
+			in.clear();
+			throw new IOException("Internal Error!! GOT LEN OF: " + len);
+		}
+		
+		byte[] bytes = new byte[len];
+		in.get(bytes);
+		
+		Packet packet = new Packet(ByteBuffer.wrap(bytes),getSocketAddress());
+		
+		if(in.remaining() > 0)
+			in.compact();
+		else
+			in.clear();
+		
+		return packet;
 	}
 	
 	public boolean write(Packet packet) throws IOException {
-		synchronized(out) {
-			out.clear();
-			
-			write(packet,oout);
-			
-			byte[] array = adjustSize(bout.toByteArray());
-			
-			bout.reset();
-			
-			out.putInt(array.length);
-			out.put(array);
-			out.flip();
-			
-			do {
-				channel.write(out);
-			}while(out.remaining() > 0);
-			
-			return true;
-		}
+		final ByteBuffer out = this.out;
+		
+		out.clear();
+		
+		ByteBuffer data = packet.getData();
+		
+		data.flip();
+		out.putInt(data.remaining());
+		out.put(data);
+		
+		out.flip();
+		
+		while(out.remaining() > channel.write(out));
+		
+		return true;
 	}
 	
 	public int getBufferSize() {
@@ -199,22 +157,17 @@ public class SocketPacketIO extends PacketIO {
 		return (InetSocketAddress)channel.socket().getRemoteSocketAddress();
 	}
 	
-	private byte[] adjustSize(byte array[]) {
-		if(array.length <= out.capacity())
-			return array;
-		
-		byte adjust[] = new byte[out.capacity()];
-		System.arraycopy(array, 0, adjust, 0, adjust.length);
-		return adjust;
-	}
-	
 	public boolean isConnected() {
 		return !channel.socket().isClosed() && !isClosed;
 	}
 	
 	public void close() throws IOException {
-		channel.socket().shutdownInput();
-		channel.socket().shutdownOutput();
+		try{
+			channel.socket().shutdownInput();
+			channel.socket().shutdownOutput();
+		}
+		catch(Exception exc) {}
+		
 		channel.close();
 	}
 }
