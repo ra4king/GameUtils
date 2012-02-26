@@ -124,10 +124,11 @@ public class Packet {
 	 * @param b The byte.
 	 * @return Returns this.
 	 */
-	public Packet writeByte(byte b) {
-		ensureSize(1);
+	public Packet writeByte(byte ... b) {
+		ensureSize(b.length);
 		
 		data.put(b);
+		
 		return this;
 	}
 	
@@ -136,10 +137,12 @@ public class Packet {
 	 * @param s The short.
 	 * @return Returns this.
 	 */
-	public Packet writeShort(short s) {
-		ensureSize(2);
+	public Packet writeShort(short ... ss) {
+		ensureSize(ss.length * 2);
 		
-		data.putShort(s);
+		for(short s : ss)
+			data.putShort(s);
+		
 		return this;
 	}
 	
@@ -148,10 +151,12 @@ public class Packet {
 	 * @param c The char.
 	 * @return Returns this.
 	 */
-	public Packet writeChar(char c) {
-		ensureSize(2);
+	public Packet writeChar(char ... cs) {
+		ensureSize(cs.length * 2);
 		
-		data.putChar(c);
+		for(char c : cs)
+			data.putChar(c);
+		
 		return this;
 	}
 	
@@ -160,10 +165,12 @@ public class Packet {
 	 * @param i The integer.
 	 * @return Returns this.
 	 */
-	public Packet writeInt(int i) {
-		ensureSize(4);
+	public Packet writeInt(int ... is) {
+		ensureSize(is.length);
 		
-		data.putInt(i);
+		for(int i : is)
+			data.putInt(i);
+		
 		return this;
 	}
 	
@@ -172,10 +179,12 @@ public class Packet {
 	 * @param l The long.
 	 * @return Returns this.
 	 */
-	public Packet writeLong(long l) {
-		ensureSize(8);
+	public Packet writeLong(long ... ls) {
+		ensureSize(ls.length * 8);
 		
-		data.putLong(l);
+		for(long l : ls)
+			data.putLong(l);
+		
 		return this;
 	}
 	
@@ -184,10 +193,12 @@ public class Packet {
 	 * @param f The float.
 	 * @return Returns this.
 	 */
-	public Packet writeFloat(float f) {
-		ensureSize(4);
+	public Packet writeFloat(float ... fs) {
+		ensureSize(fs.length * 4);
 		
-		data.putFloat(f);
+		for(float f : fs)
+			data.putFloat(f);
+		
 		return this;
 	}
 	
@@ -196,10 +207,12 @@ public class Packet {
 	 * @param d The double.
 	 * @return Returns this.
 	 */
-	public Packet writeDouble(double d) {
-		ensureSize(8);
+	public Packet writeDouble(double ... ds) {
+		ensureSize(ds.length * 8);
 		
-		data.putDouble(d);
+		for(double d : ds)
+			data.putDouble(d);
+		
 		return this;
 	}
 	
@@ -208,10 +221,12 @@ public class Packet {
 	 * @param b The boolean.
 	 * @return Returns this.
 	 */
-	public Packet writeBoolean(boolean b) {
-		ensureSize(1);
+	public Packet writeBoolean(boolean ... bs) {
+		ensureSize(bs.length);
 		
-		data.put(b ? (byte)1 : (byte)0);
+		for(boolean b : bs)
+			data.put(b ? (byte)1 : (byte)0);
+		
 		return this;
 	}
 	
@@ -220,18 +235,20 @@ public class Packet {
 	 * @param s The String.
 	 * @return Returns this.
 	 */
-	public Packet writeString(String s) {
-		try{
-			byte[] b = s.getBytes("UTF-8");
-			
-			ensureSize(b.length + 2);
-			
-			data.putShort((short)b.length);
-			
-			data.put(b);
-		}
-		catch(Exception exc) {
-			exc.printStackTrace();
+	public Packet writeString(String ... ss) {
+		for(String s : ss) {
+			try{
+				byte[] b = s.getBytes("UTF-8");
+				
+				ensureSize(b.length + 2);
+				
+				data.putShort((short)b.length);
+				
+				data.put(b);
+			}
+			catch(Exception exc) {
+				exc.printStackTrace();
+			}
 		}
 		
 		return this;
