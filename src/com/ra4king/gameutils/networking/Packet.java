@@ -106,7 +106,7 @@ public class Packet {
 	 * @return The next String.
 	 */
 	public String readString() {
-		byte[] b = new byte[readShort()];
+		byte[] b = new byte[readInt()];
 		
 		data.get(b);
 		
@@ -242,7 +242,7 @@ public class Packet {
 				
 				ensureSize(b.length + 2);
 				
-				data.putShort((short)b.length);
+				data.putInt(b.length);
 				
 				data.put(b);
 			}
@@ -341,7 +341,7 @@ public class Packet {
 	}
 	
 	private void ensureSize(int size) {
-		if(data.capacity() > data.position() + size)
+		if(data.capacity() >= data.position() + size)
 			return;
 		ByteBuffer temp = ByteBuffer.allocate((data.position() + size + 1) * 3 / 2);
 		data.flip();
