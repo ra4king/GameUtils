@@ -240,7 +240,7 @@ public class Packet {
 			try{
 				byte[] b = s.getBytes("UTF-8");
 				
-				ensureSize(b.length + 2);
+				ensureSize(b.length + 4);
 				
 				data.putInt(b.length);
 				
