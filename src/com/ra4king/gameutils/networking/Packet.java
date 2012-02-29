@@ -25,7 +25,7 @@ public class Packet {
 	 * @param messages A variable number of data to be written to this Packet.
 	 */
 	public Packet(SocketAddress address) {
-		this(ByteBuffer.allocate(32),address);
+		this(ByteBuffer.allocate(64),address);
 	}
 	
 	Packet(ByteBuffer buffer, SocketAddress address) {
