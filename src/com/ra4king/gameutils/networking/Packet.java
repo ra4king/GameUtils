@@ -344,8 +344,7 @@ public class Packet {
 		if(data.capacity() > data.position() + size)
 			return;
 		ByteBuffer temp = ByteBuffer.allocate((data.position() + size + 1) * 3 / 2);
-		data.position(0);
-		data.limit(data.capacity()-1);
+		data.flip();
 		temp.put(data);
 		data = temp;
 	}
