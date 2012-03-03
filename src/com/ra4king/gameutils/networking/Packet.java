@@ -166,7 +166,7 @@ public class Packet {
 	 * @return Returns this.
 	 */
 	public Packet writeInt(int ... is) {
-		ensureSize(is.length);
+		ensureSize(is.length * 4);
 		
 		for(int i : is)
 			data.putInt(i);
