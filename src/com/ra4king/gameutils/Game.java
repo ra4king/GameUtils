@@ -95,6 +95,8 @@ public abstract class Game extends Applet {
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
 		}
 		catch(Exception exc) {}
+		
+		System.setProperty("sun.java2d.opengl", "true");
 	}
 	
 	/**
