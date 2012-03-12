@@ -106,11 +106,6 @@ public abstract class Game extends Applet {
 	 * @return The JFrame that was initialized by this method.
 	 */
 	protected final JFrame setupFrame(String title, boolean resizable) {
-		if(System.getProperty("os.name").startsWith("Win"))
-			System.setProperty("sun.java2d.d3d","true");
-		else
-			System.setProperty("sun.java2d.opengl", "true");
-		
 		final JFrame frame = new JFrame(title);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setIgnoreRepaint(true);
