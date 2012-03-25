@@ -10,7 +10,7 @@ import java.nio.channels.DatagramChannel;
  * A blocking or non-blocking UDP wrapper that uses NIO.
  * @author Roi Atalla
  */
-public class DatagramPacketIO extends PacketIO {
+public class DatagramPacketIO implements PacketIO {
 	private DatagramChannel channel;
 	private InetSocketAddress address;
 	private ByteBuffer in, out;
@@ -32,7 +32,7 @@ public class DatagramPacketIO extends PacketIO {
 	}
 	
 	public DatagramPacketIO(InetSocketAddress address, boolean isBlocking) throws IOException {
-		this(address,isBlocking,1024);
+		this(address,isBlocking,8192);
 	}
 	
 	public DatagramPacketIO(InetSocketAddress address, int bufferSize) throws IOException {
@@ -64,7 +64,7 @@ public class DatagramPacketIO extends PacketIO {
 	}
 	
 	public DatagramPacketIO(DatagramChannel channel, InetSocketAddress address, boolean isBlocking) throws IOException {
-		this(channel,address,isBlocking,1024);
+		this(channel,address,isBlocking,8192);
 	}
 	
 	public DatagramPacketIO(DatagramChannel channel, InetSocketAddress address, int bufferSize) throws IOException {
@@ -145,6 +145,14 @@ public class DatagramPacketIO extends PacketIO {
 	
 	public boolean isConnected() {
 		return channel.socket().isClosed();
+	}
+	
+	public void setBlocking(boolean isBlocking) throws IOException {
+		channel.configureBlocking(isBlocking);
+	}
+	
+	public boolean isBlocking() {
+		return channel.isBlocking();
 	}
 	
 	public void close() throws IOException {

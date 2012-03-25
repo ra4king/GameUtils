@@ -10,7 +10,7 @@ import java.nio.channels.SocketChannel;
  * A Non-Blocking TCP wrapper.
  * @author Roi Atalla
  */
-public class SocketPacketIO extends PacketIO {
+public class SocketPacketIO implements PacketIO {
 	private SocketChannel channel;
 	private ByteBuffer in, out;
 	private boolean isClosed;

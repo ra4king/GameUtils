@@ -5,12 +5,13 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -28,12 +29,9 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -48,41 +46,45 @@ import javax.swing.UIManager;
  * <br>
  * <code>
  * public class MyGame extends Game {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;public static void main(String args[]) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyGame game = new MyGame();<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;game.setupFrame("My Game",800,600,true);<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;game.start();<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * &#09;public static void main(String args[]) {<br>
+ * &#09;&#09;MyGame game = new MyGame();<br>
+ * &#09;&#09;game.setupFrame("My Game",true);<br>
+ * &#09;&#09;game.start();<br>
+ * &#09;}<br>
  * <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;public void initGame() {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Initialize the game<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * &#09;public MyGame() {<br>
+ * &#09;&#09;super(800,600);<br>
+ * &#09;}<br>
  * <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;public void update(long deltaTime) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;super.update(deltaTime);<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Optional: update the game<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * &#09;public void initGame() {<br>
+ * &#09;&#09;//Initialize the game<br>
+ * &#09;}<br>
  * <br>
- * &nbsp;&nbsp;&nbsp;&nbsp;public void paused() {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Pause the game<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
- *<br>     
- * &nbsp;&nbsp;&nbsp;&nbsp;public void resumed() {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Resume the game<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
- *<br>     
- * &nbsp;&nbsp;&nbsp;&nbsp;public void resized(int width, int height) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Resize the game<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
- *<br>     
- * &nbsp;&nbsp;&nbsp;&nbsp;public void stopGame() {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Stop the game<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
- *<br>     
- * &nbsp;&nbsp;&nbsp;&nbsp;public void paint(Graphics2D g) {<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;super.paint(g);<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Optional: draw the game<br>
- * &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+ * &#09;public void update(long deltaTime) {<br>
+ * &#09;&#09;super.update(deltaTime);<br>
+ * &#09;&#09;//Optional: update the game<br>
+ * &#09;}<br>
+ * <br>
+ * &#09;public void paused() {<br>
+ * &#09;&#09;//Pause the game<br>
+ * &#09;}<br>
+ * <br>
+ * &#09;public void resumed() {<br>
+ * &#09;&#09;//Resume the game<br>
+ * &#09;}<br>
+ * <br>     
+ * &#09;public void resized(int width, int height) {<br>
+ * &#09;&#09;//Resize the game<br>
+ * &#09;}<br>
+ * <br>     
+ * &#09;public void stopGame() {<br>
+ * &#09;&#09;//Stop the game<br>
+ * &#09;}<br>
+ * <br>     
+ * &#09;public void paint(Graphics2D g) {<br>
+ * &#09;&#09;super.paint(g);<br>
+ * &#09;&#09;//Optional: draw the game<br>
+ * &#09;}<br>
  * }
  * </code>
  * @author Roi Atalla
@@ -95,19 +97,34 @@ public abstract class Game extends Applet {
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
 		}
 		catch(Exception exc) {}
+		
+		if(System.getProperty("os.name").startsWith("Win")) {
+			new Thread() {
+				{
+					setDaemon(true);
+					start();
+				}
+				
+				public void run() {
+					while(true) {
+						try {
+							Thread.sleep(Long.MAX_VALUE);
+						}
+						catch(Exception exc) {}
+					}
+				}
+			};
+		}
 	}
 	
 	/**
 	 * Initializes and displays the window.
 	 * @param title The title of the window
-	 * @param width The width of the window
-	 * @param height The height of the window
 	 * @param resizable If true, the window will be resizable, else it will not be resizable.
-	 * @return The JFrame that was initialized by this method.
+	 * @return The Frame that was initialized by this method.
 	 */
-	protected final JFrame setupFrame(String title, boolean resizable) {
-		final JFrame frame = new JFrame(title);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+	protected final Frame setupFrame(String title, boolean resizable) {
+		Frame frame = new Frame(title);
 		frame.setIgnoreRepaint(true);
 		frame.setResizable(resizable);
 		
@@ -125,8 +142,6 @@ public abstract class Game extends Applet {
 		setSize(width,height);
 		
 		init();
-		
-		((JPanel)frame.getContentPane()).revalidate();
 		
 		return frame;
 	}
@@ -149,23 +164,23 @@ public abstract class Game extends Applet {
 	private final Art art;
 	private final Sound sound;
 	
-	private final Map<String,ScreenInfo> screens;
+	private final ArrayList<Callback> callbacks;
+	
+	private final HashMap<String,ScreenInfo> screens;
 	private ScreenInfo currentScreen;
 	
 	private final Canvas canvas;
 	private BufferStrategy strategy;
 	
 	private final Input input;
-	private ArrayList<Event> events;
-	private ArrayList<Event> tempEvents;
+	private ConcurrentLinkedQueue<Event> events;
 	
 	private boolean isApplet = true;
 	private int width, height;
 	
-	private int FPS;
+	private int FPS, maxUpdates;
 	private double version;
 	private boolean showFPS;
-	private volatile boolean isProcessingEvents;
 	private volatile boolean isActive;
 	private volatile boolean isPaused;
 	
@@ -188,7 +203,9 @@ public abstract class Game extends Applet {
 		art = new Art();
 		sound = new Sound();
 		
-		screens = Collections.synchronizedMap(new HashMap<String,ScreenInfo>());
+		callbacks = new ArrayList<Callback>();
+		
+		screens = new HashMap<String,ScreenInfo>();
 		
 		currentScreen = new ScreenInfo(new Screen() {
 			public void init(Game game) {}
@@ -202,13 +219,12 @@ public abstract class Game extends Applet {
 			public void draw(Graphics2D g) {}
 		});
 		
-		screens.put("Default", currentScreen);
+		screens.put("", currentScreen);
 		
 		canvas = new Canvas();
 		input = new Input();
 		
-		events = new ArrayList<Event>();
-		tempEvents = new ArrayList<Event>();
+		events = new ConcurrentLinkedQueue<Event>();
 		
 		this.width = width;
 		this.height = height;
@@ -216,24 +232,6 @@ public abstract class Game extends Applet {
 		setVersion(version);
 		
 		showFPS = true;
-		
-		if(System.getProperty("os.name").startsWith("Win")) {
-			new Thread() {
-				{
-					setDaemon(true);
-					start();
-				}
-				
-				public void run() {
-					while(true) {
-						try {
-							Thread.sleep(Long.MAX_VALUE);
-						}
-						catch(Exception exc) {}
-					}
-				}
-			};
-		}
 	}
 	
 	/**
@@ -264,7 +262,7 @@ public abstract class Game extends Applet {
 	public Container getRootParent() {
 		if(isApplet())
 			return this;
-		return getParent().getParent().getParent().getParent();
+		return getParent();
 	}
 	
 	public int getWidth() {
@@ -327,19 +325,17 @@ public abstract class Game extends Applet {
 	}
 	
 	/**
-	 * If this game is an Applet, it calls the superclass's resize method, else it adjusts the JFrame according to the platform specific Insets.
+	 * If this game is an Applet, it calls the superclass's resize method, else it adjusts the JFrame accordingly.
 	 * @param width The new width of this game's canvas
 	 * @param height The new height of this game's canvas
 	 */
 	public void setSize(int width, int height) {
-		invalidate();
-		
 		if(isApplet())
 			super.resize(width,height);
 		else {
-			Insets i = getRootParent().getInsets();
-			getRootParent().setSize(width+i.right+i.left,height+i.bottom+i.top);
-			((JFrame)getRootParent()).setLocationRelativeTo(null);
+			setPreferredSize(new Dimension(width,height));
+			((Frame)getRootParent()).pack();
+			((Frame)getRootParent()).setLocationRelativeTo(null);
 		}
 		
 		if(isActive) {
@@ -363,7 +359,7 @@ public abstract class Game extends Applet {
 			if(isFullScreen())
 				return;
 			
-			JFrame frame = new JFrame();
+			Frame frame = new Frame();
 			frame.setResizable(false);
 			frame.setUndecorated(true);
 			frame.setIgnoreRepaint(true);
@@ -376,9 +372,7 @@ public abstract class Game extends Applet {
 			
 			frame.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent we) {
-					synchronized(Game.this) {
-						setFullScreen(false);
-					}
+					events.add(new Event(14,we));
 				}
 			});
 			
@@ -408,10 +402,10 @@ public abstract class Game extends Applet {
 			strategy = canvas.getBufferStrategy();
 		}
 		
-		canvas.requestFocus();
-		
 		width = canvas.getWidth();
 		height = canvas.getHeight();
+		
+		canvas.requestFocus();
 	}
 	
 	/**
@@ -431,9 +425,7 @@ public abstract class Game extends Applet {
 		try {
 			setSize(width,height);
 			
-			synchronized(Game.this) {
-				initGame();
-			}
+			initGame();
 			
 			getScreen().show();
 		}
@@ -463,7 +455,14 @@ public abstract class Game extends Applet {
 		
 		canvas.requestFocus();
 		
-		while(isActive()) {
+		while(true) {
+			try {
+				processCallbacks();
+			}
+			catch(Exception exc) {
+				exc.printStackTrace();
+			}
+			
 			try{
 				processEvents();
 			}
@@ -472,16 +471,27 @@ public abstract class Game extends Applet {
 			}
 			
 			long diffTime = System.nanoTime()-lastTime;
+			lastTime += diffTime;
 			
-			if(!isPaused) {
-				if(FPS <= 0 || diffTime >= ONE_SECOND/FPS) {
-					update(diffTime);
+			int updateCount = 0;
+			
+			if(!isPaused()) {
+				while(diffTime > 0 && (maxUpdates <= 0 || updateCount < maxUpdates)) {
+					int fps = FPS > 0 ? FPS : 60;
+					long deltaTime = Math.min(diffTime,ONE_SECOND/fps);
 					
-					lastTime += diffTime;
+					try{
+						update(deltaTime);
+					}
+					catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					
+					diffTime -= deltaTime;
+					
+					updateCount++;
 				}
 			}
-			else
-				lastTime = System.nanoTime();
 			
 			try{
 				do{
@@ -490,9 +500,7 @@ public abstract class Game extends Applet {
 						g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
 						
 						try{
-							synchronized(Game.this) {
-								paint(g);
-							}
+							paint(g);
 						}
 						catch(Exception exc) {
 							exc.printStackTrace();
@@ -521,208 +529,246 @@ public abstract class Game extends Applet {
 				frames = 0;
 			}
 			
-			Thread.yield();
+			try{
+				if(FPS > 0) {
+					long sleepTime = Math.round((ONE_SECOND/FPS)-(System.nanoTime()-lastTime));
+					if(sleepTime <= 0)
+						continue;
+					
+					long prevTime = System.nanoTime();
+					while(System.nanoTime()-prevTime <= sleepTime) {
+						if(System.nanoTime()-prevTime <= sleepTime * 0.9)
+							Thread.sleep(1);
+						else
+							Thread.yield();
+					}
+				}
+				else
+					Thread.yield();
+			}
+			catch(Exception exc) {
+				exc.printStackTrace();
+			}
+			
+			if(!isActive()) {
+				boolean stop = stopGame();
+				if(stop && !isApplet())
+					System.exit(0);
+				else if(!stop)
+					isActive = true;
+			}
 		}
-		
-		if(stopGame() && !isApplet())
-			System.exit(0);
+	}
+	
+	private void processCallbacks() {
+		for(int a = 0; a < callbacks.size(); a++) {
+			Callback c = callbacks.get(a);
+			
+			if(System.nanoTime()-c.lastTime >= c.delay) {
+				try {
+					c.r.run();
+				}
+				catch(Exception exc) {
+					exc.printStackTrace();
+				}
+				
+				c.lastTime += c.delay;
+			}
+		}
 	}
 	
 	private void processEvents() {
-		isProcessingEvents = true;
-		
-		synchronized(events) {
-			for(Event e : events) {
-				switch(e.id) {
-					case 0:
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.keyTyped((KeyEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 1:
-						input.keyPressed((KeyEvent)e.event);
-						
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.keyPressed((KeyEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 2:
-						input.keyReleased((KeyEvent)e.event);
-						
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.keyReleased((KeyEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 3:
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.mouseClicked((MouseEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 4:
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.mouseEntered((MouseEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 5:
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.mouseExited((MouseEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 6:
-						input.mousePressed((MouseEvent)e.event);
-						
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.mousePressed((MouseEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 7:
-						input.mouseReleased((MouseEvent)e.event);
-						
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.mouseReleased((MouseEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 8:
-						input.mouseDragged((MouseEvent)e.event);
-						
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.mouseDragged((MouseEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 9:
-						input.mouseMoved((MouseEvent)e.event);
-						
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.mouseMoved((MouseEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 10:
-						for(InputListener l : currentScreen.listeners) {
-							try {
-								l.mouseWheelMoved((MouseWheelEvent)e.event,getScreen());
-							}
-							catch(Exception exc) {
-								exc.printStackTrace();
-							}
-						}
-						
-						break;
-					case 11:
-						try {
-							resized(getWidth(),getHeight());
-						}
-						catch(Exception exc) {
-							exc.printStackTrace();
-						}
-						
-						break;
-					case 12:
-						try {
-							focusGained();
-						}
-						catch(Exception exc) {
-							exc.printStackTrace();
-						}
-						
-						break;
-					case 13:
-						try {
-							focusLost();
-						}
-						catch(Exception exc) {
-							exc.printStackTrace();
-						}
-						
-						break;
-				}
-			}
+		while(!events.isEmpty()) {
+			Event e = events.poll();
 			
-			events.clear();
-			events.addAll(tempEvents);
-			tempEvents.clear();
+			switch(e.id) {
+				case 0:
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.keyTyped((KeyEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 1:
+					input.keyPressed((KeyEvent)e.event);
+					
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.keyPressed((KeyEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 2:
+					input.keyReleased((KeyEvent)e.event);
+					
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.keyReleased((KeyEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 3:
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.mouseClicked((MouseEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 4:
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.mouseEntered((MouseEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 5:
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.mouseExited((MouseEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 6:
+					input.mousePressed((MouseEvent)e.event);
+					
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.mousePressed((MouseEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 7:
+					input.mouseReleased((MouseEvent)e.event);
+					
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.mouseReleased((MouseEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 8:
+					input.mouseDragged((MouseEvent)e.event);
+					
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.mouseDragged((MouseEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 9:
+					input.mouseMoved((MouseEvent)e.event);
+					
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.mouseMoved((MouseEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 10:
+					for(InputListener l : currentScreen.listeners) {
+						try {
+							l.mouseWheelMoved((MouseWheelEvent)e.event,getScreen());
+						}
+						catch(Exception exc) {
+							exc.printStackTrace();
+						}
+					}
+					
+					break;
+				case 11:
+					try {
+						resized(getWidth(),getHeight());
+					}
+					catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					
+					break;
+				case 12:
+					try {
+						focusGained();
+					}
+					catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					
+					break;
+				case 13:
+					try {
+						focusLost();
+					}
+					catch(Exception exc) {
+						exc.printStackTrace();
+					}
+					
+					break;
+				case 14:
+					try {
+						setFullScreen(false);
+					}
+					catch(Exception exc) {
+						exc.printStackTrace();
+					}
+			}
 		}
 		
-		isProcessingEvents = false;
+		events.clear();
 	}
 	
 	public final void init() {
 		setLayout(new BorderLayout());
 		
 		add(canvas);
+		invalidate();
+		validate();
+		
 		canvas.setSize(super.getWidth(),super.getHeight());
 		canvas.setIgnoreRepaint(true);
 		canvas.setFocusTraversalKeysEnabled(false);
 		
 		canvas.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent ce) {
-				if(isProcessingEvents) {
-					tempEvents.add(new Event(11,ce));
-				}
-				else {
-					synchronized(events) {
-						events.add(new Event(11,ce));
-					}
-				}
+				events.add(new Event(11,ce));
 				
 				if(isActive) {
 					width = canvas.getWidth();
@@ -733,25 +779,11 @@ public abstract class Game extends Applet {
 		
 		canvas.addFocusListener(new FocusListener() {
 			public void focusGained(FocusEvent fe) {
-				if(isProcessingEvents) {
-					tempEvents.add(new Event(12,fe));
-				}
-				else {
-					synchronized(events) {
-						events.add(new Event(12,fe));
-					}
-				}
+				events.add(new Event(12,fe));
 			}
 			
 			public void focusLost(FocusEvent fe) {
-				if(isProcessingEvents) {
-					tempEvents.add(new Event(13,fe));
-				}
-				else {
-					synchronized(events) {
-						events.add(new Event(13,fe));
-					}
-				}
+				events.add(new Event(13,fe));
 				
 				input.reset();
 			}
@@ -855,7 +887,7 @@ public abstract class Game extends Applet {
 	 * @param screen The Screen to add.
 	 * @param name The name of the screen.
 	 */
-	public synchronized void addScreen(String name, Screen screen) {
+	public void addScreen(String name, Screen screen) {
 		if(screen == null)
 			throw new IllegalArgumentException("Screen cannot be null.");
 		if(name == null)
@@ -895,7 +927,7 @@ public abstract class Game extends Applet {
 	 * @param screen The Screen who's name is returned.
 	 * @return The name of the specified screen.
 	 */
-	public synchronized String getName(Screen screen) {
+	public String getName(Screen screen) {
 		for(String s : screens.keySet())
 			if(screens.get(s).screen == screen)
 				return s;
@@ -907,7 +939,7 @@ public abstract class Game extends Applet {
 	 * @param screen The Screen to be added and set.
 	 * @param name The name assigned to the Screen.
 	 */
-	public synchronized void setScreen(String name, Screen screen) {
+	public void setScreen(String name, Screen screen) {
 		addScreen(name,screen);
 		setScreen(name);
 	}
@@ -981,7 +1013,7 @@ public abstract class Game extends Applet {
 		addInputListener(screens.get(name),listener);
 	}
 	
-	private synchronized void addInputListener(ScreenInfo screenInfo, InputListener listener) {
+	private void addInputListener(ScreenInfo screenInfo, InputListener listener) {
 		if(screenInfo == null || !screens.containsValue(screenInfo))
 			throw new IllegalArgumentException("Screen has not been added.");
 		
@@ -1016,7 +1048,7 @@ public abstract class Game extends Applet {
 		removeInputListener(screens.get(name),listener);
 	}
 	
-	private synchronized void removeInputListener(ScreenInfo screenInfo, InputListener listener) {
+	private void removeInputListener(ScreenInfo screenInfo, InputListener listener) {
 		if(screenInfo == null || !screens.containsValue(screenInfo))
 			throw new IllegalArgumentException("Screen has not been added.");
 		
@@ -1024,6 +1056,17 @@ public abstract class Game extends Applet {
 			throw new IllegalArgumentException("InputListener cannot be null.");
 		
 		screenInfo.listeners.remove(listener);
+	}
+	
+	public void addCallback(long delay, Runnable r) {
+		if(r == null)
+			throw new NullPointerException("Runnable is null");
+		
+		callbacks.add(new Callback(r,delay));
+	}
+	
+	public boolean removeCallback(Runnable r) {
+		return callbacks.remove(r);
 	}
 	
 	/**
@@ -1064,6 +1107,14 @@ public abstract class Game extends Applet {
 	 */
 	public void setFPS(int FPS) {
 		this.FPS = FPS;
+	}
+	
+	public void setMaximumUpdatesBeforeRender(int count) {
+		maxUpdates = count;
+	}
+	
+	public int getMaximumUpdatesBeforeRender() {
+		return maxUpdates;
 	}
 	
 	/**
@@ -1117,126 +1168,62 @@ public abstract class Game extends Applet {
 		}
 	}
 	
+	private static class Callback {
+		private final Runnable r;
+		private final long delay;
+		
+		private long lastTime;
+		
+		public Callback(Runnable r, long delay) {
+			this.r = r;
+			this.delay = delay;
+			lastTime = System.nanoTime();
+		}
+	}
+	
 	private class Listener implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
 		public void keyTyped(KeyEvent key) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(0,key));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(0,key));
-				}
-			}
+			events.add(new Event(0,key));
 		}
 		
 		public void keyPressed(KeyEvent key) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(1,key));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(1,key));
-				}
-			}
+			events.add(new Event(1,key));
 		}
 		
 		public void keyReleased(KeyEvent key) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(2,key));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(2,key));
-				}
-			}
+			events.add(new Event(2,key));
 		}
 		
 		public void mouseClicked(MouseEvent me) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(3,me));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(3,me));
-				}
-			}
+			events.add(new Event(3,me));
 		}
 		
 		public void mouseEntered(MouseEvent me) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(4,me));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(4,me));
-				}
-			}
+			events.add(new Event(4,me));
 		}
 		
 		public void mouseExited(MouseEvent me) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(5,me));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(5,me));
-				}
-			}
+			events.add(new Event(5,me));
 		}
 		
 		public void mousePressed(MouseEvent me) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(6,me));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(6,me));
-				}
-			}
+			events.add(new Event(6,me));
 		}
 		
 		public void mouseReleased(MouseEvent me) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(7,me));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(7,me));
-				}
-			}
+			events.add(new Event(7,me));
 		}
 		
 		public void mouseDragged(MouseEvent me) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(8,me));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(8,me));
-				}
-			}
+			events.add(new Event(8,me));
 		}
 		
 		public void mouseMoved(MouseEvent me) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(9,me));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(9,me));
-				}
-			}
+			events.add(new Event(9,me));
 		}
 		
 		public void mouseWheelMoved(MouseWheelEvent mwe) {
-			if(isProcessingEvents) {
-				tempEvents.add(new Event(10,mwe));
-			}
-			else {
-				synchronized(events) {
-					events.add(new Event(10,mwe));
-				}
-			}
+			events.add(new Event(10,mwe));
 		}
 	}
 }
