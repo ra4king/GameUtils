@@ -91,19 +91,10 @@ public class DatagramPacketIO implements PacketIO {
 		
 		in.clear();
 		
-		SocketAddress address;
+		SocketAddress address = channel.receive(in);
 		
-		if(channel.isConnected()) {
-			if(channel.read(in) <= 0)
-				return null;
-			address = this.address;
-		}
-		else {
-			address = channel.receive(in);
-			
-			if(address == null)
-				return null;
-		}
+		if(address == null)
+			return null;
 		
 		in.flip();
 		
