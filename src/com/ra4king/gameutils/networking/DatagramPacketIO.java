@@ -40,7 +40,7 @@ public class DatagramPacketIO implements PacketIO {
 	}
 	
 	public DatagramPacketIO(InetSocketAddress address, boolean isBlocking, int bufferSize) throws IOException {
-		this(DatagramChannel.open(),address,bufferSize);
+		this(DatagramChannel.open(),address,isBlocking,bufferSize);
 	}
 	
 	public DatagramPacketIO(DatagramChannel channel) throws IOException {
@@ -91,10 +91,19 @@ public class DatagramPacketIO implements PacketIO {
 		
 		in.clear();
 		
-		SocketAddress address = channel.receive(in);
+		SocketAddress address;
 		
-		if(address == null)
-			return null;
+		if(channel.isConnected()) {
+			if(channel.read(in) <= 0)
+				return null;
+			address = this.address;
+		}
+		else {
+			address = channel.receive(in);
+			
+			if(address == null)
+				return null;
+		}
 		
 		in.flip();
 		
@@ -109,9 +118,7 @@ public class DatagramPacketIO implements PacketIO {
 		ByteBuffer data = packet.getData();
 		
 		data.flip();
-		out.putInt(data.remaining());
 		out.put(data);
-		
 		out.flip();
 		
 		SocketAddress sa = (packet.getAddress() == null ? address : packet.getAddress());
@@ -144,7 +151,7 @@ public class DatagramPacketIO implements PacketIO {
 	}
 	
 	public boolean isConnected() {
-		return channel.socket().isClosed();
+		throw new UnsupportedOperationException("UDP has no form of 'connection'");
 	}
 	
 	public void setBlocking(boolean isBlocking) throws IOException {
