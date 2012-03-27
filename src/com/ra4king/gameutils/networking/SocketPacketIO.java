@@ -68,24 +68,26 @@ public class SocketPacketIO implements PacketIO {
 		if(!isConnected())
 			throw new IOException("Connection is closed.");
 		
-		if(isBlocking()) {
-			while(in.position() < 4 || in.position()-4 < in.getInt(0)) {
-				if(channel.read(in) <= 0) {
+		if(in.position() < 4 || in.getInt(0) > in.position()-4) {
+			if(isBlocking()) {
+				do {
+					if(channel.read(in) <= 0) {
+						isClosed = true;
+						throw new IOException("Connection is closed.");
+					}
+				} while(in.position() < 4 || in.getInt(0) > in.position()-4);
+			}
+			else {
+				int read = channel.read(in);
+				
+				if(read == -1) {
 					isClosed = true;
 					throw new IOException("Connection is closed.");
 				}
+				
+				if(read == 0 || in.position() < 4 || in.getInt(0) > in.position()-4)
+					return null;
 			}
-		}
-		else {
-			int read = channel.read(in);
-			
-			if(read == -1) {
-				isClosed = true;
-				throw new IOException("Connection is closed.");
-			}
-			
-			if(read == 0 || (in.position() >= 4 && in.position()-4 < in.getInt(0)))
-				return null;
 		}
 		
 		in.flip();
