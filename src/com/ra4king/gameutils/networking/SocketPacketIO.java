@@ -13,7 +13,7 @@ import java.nio.channels.SocketChannel;
 public class SocketPacketIO implements PacketIO {
 	private SocketChannel channel;
 	private ByteBuffer in, out;
-	private boolean isClosed;
+	private boolean isClosed = true;
 	
 	public SocketPacketIO(String address, int port) throws IOException {
 		this(address,port,true);
@@ -60,6 +60,8 @@ public class SocketPacketIO implements PacketIO {
 		channel.socket().setTcpNoDelay(true);
 		
 		setBufferSize(bufferSize);
+		
+		isClosed = false;
 	}
 	
 	public Packet read() throws IOException {
