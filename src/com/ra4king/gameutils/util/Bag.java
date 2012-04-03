@@ -52,9 +52,18 @@ public class Bag<T> extends ArrayList<T> {
 			private int pos, knownMod = modCount;
 			
 			public boolean hasNext() {
-				boolean hn = pos < size();
+				boolean hn = false;
+				
+				for(int a = pos; a < size(); a++) {
+					if(get(a) != null) {
+						hn = true;
+						break;
+					}
+				}
+				
 				if(!hn)
 					clean();
+				
 				return hn;
 			}
 			
@@ -64,8 +73,11 @@ public class Bag<T> extends ArrayList<T> {
 				if(!hasNext())
 					throw new NoSuchElementException("reached the end");
 				
-				T t;
-				while((t = get(pos++)) == null);
+				T t = null;
+				while(hasNext() && (t = get(pos++)) == null);
+				
+				if(t == null)
+					throw new NoSuchElementException("reached the end");
 				
 				return t;
 			}
