@@ -535,9 +535,9 @@ public abstract class Game extends Applet {
 					if(sleepTime <= 0)
 						continue;
 					
-					long prevTime = System.nanoTime();
-					while(System.nanoTime()-prevTime <= sleepTime) {
-						if(System.nanoTime()-prevTime <= sleepTime * 0.9)
+					long prevTime = System.nanoTime(), timePassed;
+					while((timePassed = System.nanoTime()-prevTime) <= sleepTime) {
+						if(timePassed <= sleepTime * 0.8)
 							Thread.sleep(1);
 						else
 							Thread.yield();
