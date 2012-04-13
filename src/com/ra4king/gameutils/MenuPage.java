@@ -57,7 +57,7 @@ public class MenuPage implements Screen {
 	/**
 	 * Calls all added Widget's show() method.
 	 */
-	public synchronized void show() {
+	public void show() {
 		for(Widget w : widgets)
 			w.show();
 	}
@@ -65,27 +65,27 @@ public class MenuPage implements Screen {
 	/**
 	 * Calls all added Widget's hide() method.
 	 */
-	public synchronized void hide() {
+	public void hide() {
 		for(Widget w : widgets)
 			w.hide();
 	}
 	
-	public synchronized void paused() {
+	public void paused() {
 		for(Widget w : widgets)
 			w.paused();
 	}
 	
-	public synchronized void resumed() {
+	public void resumed() {
 		for(Widget w : widgets)
 			w.resumed();
 	}
 	
-	public synchronized void resized(int width, int height) {}
+	public void resized(int width, int height) {}
 	
 	/**
 	 * Calls all added Widget's update(long) method.
 	 */
-	public synchronized void update(long deltaTime) {
+	public void update(long deltaTime) {
 		for(Widget w : widgets)
 			w.update(deltaTime);
 	}
@@ -93,7 +93,7 @@ public class MenuPage implements Screen {
 	/**
 	 * Draws the background then calls all added Widget's draw(Graphics2D) method in the order they were added in.
 	 */
-	public synchronized void draw(Graphics2D g) {
+	public void draw(Graphics2D g) {
 		Image bg = (this.bg == null ? game.getArt().get(bgImage) : this.bg);
 		
 		if(bg != null)
@@ -116,7 +116,7 @@ public class MenuPage implements Screen {
 	 * @param widget The Widget to add.
 	 * @return The Widget added.
 	 */
-	public synchronized Widget add(Widget widget) {
+	public Widget add(Widget widget) {
 		if(widget == null)
 			throw new IllegalArgumentException("Widget cannot be null.");
 		
@@ -142,7 +142,7 @@ public class MenuPage implements Screen {
 	 * @param widget The Widget to be removed.
 	 * @return True if the Widget has been found and removed, false otherwise.
 	 */
-	public synchronized boolean remove(Widget widget) {
+	public boolean remove(Widget widget) {
 		return widgets.remove(widget);
 	}
 	

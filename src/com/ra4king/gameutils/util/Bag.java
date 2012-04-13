@@ -8,6 +8,8 @@ import java.util.NoSuchElementException;
 public class Bag<T> extends ArrayList<T> {
 	private static final long serialVersionUID = 8096168672390044428L;
 	
+	private volatile int iteratorCount;
+	
 	public boolean add(T t) {
 		checkIfNull(t);
 		modCount--;
@@ -51,6 +53,10 @@ public class Bag<T> extends ArrayList<T> {
 		return new Iterator<T>() {
 			private int pos, knownMod = modCount;
 			
+			{
+				iteratorCount++;
+			}
+			
 			public boolean hasNext() {
 				boolean hn = false;
 				
@@ -61,24 +67,31 @@ public class Bag<T> extends ArrayList<T> {
 					}
 				}
 				
-				if(!hn)
-					clean();
+				if(!hn) {
+					iteratorCount--;
+					if(iteratorCount == 0)
+						clean();
+				}
 				
 				return hn;
 			}
 			
-			public T next() {
+			private T nextItem() {
 				checkForCoMod();
 				
 				if(!hasNext())
 					throw new NoSuchElementException("reached the end");
 				
 				T t = null;
-				while(hasNext() && (t = get(pos++)) == null);
+				while((t = get(pos++)) == null);
 				
+				return t;
+			}
+			
+			public T next() {
+				T t = nextItem();
 				if(t == null)
-					throw new NoSuchElementException("reached the end");
-				
+					System.out.println("IT'S NULL!!!");
 				return t;
 			}
 			
@@ -96,7 +109,7 @@ public class Bag<T> extends ArrayList<T> {
 		};
 	}
 	
-	private void clean() {
+	public void clean() {
 		while(remove(null));
 	}
 	

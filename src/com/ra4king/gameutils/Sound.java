@@ -81,7 +81,7 @@ public class Sound extends Assets<Clip> {
 	/**
 	 * Pauses all currently playing Clips.
 	 */
-	public synchronized void pause() {
+	public void pause() {
 		for(Clip c : assets.values())
 			c.stop();
 	}
@@ -89,7 +89,7 @@ public class Sound extends Assets<Clip> {
 	/**
 	 * Plays all currently paused Clips.
 	 */
-	public synchronized void resume() {
+	public void resume() {
 		for(Clip c : assets.values()) {
 			if(on && c.getMicrosecondPosition() != c.getMicrosecondLength() &&
 					c.getMicrosecondPosition() != 0) {
@@ -124,7 +124,7 @@ public class Sound extends Assets<Clip> {
 	 * Sets the sound on/off.
 	 * @param isOn If true, all currently playing Clips are set to the minimum volume, else they are set to default volume.
 	 */
-	public synchronized void setOn(boolean isOn) {
+	public void setOn(boolean isOn) {
 		on = isOn;
 		
 		for(Clip c : assets.values()) {

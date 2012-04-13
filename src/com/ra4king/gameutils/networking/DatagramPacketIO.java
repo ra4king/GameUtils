@@ -101,7 +101,7 @@ public class DatagramPacketIO implements PacketIO {
 		return new Packet((ByteBuffer)ByteBuffer.allocate(in.remaining()).put(in).flip(),address);
 	}
 	
-	public synchronized boolean write(Packet packet) throws IOException {
+	public boolean write(Packet packet) throws IOException {
 		final ByteBuffer out = this.out;
 		
 		out.clear();

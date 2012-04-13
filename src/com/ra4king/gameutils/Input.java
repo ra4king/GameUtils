@@ -3,21 +3,19 @@ package com.ra4king.gameutils;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Handles key, mouse, and mouse motion input.
  * @author Roi Atalla
  */
 public class Input {
-	private Set<Integer> keys;
+	private HashSet<Integer> keys;
 	private Point currentMouseLocation;
 	private MouseEvent lastMousePressed, currentMousePressed;
 	
 	Input() {
-		keys = Collections.synchronizedSet(new HashSet<Integer>());
+		keys = new HashSet<Integer>();
 	}
 	
 	/**

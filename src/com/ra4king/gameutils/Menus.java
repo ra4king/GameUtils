@@ -50,7 +50,7 @@ public class Menus implements Screen {
 	 * @param page The MenuPage to add.
 	 * @return The MenuPage that was added.
 	 */
-	public synchronized MenuPage addPage(String name, MenuPage page) {
+	public MenuPage addPage(String name, MenuPage page) {
 		if(name == null)
 			throw new IllegalArgumentException("Name cannot be null");
 		if(page == null)
@@ -89,7 +89,7 @@ public class Menus implements Screen {
 	 * @param page The MenuPage whose name is returned.
 	 * @return The name of the MenuPage. If it is not found, returns null.
 	 */
-	public synchronized String getMenuPageName(MenuPage page) {
+	public String getMenuPageName(MenuPage page) {
 		for(String s : menuPages.keySet())
 			if(menuPages.get(s) == page)
 				return s;

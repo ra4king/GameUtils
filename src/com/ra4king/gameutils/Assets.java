@@ -31,7 +31,7 @@ public abstract class Assets<T> {
 	
 	public abstract T extract(URL url) throws IOException;
 	
-	public synchronized T add(String name, T t) {
+	public T add(String name, T t) {
 		assets.put(name,t);
 		return t;
 	}
@@ -40,7 +40,7 @@ public abstract class Assets<T> {
 		return assets.get(name);
 	}
 	
-	public synchronized String getName(T t) {
+	public String getName(T t) {
 		for(String s : assets.keySet()) {
 			if(assets.get(s) == t)
 				return s;
@@ -69,7 +69,7 @@ public abstract class Assets<T> {
 		add(second,assets.put(first,get(second)));
 	}
 	
-	public synchronized T remove(String name) {
+	public T remove(String name) {
 		T t = assets.get(name);
 		assets.remove(name);
 		return t;
@@ -99,7 +99,7 @@ public abstract class Assets<T> {
 			addFile(file,getFileName(file));
 		}
 		
-		public synchronized void addFile(String file, String name) {
+		public void addFile(String file, String name) {
 			files.put(name,file);
 		}
 		
@@ -114,11 +114,11 @@ public abstract class Assets<T> {
 			}
 		}
 		
-		public synchronized void start() {
+		public void start() {
 			new Thread(this).start();
 		}
 		
-		public synchronized void run() {
+		public void run() {
 			for(String s : files.keySet()) {
 				try{
 					add(files.get(s),s);

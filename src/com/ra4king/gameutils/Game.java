@@ -473,10 +473,8 @@ public abstract class Game extends Applet {
 			long diffTime = System.nanoTime()-lastTime;
 			lastTime += diffTime;
 			
-			int updateCount = 0;
-			
 			if(!isPaused()) {
-				while(diffTime > 0 && (maxUpdates <= 0 || updateCount < maxUpdates)) {
+				while(diffTime > 0) {
 					int fps = FPS > 0 ? FPS : 60;
 					long deltaTime = Math.min(diffTime,ONE_SECOND/fps);
 					
@@ -488,8 +486,6 @@ public abstract class Game extends Applet {
 					}
 					
 					diffTime -= deltaTime;
-					
-					updateCount++;
 				}
 			}
 			

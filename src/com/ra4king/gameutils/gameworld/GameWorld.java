@@ -50,8 +50,7 @@ public class GameWorld implements Screen {
 		try{
 			for(Bag<Entity> b : entities)
 				for(Entity e : b)
-					if(e != null)
-						e.init(this);
+					e.init(this);
 		}
 		finally {
 			postLoop();
@@ -63,7 +62,7 @@ public class GameWorld implements Screen {
 	/**
 	 * Calls each Entity's <code>show()</code> method in z-index order.
 	 */
-	public synchronized void show() {
+	public void show() {
 		hasShown = true;
 		
 		//for(Entity e : getEntities())
@@ -73,8 +72,7 @@ public class GameWorld implements Screen {
 		try{
 			for(Bag<Entity> b : entities)
 				for(Entity e : b)
-					if(e != null)
-						e.show();
+					e.show();
 		}
 		finally {
 			postLoop();
@@ -84,7 +82,7 @@ public class GameWorld implements Screen {
 	/**
 	 * Calls each Entity's <code>hide()</code> method in z-index order.
 	 */
-	public synchronized void hide() {
+	public void hide() {
 		hasShown = false;
 		
 		//for(Entity e : getEntities())
@@ -94,15 +92,14 @@ public class GameWorld implements Screen {
 		try{
 			for(Bag<Entity> b : entities)
 				for(Entity e : b)
-					if(e != null)
-						e.hide();
+					e.hide();
 		}
 		finally {
 			postLoop();
 		}
 	}
 	
-	public synchronized void paused() {
+	public void paused() {
 		//for(Entity e : getEntities())
 		
 		preLoop();
@@ -110,51 +107,57 @@ public class GameWorld implements Screen {
 		try{
 			for(Bag<Entity> b : entities)
 				for(Entity e : b)
-					if(e != null)
-						e.paused();
+					e.paused();
 		}
 		finally {
 			postLoop();
 		}
 	}
 	
-	public synchronized void resumed() {
-		//for(Entity e : getEntities())
-		
+	public void resumed() {
 		preLoop();
 		
 		try{
 			for(Bag<Entity> b : entities)
 				for(Entity e : b)
-					if(e != null)
-						e.resumed();
+					e.resumed();
 		}
 		finally {
 			postLoop();
 		}
 	}
 	
-	public synchronized void resized(int width, int height) {}
+	public void resized(int width, int height) {}
 	
 	/**
 	 * Calls each Entity's <code>update(long)</code> method in z-index order.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
-	public synchronized void update(long deltaTime) {
+	public void update(long deltaTime) {
 		//for(Entity e : getEntities())
 		
 		preLoop();
 		
 		try {
-			for(Bag<Entity> b : entities)
-				for(Entity e : b)
-					if(e != null)
+			for(Bag<Entity> b : entities) {
+				Entity lastE = null;
+				try {
+					for(Entity e : b) {
+						lastE = e;
 						try{
 							e.update(deltaTime);
 						}
 						catch(Exception exc) {
 							exc.printStackTrace();
 						}
+					}
+				}
+				catch(RuntimeException exc) {
+					exc.printStackTrace();
+					System.out.println(lastE);
+					//throw exc;
+				}
+			}
 		}
 		finally {
 			postLoop();
@@ -165,7 +168,7 @@ public class GameWorld implements Screen {
 	 * Draws the background then all the Entities in z-index order.
 	 * @param g The Graphics context to draw to the screen.
 	 */
-	public synchronized void draw(Graphics2D g) {
+	public void draw(Graphics2D g) {
 		g = (Graphics2D)g.create();
 		
 		Image bg = (this.bg == null ? parent.getArt().get(bgImage) : this.bg);
@@ -183,8 +186,7 @@ public class GameWorld implements Screen {
 			for(Bag<Entity> b : entities)
 				for(Entity e : b)
 					try{
-						if(e != null)
-							e.draw((Graphics2D)g.create());
+						e.draw((Graphics2D)g.create());
 					}
 					catch(Exception exc) {
 						exc.printStackTrace();
@@ -207,7 +209,7 @@ public class GameWorld implements Screen {
 	 * @param e The Entity to be added.
 	 * @return The Entity that was added.
 	 */
-	public synchronized Entity add(Entity e) {
+	public Entity add(Entity e) {
 		return add(0,e);
 	}
 	
@@ -217,7 +219,7 @@ public class GameWorld implements Screen {
 	 * @param zindex The z-index of this Entity.
 	 * @return The Entity that was added.
 	 */
-	public synchronized Entity add(int zindex, Entity e) {
+	public Entity add(int zindex, Entity e) {
 		if(isLooping) {
 			temp.add(new Temp(zindex,e));
 		}
@@ -281,7 +283,7 @@ public class GameWorld implements Screen {
 	 * @param e The Entity to remove.
 	 * @return True if the Entity was found and removed, false if the Entity was not found.
 	 */
-	public synchronized boolean remove(Entity e) {
+	public boolean remove(Entity e) {
 		boolean removed = false;
 		
 		for(Bag<Entity> bag : entities)
@@ -296,7 +298,7 @@ public class GameWorld implements Screen {
 	/**
 	 * Clears this game world.
 	 */
-	public synchronized void clear() {
+	public void clear() {
 		entities.clear();
 		temp.clear();
 		
@@ -311,7 +313,7 @@ public class GameWorld implements Screen {
 	 * @param newZIndex The new z-index
 	 * @return True if the Entity was found and updated, false otherwise.
 	 */
-	public synchronized boolean changeZIndex(Entity e, int newZIndex) {
+	public boolean changeZIndex(Entity e, int newZIndex) {
 		if(isLooping) {
 			int i = temp.indexOf(e);
 			if(i >= 0) {
@@ -335,7 +337,7 @@ public class GameWorld implements Screen {
 	 * @param e The Entity who's index is returned.
 	 * @return The z-index of the specified Entity, or -1 if the Entity was not found.
 	 */
-	public synchronized int getZIndex(Entity e) {
+	public int getZIndex(Entity e) {
 		if(isLooping) {
 			int i = temp.indexOf(e);
 			if(i >= 0)
@@ -353,7 +355,7 @@ public class GameWorld implements Screen {
 	 * @param zindex The z-index to check.
 	 * @return True if the specified z-index exists, false otherwise.
 	 */
-	public synchronized boolean containsZIndex(int zindex) {
+	public boolean containsZIndex(int zindex) {
 		return zindex < entities.size();
 	}
 	
@@ -362,7 +364,7 @@ public class GameWorld implements Screen {
 	 * @param zindex The z-index.
 	 * @return A list of all Entities at the specified z-index.
 	 */
-	public synchronized ArrayList<Entity> getEntitiesAt(int zindex) {
+	public ArrayList<Entity> getEntitiesAt(int zindex) {
 		return entities.get(zindex);
 	}
 	
@@ -370,11 +372,12 @@ public class GameWorld implements Screen {
 	 * A list of all Entities in this entire world.
 	 * @return A list of all Entities in this world in z-index order.
 	 */
-	public synchronized ArrayList<Entity> getEntities() {
+	public ArrayList<Entity> getEntities() {
 		ArrayList<Entity> allEntities = new ArrayList<Entity>();
 		
 		for(Bag<Entity> bag : entities)
-			allEntities.addAll(bag);
+			for(Entity e : bag)
+				allEntities.add(e);
 		
 		return allEntities;
 	}
@@ -383,7 +386,7 @@ public class GameWorld implements Screen {
 	 * Sets the background of this GameWorld with an image in Art.
 	 * @param s The associated name of an image in Art. This image will be drawn before all other Entities.
 	 */
-	public synchronized void setBackground(String s) {
+	public void setBackground(String s) {
 		bg = null;
 		bgImage = s;
 	}
@@ -392,7 +395,7 @@ public class GameWorld implements Screen {
 	 * Sets the background of this GameWorld. A compatible image is created.
 	 * @param bg The image to be drawn before all other Entities.
 	 */
-	public synchronized void setBackground(Image bg) {
+	public void setBackground(Image bg) {
 		bgImage = null;
 		
 		this.bg = Art.createCompatibleImage(bg);
@@ -404,7 +407,7 @@ public class GameWorld implements Screen {
 	 * and stretches it to the width and height of the parent.
 	 * @param color The color to be used as the entire background. It will be drawn before all other Entities.
 	 */
-	public synchronized void setBackground(Color color) {
+	public void setBackground(Color color) {
 		bgImage = null;
 		
 		bg = Art.createCompatibleImage(1, 1, color.getAlpha() == 0 || color.getAlpha() == 255 ? (color.getAlpha() == 0 ? Transparency.BITMASK : Transparency.OPAQUE) : Transparency.TRANSLUCENT);
@@ -427,7 +430,7 @@ public class GameWorld implements Screen {
 	/**
 	 * @return The total number of Entities in this world.
 	 */
-	public synchronized int size() {
+	public int size() {
 		return getEntities().size();
 	}
 	
@@ -481,9 +484,6 @@ public class GameWorld implements Screen {
 			add(p.zIndex,p.e);
 		
 		temp.clear();
-		
-		for(Bag<Entity> bag : entities)
-			bag.remove(null);
 	}
 	
 	private class Temp {
