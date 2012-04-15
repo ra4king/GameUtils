@@ -157,7 +157,7 @@ public abstract class Game extends Applet {
 	public static final int MAX_UPDATES = -1;
 	
 	/**
-	 * 1 second in nanoseconds, AKA 1,000,000 nanoseconds.
+	 * 1 second in nanoseconds, AKA 1,000,000,000 nanoseconds.
 	 */
 	public static final long ONE_SECOND = (long)1e9;
 	
@@ -476,7 +476,7 @@ public abstract class Game extends Applet {
 			if(!isPaused()) {
 				while(diffTime > 0) {
 					int fps = FPS > 0 ? FPS : 60;
-					long deltaTime = Math.min(diffTime,ONE_SECOND/fps);
+					long deltaTime = Math.min(diffTime,Math.round(ONE_SECOND/(double)fps));
 					
 					try{
 						update(deltaTime);
