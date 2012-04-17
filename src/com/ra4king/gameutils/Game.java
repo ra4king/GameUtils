@@ -405,6 +405,8 @@ public abstract class Game extends Applet {
 		width = canvas.getWidth();
 		height = canvas.getHeight();
 		
+		requestFocus();
+		
 		canvas.requestFocus();
 	}
 	
