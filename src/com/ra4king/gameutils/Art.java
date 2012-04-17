@@ -32,8 +32,8 @@ public class Art extends Assets<Image> {
 	 * @param height the height of each quadrant inside the image.
 	 * @return The images split from the original image.
 	 */
-	public Image[][] splitAndAdd(Image image, int width, int height) {
-		Image im[][] = split(image,width,height);
+	public BufferedImage[][] splitAndAdd(Image image, int width, int height) {
+		BufferedImage im[][] = split(image,width,height);
 		for(Image i[] : im)
 			for(Image i2 : i)
 				add(i2,"Image"+size());
@@ -54,15 +54,26 @@ public class Art extends Assets<Image> {
 		if(r-(int)r != 0.0 || c-(int)c != 0.0)
 			throw new IllegalArgumentException("Image is not evenly divisible.");
 		
+		boolean isBI = image instanceof BufferedImage;
+		
+		if(isBI)
+			image = createCompatibleImage(image);
+		
 		BufferedImage newImages[][] = new BufferedImage[image.getHeight(null)/height][image.getWidth(null)/width];
 		for(int a = 0; a < newImages.length; a++) {
 			for(int b = 0; b < newImages[a].length; b++) {
-				newImages[a][b] = createCompatibleImage(width,height);
-				Graphics2D g = newImages[a][b].createGraphics();
-				g.drawImage(image, 0, 0, width, height, b*width, a*height, b*width+width, a*height+height, null);
-				g.dispose();
+				if(isBI) {
+					newImages[a][b] = ((BufferedImage)image).getSubimage(b*width, a*height, b*width+width, a*height+height);
+				}
+				else {
+					newImages[a][b] = createCompatibleImage(width,height);
+					Graphics2D g = newImages[a][b].createGraphics();
+					g.drawImage(image, 0, 0, width, height, b*width, a*height, b*width+width, a*height+height, null);
+					g.dispose();
+				}
 			}
 		}
+		
 		return newImages;
 	}
 	
