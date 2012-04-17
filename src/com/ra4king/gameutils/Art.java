@@ -62,9 +62,8 @@ public class Art extends Assets<Image> {
 		BufferedImage newImages[][] = new BufferedImage[image.getHeight(null)/height][image.getWidth(null)/width];
 		for(int a = 0; a < newImages.length; a++) {
 			for(int b = 0; b < newImages[a].length; b++) {
-				if(isBI) {
-					newImages[a][b] = ((BufferedImage)image).getSubimage(b*width, a*height, b*width+width, a*height+height);
-				}
+				if(isBI)
+					newImages[a][b] = ((BufferedImage)image).getSubimage(b*width, a*height, width, height);
 				else {
 					newImages[a][b] = createCompatibleImage(width,height);
 					Graphics2D g = newImages[a][b].createGraphics();
