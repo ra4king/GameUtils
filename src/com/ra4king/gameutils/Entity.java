@@ -192,6 +192,10 @@ public abstract class Entity implements Element {
 		return getBounds().contains(x,y);
 	}
 	
+	public boolean intersects(Entity other) {
+		return getBounds().intersects(other.getBounds());
+	}
+	
 	public boolean intersects(Rectangle2D.Double r) {
 		return getBounds().intersects(r);
 	}
