@@ -93,6 +93,7 @@ public class Input {
 	}
 	
 	void mouseDragged(MouseEvent me) {
+		currentMousePressed = me;
 		currentMouseLocation = me.getPoint();
 	}
 }
