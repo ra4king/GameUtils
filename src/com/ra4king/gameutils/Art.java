@@ -25,6 +25,10 @@ public class Art extends Assets<Image> {
 		return ImageIO.read(url);
 	}
 	
+	public BufferedImage[][] splitAndAdd(String file, int width, int height) throws IOException {
+		return splitAndAdd(extract(getClass().getClassLoader().getResource("res/" + file)),width,height,getFileName(file));
+	}
+	
 	/**
 	 * Splits the image with the specified width and height of each quadrant and adds the pieces to the map.
 	 * @param image The image to be split.
@@ -32,11 +36,12 @@ public class Art extends Assets<Image> {
 	 * @param height the height of each quadrant inside the image.
 	 * @return The images split from the original image.
 	 */
-	public BufferedImage[][] splitAndAdd(Image image, int width, int height) {
+	public BufferedImage[][] splitAndAdd(Image image, int width, int height, String name) {
 		BufferedImage im[][] = split(image,width,height);
+		int num = 0;
 		for(Image i[] : im)
 			for(Image i2 : i)
-				add(i2,"Image"+size());
+				add(i2,name+(num++));
 		return im;
 	}
 	
