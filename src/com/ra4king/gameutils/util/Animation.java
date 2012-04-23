@@ -14,12 +14,14 @@ public class Animation {
 	private ArrayList<Frame> frames;
 	private long totalTime, currentTime;
 	private int frameIndex;
+	private boolean looping;
 	
 	/**
 	 * Default constructor.
 	 */
-	public Animation() {
+	public Animation(boolean looping) {
 		frames = new ArrayList<Frame>();
+		this.looping = looping;
 	}
 	
 	/**
@@ -68,9 +70,10 @@ public class Animation {
 		
 		Image images[][] = Art.split(i, width, height);
 		
+		int count = 0;
 		for(Image row[] : images)
 			for(Image col : row)
-				addFrame(col,times[rows*cols]);
+				addFrame(col,times[count++]);
 	}
 	
 	/**
@@ -81,6 +84,10 @@ public class Animation {
 		return frames.size() == 0 ? null : frames.get(frameIndex).i;
 	}
 	
+	public boolean isDone() {
+		return looping ? false : frameIndex >= frames.size();
+	}
+	
 	/**
 	 * Must be called to update the animation
 	 * @param deltaTime The time passed since the last call to it.
@@ -89,7 +96,7 @@ public class Animation {
 		if(frames.size() > 1) {
 			currentTime += deltaTime;
 			
-			if(currentTime > totalTime) {
+			if(currentTime > totalTime && looping) {
 				frameIndex = 0;
 				currentTime %= totalTime;
 			}
