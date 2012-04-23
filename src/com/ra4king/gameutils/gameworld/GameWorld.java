@@ -9,17 +9,16 @@ import java.awt.Transparency;
 import java.util.ArrayList;
 
 import com.ra4king.gameutils.Art;
+import com.ra4king.gameutils.BasicScreen;
 import com.ra4king.gameutils.Entity;
 import com.ra4king.gameutils.Game;
-import com.ra4king.gameutils.Screen;
 import com.ra4king.gameutils.util.Bag;
 
 /**
  * A GameWorld is a container of Entities. It has a z-buffer that goes in back-to-front order, 0 being the back.
  * @author Roi Atalla
  */
-public class GameWorld implements Screen {
-	private Game parent;
+public class GameWorld extends BasicScreen {
 	private ArrayList<Bag<Entity>> entities;
 	private ArrayList<Temp> temp;
 	private Image bg;
@@ -41,7 +40,7 @@ public class GameWorld implements Screen {
 	}
 	
 	public void init(Game game) {
-		parent = game;
+		super.init(game);
 		
 		//for(Entity e : getEntities())
 		
@@ -171,7 +170,7 @@ public class GameWorld implements Screen {
 	public void draw(Graphics2D g) {
 		g = (Graphics2D)g.create();
 		
-		Image bg = (this.bg == null ? parent.getArt().get(bgImage) : this.bg);
+		Image bg = (this.bg == null ? getGame().getArt().get(bgImage) : this.bg);
 		
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
@@ -195,13 +194,6 @@ public class GameWorld implements Screen {
 		finally {
 			postLoop();
 		}
-	}
-	
-	/**
-	 * @return The parent of this object.
-	 */
-	public Game getGame() {
-		return parent;
 	}
 	
 	/**
@@ -423,7 +415,7 @@ public class GameWorld implements Screen {
 	 */
 	public Image getBackgroundImage() {
 		if(bg == null)
-			return parent.getArt().get(bgImage);
+			return getGame().getArt().get(bgImage);
 		return bg;
 	}
 	
@@ -432,22 +424,6 @@ public class GameWorld implements Screen {
 	 */
 	public int size() {
 		return getEntities().size();
-	}
-	
-	/**
-	 * This calls the parent's getWidth() method.
-	 * @return The width of this world.
-	 */
-	public int getWidth() {
-		return parent.getWidth();
-	}
-	
-	/**
-	 * This calls the parent's getHeight() method.
-	 * @return The height of this world.
-	 */
-	public int getHeight() {
-		return parent.getHeight();
 	}
 	
 	public void setXOffset(double xOffset) {
