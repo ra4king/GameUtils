@@ -21,14 +21,15 @@ public class MenuPage extends BasicScreen {
 	private String bgImage;
 	private boolean hasInited;
 	
+	public MenuPage() {
+		this(null);
+	}
+	
 	/**
 	 * Initializes this object.
 	 * @param menus The Menus parent of this MenuPage.
 	 */
 	public MenuPage(Menus menus) {
-		if(menus == null)
-			throw new IllegalArgumentException("Menus cannot be null.");
-		
 		this.menus = menus;
 		
 		widgets = new ArrayList<Widget>();
