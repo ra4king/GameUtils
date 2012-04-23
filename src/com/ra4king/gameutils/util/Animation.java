@@ -81,7 +81,7 @@ public class Animation {
 	 * @return The current image displayed.
 	 */
 	public Image getFrame() {
-		return frames.size() == 0 ? null : frames.get(frameIndex).i;
+		return frames.size() == 0 || isDone() ? null : frames.get(frameIndex).i;
 	}
 	
 	public boolean isDone() {
@@ -96,13 +96,18 @@ public class Animation {
 		if(frames.size() > 1) {
 			currentTime += deltaTime;
 			
-			if(currentTime > totalTime && looping) {
-				frameIndex = 0;
-				currentTime %= totalTime;
+			if(currentTime > totalTime) {
+				if(looping) {
+					frameIndex = 0;
+					currentTime %= totalTime;
+				}
+				else
+					frameIndex++;
 			}
 			
-			while(currentTime > frames.get(frameIndex).time)
-				frameIndex++;
+			if(!isDone())
+				while(currentTime > frames.get(frameIndex).time)
+					frameIndex++;
 		}
 	}
 	
