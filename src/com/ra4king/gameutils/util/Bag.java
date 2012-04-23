@@ -40,13 +40,15 @@ public class Bag<T> extends ArrayList<T> {
 			return true;
 		}
 		
-		int idx = indexOf(o);
-		if(idx == -1)
-			return false;
+		int idx;
+		boolean found = false;
 		
-		remove(idx);
+		while((idx = indexOf(o)) != -1) {
+			remove(idx);
+			found = true;
+		}
 		
-		return remove(o);
+		return found;
 	}
 	
 	public Iterator<T> iterator() {
