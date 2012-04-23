@@ -238,12 +238,6 @@ public class Label extends Widget {
 		randomColors = useRandom;
 	}
 	
-	public void paused() {}
-	
-	public void resumed() {}
-	
-	public void update(long deltaTime) {}
-	
 	/**
 	 * Fills the background then draws the text with the specified font and paint.
 	 * @param g The Graphics context to draw to the screen.

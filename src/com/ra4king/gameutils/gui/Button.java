@@ -11,9 +11,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
-import com.ra4king.gameutils.InputAdapter;
-import com.ra4king.gameutils.Screen;
-
 /**
  * A Button extends Widget and draws a button. If you are confused with the usage of Paint, remember Color implements Paint so you can still a Color if you wish.
  * @author Roi Atalla
@@ -56,6 +53,8 @@ public class Button extends Widget {
 	 * @param action The action to be called when this button is pressed.
 	 */
 	public Button(String text, int fontSize, double x, double y, int arcwidth, int archeight, boolean centered, Action action) {
+		setFocusable(false);
+		
 		this.action = action;
 		this.text = text;
 		
@@ -83,45 +82,6 @@ public class Button extends Widget {
 		disabledBorder = Color.black;
 		
 		isEnabled = true;
-	}
-	
-	public void init(Screen screen) {
-		super.init(screen);
-		
-		screen.getGame().addInputListener(screen, new InputAdapter() {
-			public void mousePressed(MouseEvent me, Screen screen) {
-				if(me.getButton() != MouseEvent.BUTTON1)
-					return;
-				
-				setPressed(false);
-				setHighlighted(false);
-				
-				if(getButtonBounds().contains(me.getPoint()) && isEnabled())
-					setPressed(true);
-			}
-			
-			public void mouseReleased(MouseEvent me, Screen screen) {
-				if(me.getButton() != MouseEvent.BUTTON1)
-					return;
-				
-				setHighlighted(false);
-				
-				if(getButtonBounds().contains(me.getPoint()) && isEnabled())
-					if(isPressed())
-						getAction().doAction(Button.this);
-					else
-						setHighlighted(true);
-				
-				setPressed(false);
-			}
-			
-			public void mouseMoved(MouseEvent me, Screen screen) {
-				setHighlighted(false);
-				
-				if(getButtonBounds().contains(me.getPoint()) && isEnabled() && !isPressed())
-					setHighlighted(true);
-			}
-		});
 	}
 	
 	/**
@@ -507,12 +467,6 @@ public class Button extends Widget {
 		disabledBorder = paint;
 	}
 	
-	public void paused() {}
-	
-	public void resumed() {}
-	
-	public void update(long deltaTime) {}
-	
 	/**
 	 * Draws the button.
 	 */
@@ -551,6 +505,42 @@ public class Button extends Widget {
 			g.setPaint(disabledBackground);
 			g.fill(getButtonBounds());
 		}
+	}
+	
+	@Override
+	public void mousePressed(MouseEvent me) {
+		if(me.getButton() != MouseEvent.BUTTON1)
+			return;
+		
+		setPressed(false);
+		setHighlighted(false);
+		
+		if(getButtonBounds().contains(me.getPoint()) && isEnabled())
+			setPressed(true);
+	}
+	
+	@Override
+	public void mouseReleased(MouseEvent me) {
+		if(me.getButton() != MouseEvent.BUTTON1)
+			return;
+		
+		setHighlighted(false);
+		
+		if(getButtonBounds().contains(me.getPoint()) && isEnabled())
+			if(isPressed())
+				getAction().doAction(Button.this);
+			else
+				setHighlighted(true);
+		
+		setPressed(false);
+	}
+	
+	@Override
+	public void mouseMoved(MouseEvent me) {
+		setHighlighted(false);
+		
+		if(getButtonBounds().contains(me.getPoint()) && isEnabled() && !isPressed())
+			setHighlighted(true);
 	}
 	
 	/**

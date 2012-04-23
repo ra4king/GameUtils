@@ -184,6 +184,9 @@ public abstract class Game extends Applet {
 	private volatile boolean isActive;
 	private volatile boolean isPaused;
 	
+	private ArrayList<TempListener> tempListeners;
+	private volatile boolean processingEvents;
+	
 	public Game(int width, int height) {
 		this(width,height,60,1.0);
 	}
@@ -225,6 +228,8 @@ public abstract class Game extends Applet {
 		input = new Input();
 		
 		events = new ConcurrentLinkedQueue<Event>();
+		
+		tempListeners = new ArrayList<TempListener>();
 		
 		this.width = width;
 		this.height = height;
@@ -576,6 +581,8 @@ public abstract class Game extends Applet {
 	}
 	
 	private void processEvents() {
+		processingEvents = true;
+		
 		while(!events.isEmpty()) {
 			Event e = events.poll();
 			
@@ -749,6 +756,16 @@ public abstract class Game extends Applet {
 					}
 			}
 		}
+		
+		processingEvents = false;
+		for(TempListener t : tempListeners) {
+			if(t.isAdding)
+				addInputListener(t.screenInfo, t.listener);
+			else
+				removeInputListener(t.screenInfo,t.listener);
+		}
+		
+		tempListeners.clear();
 		
 		events.clear();
 	}
@@ -1018,7 +1035,10 @@ public abstract class Game extends Applet {
 		if(listener == null)
 			throw new IllegalArgumentException("InputListener cannot be null.");
 		
-		screenInfo.listeners.add(listener);
+		if(processingEvents)
+			tempListeners.add(new TempListener(screenInfo,listener,true));
+		else
+			screenInfo.listeners.add(listener);
 	}
 	
 	/**
@@ -1053,7 +1073,10 @@ public abstract class Game extends Applet {
 		if(listener == null)
 			throw new IllegalArgumentException("InputListener cannot be null.");
 		
-		screenInfo.listeners.remove(listener);
+		if(processingEvents)
+			tempListeners.add(new TempListener(screenInfo,listener,false));
+		else
+			screenInfo.listeners.remove(listener);
 	}
 	
 	public void addCallback(long delay, Runnable r) {
@@ -1163,6 +1186,18 @@ public abstract class Game extends Applet {
 		public Event(int id, AWTEvent event) {
 			this.id = id;
 			this.event = event;
+		}
+	}
+	
+	private static class TempListener {
+		private ScreenInfo screenInfo;
+		private InputListener listener;
+		private boolean isAdding;
+		
+		public TempListener(ScreenInfo screenInfo, InputListener listener, boolean isAdding) {
+			this.screenInfo = screenInfo;
+			this.listener = listener;
+			this.isAdding = isAdding;
 		}
 	}
 	

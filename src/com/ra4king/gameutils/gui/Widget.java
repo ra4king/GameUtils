@@ -14,7 +14,9 @@ import com.ra4king.gameutils.Screen;
  * @author Roi Atalla
  */
 public abstract class Widget extends Entity {
-	private boolean hasFocus;
+	private InputListener input;
+	
+	private boolean hasFocus, isFocusable = true;
 	
 	/**
 	 * Sets X, Y, width and height to 0.
@@ -37,34 +39,34 @@ public abstract class Widget extends Entity {
 	public void init(Screen screen) {
 		super.init(screen);
 		
-		screen.getGame().addInputListener(screen, new InputListener() {
+		input = new InputListener() {
 			public void keyPressed(KeyEvent key, Screen screen) {
-				if(hasFocus)
+				if(!isFocusable || hasFocus)
 					Widget.this.keyPressed(key);
 			}
 			
 			public void keyReleased(KeyEvent key, Screen screen) {
-				if(hasFocus)
+				if(!isFocusable || hasFocus)
 					Widget.this.keyReleased(key);
 			}
 			
 			public void keyTyped(KeyEvent key, Screen screen) {
-				if(hasFocus)
+				if(!isFocusable || hasFocus)
 					Widget.this.keyTyped(key);
 			}
 			
 			public void mouseEntered(MouseEvent me, Screen screen) {
-				if(getBounds().contains(me.getPoint()))
+				if(!isFocusable || getBounds().contains(me.getPoint()))
 					Widget.this.mouseEntered(me);
 			}
 			
 			public void mouseExited(MouseEvent me, Screen screen) {
-				if(getBounds().contains(me.getPoint()))
+				if(!isFocusable || getBounds().contains(me.getPoint()))
 					Widget.this.mouseExited(me);
 			}
 			
 			public void mousePressed(MouseEvent me, Screen screen) {
-				if(getBounds().contains(me.getPoint())) {
+				if(!isFocusable || getBounds().contains(me.getPoint())) {
 					if(!hasFocus)
 						gainFocus();
 					
@@ -75,31 +77,52 @@ public abstract class Widget extends Entity {
 			}
 			
 			public void mouseReleased(MouseEvent me, Screen screen) {
-				if(hasFocus)
+				if(!isFocusable || hasFocus)
 					Widget.this.mouseReleased(me);
 			}
 			
 			public void mouseClicked(MouseEvent me, Screen screen) {
-				if(getBounds().contains(me.getPoint()))
+				if(!isFocusable || getBounds().contains(me.getPoint()))
 					Widget.this.mouseClicked(me);
 			}
 			
 			public void mouseDragged(MouseEvent me, Screen screen) {
-				if(hasFocus)
+				if(!isFocusable || hasFocus)
 					Widget.this.mouseDragged(me);
 			}
 			
 			public void mouseMoved(MouseEvent me, Screen screen) {
-				if(getBounds().contains(me.getPoint()))
+				if(!isFocusable || getBounds().contains(me.getPoint()))
 					Widget.this.mouseMoved(me);
 			}
 			
 			public void mouseWheelMoved(MouseWheelEvent mwe, Screen screen) {
-				if(getBounds().contains(mwe.getPoint()))
+				if(!isFocusable || getBounds().contains(mwe.getPoint()))
 					Widget.this.mouseWheelMoved(mwe);
 			}
-		});
+		};
 	}
+	
+	public boolean isFocusable() {
+		return isFocusable;
+	}
+	
+	public void setFocusable(boolean isFocusable) {
+		this.isFocusable = isFocusable;
+	}
+	
+	@Override
+	public void show() {
+		getParent().getGame().addInputListener(getParent(),input);
+	}
+	
+	@Override
+	public void hide() {
+		getParent().getGame().removeInputListener(getParent(),input);
+	}
+	
+	@Override
+	public void update(long deltaTime) {}
 	
 	public void gainFocus() {
 		this.hasFocus = true;

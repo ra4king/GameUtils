@@ -159,8 +159,6 @@ public class TextField extends Widget {
 		super.init(screen);
 	}
 	
-	public void update(long deltaTime) {}
-	
 	public void draw(Graphics2D g) {
 		g.setPaint(hasFocus() ? Color.cyan : border);
 		g.draw(getBounds());
