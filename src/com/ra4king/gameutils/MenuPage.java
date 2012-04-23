@@ -14,9 +14,8 @@ import com.ra4king.gameutils.gui.Widget;
  * A MenuPage is a Screen that holds and organizes a set of Widgets.
  * @author Roi Atalla
  */
-public class MenuPage implements Screen {
+public class MenuPage extends BasicScreen {
 	private Menus menus;
-	private Game game;
 	private ArrayList<Widget> widgets;
 	private Image bg;
 	private String bgImage;
@@ -38,20 +37,12 @@ public class MenuPage implements Screen {
 	}
 	
 	public void init(Game game) {
-		this.game = game;
+		super.init(game);
 		
 		hasInited = true;
 		
 		for(Widget w : widgets)
 			w.init(this);
-	}
-	
-	/**
-	 * Returns the parent of this MenuPage.
-	 * @return The parent of this MenuPage.
-	 */
-	public Game getGame() {
-		return game;
 	}
 	
 	/**
@@ -94,7 +85,7 @@ public class MenuPage implements Screen {
 	 * Draws the background then calls all added Widget's draw(Graphics2D) method in the order they were added in.
 	 */
 	public void draw(Graphics2D g) {
-		Image bg = (this.bg == null ? game.getArt().get(bgImage) : this.bg);
+		Image bg = (this.bg == null ? getGame().getArt().get(bgImage) : this.bg);
 		
 		if(bg != null)
 			g.drawImage(bg,0,0,getWidth(),getHeight(),0,0,bg.getWidth(null),bg.getHeight(null),null);
@@ -144,22 +135,6 @@ public class MenuPage implements Screen {
 	 */
 	public boolean remove(Widget widget) {
 		return widgets.remove(widget);
-	}
-	
-	/**
-	 * Calls the parent's getWidth() method.
-	 * @return The width of this MenuPage.
-	 */
-	public int getWidth() {
-		return game.getWidth();
-	}
-	
-	/**
-	 * Calls the parent's getHeight() method.
-	 * @return The height of this MenuPage.
-	 */
-	public int getHeight() {
-		return game.getHeight();
 	}
 	
 	/**
