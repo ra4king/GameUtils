@@ -154,7 +154,10 @@ public class MenuPage extends BasicScreen {
 	public void setBackground(Image bg) {
 		bgImage = null;
 		
-		this.bg = Art.createCompatibleImage(bg);
+		if(bg == null)
+			this.bg = null;
+		else
+			this.bg = Art.createCompatibleImage(bg);
 	}
 	
 	/**
@@ -166,10 +169,14 @@ public class MenuPage extends BasicScreen {
 	public void setBackground(Color color) {
 		bgImage = null;
 		
-		bg = Art.createCompatibleImage(1, 1, color.getAlpha() == 0 || color.getAlpha() == 255 ? (color.getAlpha() == 0 ? Transparency.BITMASK : Transparency.OPAQUE) : Transparency.TRANSLUCENT);
-		Graphics g = bg.getGraphics();
-		g.setColor(color);
-		g.fillRect(0,0,1,1);
+		if(color == null)
+			bg = null;
+		else {
+			bg = Art.createCompatibleImage(1, 1, color.getAlpha() == 0 || color.getAlpha() == 255 ? (color.getAlpha() == 0 ? Transparency.BITMASK : Transparency.OPAQUE) : Transparency.TRANSLUCENT);
+			Graphics g = bg.getGraphics();
+			g.setColor(color);
+			g.fillRect(0,0,1,1);
+		}
 	}
 	
 	/**
