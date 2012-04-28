@@ -51,15 +51,20 @@ public class Sound extends Assets<Clip> {
 	 * @param name The name of the Clip to play.
 	 */
 	public void play(String name) {
-		get(name).stop();
-		get(name).setMicrosecondPosition(0);
+		Clip c = get(name);
 		
-		if(!on) {
-			FloatControl volume = (FloatControl)get(name).getControl(FloatControl.Type.MASTER_GAIN);
-			volume.setValue(volume.getMinimum());
+		if(c != null) {
+			c.stop();
+			c.flush();
+			c.setFramePosition(0);
+			
+			if(!on) {
+				FloatControl volume = (FloatControl)c.getControl(FloatControl.Type.MASTER_GAIN);
+				volume.setValue(volume.getMinimum());
+			}
+			
+			c.start();
 		}
-		
-		get(name).start();
 	}
 	
 	/**
@@ -67,15 +72,20 @@ public class Sound extends Assets<Clip> {
 	 * @param name The name of the Clip to loop.
 	 */
 	public void loop(String name) {
-		get(name).stop();
-		get(name).setMicrosecondPosition(0);
+		Clip c = get(name);
 		
-		if(!on) {
-			FloatControl volume = (FloatControl)get(name).getControl(FloatControl.Type.MASTER_GAIN);
-			volume.setValue(volume.getMinimum());
+		if(c != null) {
+			c.stop();
+			c.flush();
+			c.setFramePosition(0);
+			
+			if(!on) {
+				FloatControl volume = (FloatControl)c.getControl(FloatControl.Type.MASTER_GAIN);
+				volume.setValue(volume.getMinimum());
+			}
+			
+			c.loop(Clip.LOOP_CONTINUOUSLY);
 		}
-		
-		get(name).loop(Clip.LOOP_CONTINUOUSLY);
 	}
 	
 	/**
@@ -92,9 +102,8 @@ public class Sound extends Assets<Clip> {
 	public void resume() {
 		for(Clip c : assets.values()) {
 			if(on && c.getMicrosecondPosition() != c.getMicrosecondLength() &&
-					c.getMicrosecondPosition() != 0) {
+					c.getMicrosecondPosition() != 0)
 				c.start();
-			}
 		}
 	}
 	
@@ -103,7 +112,10 @@ public class Sound extends Assets<Clip> {
 	 * @param name The name of the Clip to pause.
 	 */
 	public void pause(String name) {
-		get(name).stop();
+		Clip c = get(name);
+		
+		if(c != null)
+			c.stop();
 	}
 	
 	/**
@@ -111,8 +123,13 @@ public class Sound extends Assets<Clip> {
 	 * @param name The name of the Clip to stop.
 	 */
 	public void stop(String name) {
-		get(name).stop();
-		get(name).setMicrosecondPosition(0);
+		Clip c = get(name);
+		
+		if(c != null) {
+			c.stop();
+			c.flush();
+			c.setFramePosition(0);
+		}
 	}
 	
 	public void stopAll() {
