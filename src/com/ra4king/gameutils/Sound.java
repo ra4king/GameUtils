@@ -21,7 +21,9 @@ public class Sound extends Assets<Clip> {
 	public Clip extract(URL url) throws IOException {
 		try{
 			Clip clip;
+			
 			AudioInputStream in = AudioSystem.getAudioInputStream(url);
+			
 			if(url.getPath().toLowerCase().endsWith(".ogg")) {
 				AudioFormat baseFormat = in.getFormat();
 				AudioFormat  decodedFormat = new AudioFormat(
@@ -40,6 +42,9 @@ public class Sound extends Assets<Clip> {
 			clip.open(in);
 			
 			return clip;
+		}
+		catch(IOException exc) {
+			throw exc;
 		}
 		catch(Exception exc) {
 			throw new IOException("Error loading clip: " + url,exc);
