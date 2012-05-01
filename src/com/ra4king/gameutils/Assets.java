@@ -82,6 +82,7 @@ public abstract class Assets<T> {
 	public class Loader implements Runnable {
 		private Map<String,String> files;
 		private int status;
+		private boolean error;
 		
 		public Loader() {
 			files = new HashMap<String,String>();
@@ -93,6 +94,10 @@ public abstract class Assets<T> {
 		
 		public int getStatus() {
 			return status;
+		}
+		
+		public boolean isLoadingError() {
+			return error;
 		}
 		
 		public void addFile(String file) {
@@ -125,10 +130,8 @@ public abstract class Assets<T> {
 					status++;
 				}
 				catch(Exception exc) {
-					System.out.println(s);
-					exc.printStackTrace();
-					status = -1;
-					return;
+					error = true;
+					new Exception("Error loading file: ".concat(s), exc);
 				}
 			}
 		}
