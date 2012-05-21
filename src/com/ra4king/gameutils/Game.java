@@ -949,6 +949,14 @@ public abstract class Game extends Applet {
 		return null;
 	}
 	
+	public boolean isScreen(String name) {
+		return screens.get(name) != null;
+	}
+	
+	public boolean isScreen(Screen screen) {
+		return getScreenInfo(screen) != null;
+	}
+	
 	/**
 	 * Adds the screen and sets it as the current screen.
 	 * @param screen The Screen to be added and set.
@@ -1025,7 +1033,7 @@ public abstract class Game extends Applet {
 		if(info == null)
 			throw new IllegalArgumentException(name + " does not exist.");
 		
-		addInputListener(screens.get(name),listener);
+		addInputListener(info,listener);
 	}
 	
 	private void addInputListener(ScreenInfo screenInfo, InputListener listener) {

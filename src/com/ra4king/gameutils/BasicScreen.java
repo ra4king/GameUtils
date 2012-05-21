@@ -17,51 +17,53 @@ public abstract class BasicScreen implements Screen {
 	 */
 	public void init(Game game) {
 		this.game = game;
-		game.addInputListener(this, new InputListener() {
-			public void keyPressed(KeyEvent key, Screen screen) {
-				BasicScreen.this.keyPressed(key);
-			}
-			
-			public void keyReleased(KeyEvent key, Screen screen) {
-				BasicScreen.this.keyReleased(key);
-			}
-			
-			public void keyTyped(KeyEvent key, Screen screen) {
-				BasicScreen.this.keyTyped(key);
-			}
-			
-			public void mouseEntered(MouseEvent me, Screen screen) {
-				BasicScreen.this.mouseEntered(me);
-			}
-			
-			public void mouseExited(MouseEvent me, Screen screen) {
-				BasicScreen.this.mouseExited(me);
-			}
-			
-			public void mousePressed(MouseEvent me, Screen screen) {
-				BasicScreen.this.mousePressed(me);
-			}
-			
-			public void mouseReleased(MouseEvent me, Screen screen) {
-				BasicScreen.this.mouseReleased(me);
-			}
-			
-			public void mouseClicked(MouseEvent me, Screen screen) {
-				BasicScreen.this.mouseClicked(me);
-			}
-			
-			public void mouseDragged(MouseEvent me, Screen screen) {
-				BasicScreen.this.mouseDragged(me);
-			}
-			
-			public void mouseMoved(MouseEvent me, Screen screen) {
-				BasicScreen.this.mouseMoved(me);
-			}
-			
-			public void mouseWheelMoved(MouseWheelEvent mwe, Screen screen) {
-				BasicScreen.this.mouseWheelMoved(mwe);
-			}
-		});
+		
+		if(game.isScreen(this))
+			game.addInputListener(this, new InputListener() {
+				public void keyPressed(KeyEvent key, Screen screen) {
+					BasicScreen.this.keyPressed(key);
+				}
+				
+				public void keyReleased(KeyEvent key, Screen screen) {
+					BasicScreen.this.keyReleased(key);
+				}
+				
+				public void keyTyped(KeyEvent key, Screen screen) {
+					BasicScreen.this.keyTyped(key);
+				}
+				
+				public void mouseEntered(MouseEvent me, Screen screen) {
+					BasicScreen.this.mouseEntered(me);
+				}
+				
+				public void mouseExited(MouseEvent me, Screen screen) {
+					BasicScreen.this.mouseExited(me);
+				}
+				
+				public void mousePressed(MouseEvent me, Screen screen) {
+					BasicScreen.this.mousePressed(me);
+				}
+				
+				public void mouseReleased(MouseEvent me, Screen screen) {
+					BasicScreen.this.mouseReleased(me);
+				}
+				
+				public void mouseClicked(MouseEvent me, Screen screen) {
+					BasicScreen.this.mouseClicked(me);
+				}
+				
+				public void mouseDragged(MouseEvent me, Screen screen) {
+					BasicScreen.this.mouseDragged(me);
+				}
+				
+				public void mouseMoved(MouseEvent me, Screen screen) {
+					BasicScreen.this.mouseMoved(me);
+				}
+				
+				public void mouseWheelMoved(MouseWheelEvent mwe, Screen screen) {
+					BasicScreen.this.mouseWheelMoved(mwe);
+				}
+			});
 	}
 	
 	public Game getGame() {
