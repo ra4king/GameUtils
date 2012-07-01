@@ -996,8 +996,7 @@ public abstract class Game extends Applet {
 		currentScreen.screen.hide();
 		currentScreen = screenInfo;
 		
-		if(isActive)
-			currentScreen.screen.show();
+		currentScreen.screen.show();
 	}
 	
 	private ScreenInfo getScreenInfo(Screen screen) {

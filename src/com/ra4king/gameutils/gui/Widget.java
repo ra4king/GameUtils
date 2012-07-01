@@ -21,9 +21,7 @@ public abstract class Widget extends Entity {
 	/**
 	 * Sets X, Y, width and height to 0.
 	 */
-	public Widget() {
-		super();
-	}
+	public Widget() {}
 	
 	/**
 	 * Sets the X, Y, width, and height.
