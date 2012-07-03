@@ -381,38 +381,34 @@ public abstract class Game extends Applet {
 				}
 			});
 			
-			if(!isApplet())
-				getRootParent().setVisible(false);
-			
 			gd.setFullScreenWindow(frame);
 			
-			canvas.createBufferStrategy(3);
+			canvas.createBufferStrategy(2);
 			strategy = canvas.getBufferStrategy();
 		}
 		else {
 			if(!isFullScreen())
 				return;
 			
-			gd.getFullScreenWindow().remove(canvas);
-			gd.getFullScreenWindow().dispose();
+			Frame f = (Frame)gd.getFullScreenWindow();
+			f.remove(canvas);
+			f.dispose();
+			
 			gd.setFullScreenWindow(null);
+			
 			add(canvas);
 			invalidate();
 			validate();
 			
-			if(!isApplet())
-				getRootParent().setVisible(true);
-			
-			canvas.createBufferStrategy(3);
+			canvas.createBufferStrategy(2);
 			strategy = canvas.getBufferStrategy();
 		}
 		
 		width = canvas.getWidth();
 		height = canvas.getHeight();
 		
-		requestFocus();
-		
 		canvas.requestFocus();
+		canvas.requestFocusInWindow();
 	}
 	
 	/**
@@ -447,7 +443,7 @@ public abstract class Game extends Applet {
 		canvas.addMouseWheelListener(listener);
 		
 		if(strategy == null) {
-			canvas.createBufferStrategy(3);
+			canvas.createBufferStrategy(2);
 			strategy = canvas.getBufferStrategy();
 		}
 		
