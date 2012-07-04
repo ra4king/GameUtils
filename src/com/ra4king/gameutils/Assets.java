@@ -131,7 +131,7 @@ public abstract class Assets<T> {
 				}
 				catch(Exception exc) {
 					error = true;
-					new Exception("Error loading file: ".concat(s), exc);
+					new Exception("Error loading file: ".concat(s), exc).printStackTrace();
 				}
 			}
 		}
