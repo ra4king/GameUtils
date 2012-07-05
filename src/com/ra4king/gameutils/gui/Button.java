@@ -526,11 +526,12 @@ public class Button extends Widget {
 		
 		setHighlighted(false);
 		
-		if(getButtonBounds().contains(me.getPoint()) && isEnabled())
+		if(getButtonBounds().contains(me.getPoint()) && isEnabled()) {
+			setHighlighted(true);
+			
 			if(isPressed())
 				getAction().doAction(Button.this);
-			else
-				setHighlighted(true);
+		}
 		
 		setPressed(false);
 	}
