@@ -35,6 +35,7 @@ public abstract class Entity implements Element {
 		height = h;
 	}
 	
+	@Override
 	public void init(Screen screen) {
 		parent = screen;
 	}
@@ -42,6 +43,7 @@ public abstract class Entity implements Element {
 	/**
 	 * @return The parent of this game component.
 	 */
+	@Override
 	public Screen getParent() {
 		return parent;
 	}
@@ -204,23 +206,29 @@ public abstract class Entity implements Element {
 		return getBounds().intersects(x, y, width, height);
 	}
 	
+	@Override
 	public void show() {}
 	
+	@Override
 	public void hide() {}
 	
+	@Override
 	public void paused() {}
 	
+	@Override
 	public void resumed() {}
 	
 	/**
 	 * Called by the parent a set number of times a second.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
+	@Override
 	public abstract void update(long deltaTime);
 	
 	/**
 	 * Called by the parent a set number of times a second.
 	 * @param g The Graphics context to draw to the screen.
 	 */
+	@Override
 	public abstract void draw(Graphics2D g);
 }

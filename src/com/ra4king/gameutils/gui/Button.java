@@ -147,6 +147,7 @@ public class Button extends Widget {
 	/**
 	 * Calls MenuItem's setX method and recalculates all the coordinates.
 	 */
+	@Override
 	public void setX(double x) {
 		centerX = x;
 		recalcCoords();
@@ -155,6 +156,7 @@ public class Button extends Widget {
 	/**
 	 * Calls MenuItem's setY method and recalculates all the coordinates.
 	 */
+	@Override
 	public void setY(double y) {
 		centerY = y;
 		recalcCoords();
@@ -467,9 +469,18 @@ public class Button extends Widget {
 		disabledBorder = paint;
 	}
 	
+	@Override
+	public void hide() {
+		super.hide();
+		
+		setHighlighted(false);
+		setPressed(false);
+	}
+	
 	/**
 	 * Draws the button.
 	 */
+	@Override
 	public void draw(Graphics2D g) {
 		g.setFont(font);
 		

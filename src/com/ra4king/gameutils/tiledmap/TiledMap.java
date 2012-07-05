@@ -21,6 +21,7 @@ public class TiledMap extends BasicScreen {
 		CELL_HEIGHT = cellHeight;
 	}
 	
+	@Override
 	public void init(Game game) {
 		super.init(game);
 		
@@ -65,10 +66,12 @@ public class TiledMap extends BasicScreen {
 		return e;
 	}
 	
+	@Override
 	public int getWidth() {
 		return getGame().getWidth();
 	}
 	
+	@Override
 	public int getHeight() {
 		return getGame().getHeight();
 	}
@@ -90,6 +93,7 @@ public class TiledMap extends BasicScreen {
 		camera.centerAt(ce.getScreenX()+ce.getWidth()/2,ce.getScreenY()+ce.getHeight()/2);
 	}
 	
+	@Override
 	public void show() {
 		hasShown = true;
 		
@@ -99,6 +103,7 @@ public class TiledMap extends BasicScreen {
 					e.show();
 	}
 	
+	@Override
 	public void hide() {
 		for(Cell[] ea : map)
 			for(Cell e : ea)
@@ -106,6 +111,7 @@ public class TiledMap extends BasicScreen {
 					e.hide();
 	}
 	
+	@Override
 	public void paused() {
 		for(Cell[] ea : map)
 			for(Cell e : ea)
@@ -113,6 +119,7 @@ public class TiledMap extends BasicScreen {
 					e.paused();
 	}
 	
+	@Override
 	public void resumed() {
 		for(Cell[] ea : map)
 			for(Cell e : ea)
@@ -120,6 +127,7 @@ public class TiledMap extends BasicScreen {
 					e.resumed();
 	}
 	
+	@Override
 	public void update(long deltaTime) {
 		for(Cell[] ea : map)
 			for(Cell e : ea)
@@ -127,6 +135,7 @@ public class TiledMap extends BasicScreen {
 					e.update(deltaTime);
 	}
 	
+	@Override
 	public void draw(Graphics2D g) {
 		AffineTransform old = g.getTransform();
 		

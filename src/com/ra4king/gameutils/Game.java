@@ -105,6 +105,7 @@ public abstract class Game extends Applet {
 					start();
 				}
 				
+				@Override
 				public void run() {
 					while(true) {
 						try {
@@ -129,6 +130,7 @@ public abstract class Game extends Applet {
 		frame.setResizable(resizable);
 		
 		frame.addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent we) {
 				stop();
 			}
@@ -211,14 +213,23 @@ public abstract class Game extends Applet {
 		screens = new HashMap<String,ScreenInfo>();
 		
 		currentScreen = new ScreenInfo(new Screen() {
+			@Override
 			public void init(Game game) {}
+			@Override
 			public Game getGame() { return Game.this; }
+			@Override
 			public void show() {}
+			@Override
 			public void hide() {}
+			@Override
 			public void paused() {}
+			@Override
 			public void resumed() {}
+			@Override
 			public void resized(int width, int height) {}
+			@Override
 			public void update(long deltaTime) {}
+			@Override
 			public void draw(Graphics2D g) {}
 		});
 		
@@ -243,6 +254,7 @@ public abstract class Game extends Applet {
 	 * Returns the current working directory of this game.
 	 * @return The current working directory of this game.
 	 */
+	@Override
 	public URL getCodeBase() {
 		if(isApplet())
 			return super.getCodeBase();
@@ -256,6 +268,7 @@ public abstract class Game extends Applet {
 		}
 	}
 	
+	@Override
 	public Graphics getGraphics() {
 		return canvas.getGraphics();
 	}
@@ -270,10 +283,12 @@ public abstract class Game extends Applet {
 		return getParent();
 	}
 	
+	@Override
 	public int getWidth() {
 		return width;
 	}
 	
+	@Override
 	public int getHeight() {
 		return height;
 	}
@@ -288,6 +303,7 @@ public abstract class Game extends Applet {
 	/**
 	 * @return Returns true if this game is currently active.
 	 */
+	@Override
 	public boolean isActive() {
 		return isActive;
 	}
@@ -325,6 +341,7 @@ public abstract class Game extends Applet {
 	 * @param width The new width of this game's canvas.
 	 * @param height The new height of this game's canvas;
 	 */
+	@Override
 	public void resize(int width, int height) {
 		setSize(width,height);
 	}
@@ -334,6 +351,7 @@ public abstract class Game extends Applet {
 	 * @param width The new width of this game's canvas
 	 * @param height The new height of this game's canvas
 	 */
+	@Override
 	public void setSize(int width, int height) {
 		if(isApplet())
 			super.resize(width,height);
@@ -376,6 +394,7 @@ public abstract class Game extends Applet {
 			frame.add(canvas);
 			
 			frame.addWindowListener(new WindowAdapter() {
+				@Override
 				public void windowClosing(WindowEvent we) {
 					events.add(new Event(14,we));
 				}
@@ -766,6 +785,7 @@ public abstract class Game extends Applet {
 		events.clear();
 	}
 	
+	@Override
 	public final void init() {
 		setLayout(new BorderLayout());
 		
@@ -778,6 +798,7 @@ public abstract class Game extends Applet {
 		canvas.setFocusTraversalKeysEnabled(false);
 		
 		canvas.addComponentListener(new ComponentAdapter() {
+			@Override
 			public void componentResized(ComponentEvent ce) {
 				events.add(new Event(11,ce));
 				
@@ -789,10 +810,12 @@ public abstract class Game extends Applet {
 		});
 		
 		canvas.addFocusListener(new FocusListener() {
+			@Override
 			public void focusGained(FocusEvent fe) {
 				events.add(new Event(12,fe));
 			}
 			
+			@Override
 			public void focusLost(FocusEvent fe) {
 				events.add(new Event(13,fe));
 				
@@ -802,8 +825,9 @@ public abstract class Game extends Applet {
 		
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
+				@Override
 				public void run() {
-					Thread.currentThread().setPriority(8);
+					Thread.currentThread().setPriority(7);
 				}
 			});
 		}
@@ -813,9 +837,11 @@ public abstract class Game extends Applet {
 	/**
 	 * Automatically called if this game is an Applet, otherwise it has to be manually called. This method starts the game loop thread.
 	 */
+	@Override
 	public final void start() {
 		if(!isActive())
 			new Thread() {
+				@Override
 				public void run() {
 					gameLoop();
 				}
@@ -825,6 +851,7 @@ public abstract class Game extends Applet {
 	/**
 	 * Called when the window is closed. Calling this method stops the game loop. stopGame() is then called on the game loop thread.
 	 */
+	@Override
 	public final void stop() {
 		sound.setOn(false);
 		isActive = false;
@@ -1218,46 +1245,57 @@ public abstract class Game extends Applet {
 	}
 	
 	private class Listener implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
+		@Override
 		public void keyTyped(KeyEvent key) {
 			events.add(new Event(0,key));
 		}
 		
+		@Override
 		public void keyPressed(KeyEvent key) {
 			events.add(new Event(1,key));
 		}
 		
+		@Override
 		public void keyReleased(KeyEvent key) {
 			events.add(new Event(2,key));
 		}
 		
+		@Override
 		public void mouseClicked(MouseEvent me) {
 			events.add(new Event(3,me));
 		}
 		
+		@Override
 		public void mouseEntered(MouseEvent me) {
 			events.add(new Event(4,me));
 		}
 		
+		@Override
 		public void mouseExited(MouseEvent me) {
 			events.add(new Event(5,me));
 		}
 		
+		@Override
 		public void mousePressed(MouseEvent me) {
 			events.add(new Event(6,me));
 		}
 		
+		@Override
 		public void mouseReleased(MouseEvent me) {
 			events.add(new Event(7,me));
 		}
 		
+		@Override
 		public void mouseDragged(MouseEvent me) {
 			events.add(new Event(8,me));
 		}
 		
+		@Override
 		public void mouseMoved(MouseEvent me) {
 			events.add(new Event(9,me));
 		}
 		
+		@Override
 		public void mouseWheelMoved(MouseWheelEvent mwe) {
 			events.add(new Event(10,mwe));
 		}

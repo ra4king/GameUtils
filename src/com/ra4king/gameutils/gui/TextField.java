@@ -155,10 +155,12 @@ public class TextField extends Widget {
 		return fontMetrics.getFont();
 	}
 	
+	@Override
 	public void init(Screen screen) {
 		super.init(screen);
 	}
 	
+	@Override
 	public void draw(Graphics2D g) {
 		g.setPaint(hasFocus() ? Color.cyan : border);
 		g.draw(getBounds());
@@ -190,6 +192,7 @@ public class TextField extends Widget {
 	
 	private int cursor;
 	
+	@Override
 	public void keyPressed(KeyEvent key) {
 		showCursor = true;
 		
@@ -234,6 +237,7 @@ public class TextField extends Widget {
 		}
 	}
 	
+	@Override
 	public void keyReleased(KeyEvent key) {
 		showCursor = false;
 	}

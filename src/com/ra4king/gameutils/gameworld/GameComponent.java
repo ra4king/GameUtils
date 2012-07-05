@@ -12,6 +12,7 @@ public abstract class GameComponent extends Entity {
 		super(x,y,width,height);
 	}
 	
+	@Override
 	public final void init(Screen screen) {
 		super.init(screen);
 		init((GameWorld)screen);
@@ -19,6 +20,7 @@ public abstract class GameComponent extends Entity {
 	
 	public void init(GameWorld gameWorld) {}
 	
+	@Override
 	public GameWorld getParent() {
 		return (GameWorld)super.getParent();
 	}

@@ -24,6 +24,7 @@ public class Menus implements Screen {
 		menuPages = new HashMap<String,MenuPage>();
 	}
 	
+	@Override
 	public void init(Game game) {
 		this.game = game;
 		
@@ -40,6 +41,7 @@ public class Menus implements Screen {
 	 * Returns the parent of this object.
 	 * @return The parent of this object.
 	 */
+	@Override
 	public Game getGame() {
 		return game;
 	}
@@ -123,23 +125,29 @@ public class Menus implements Screen {
 	/**
 	 * Sets the Game's Screen to the current MenuPage.
 	 */
+	@Override
 	public void show() {
 		if(currentPage != null)
 			game.setScreen(currentPage);
 	}
 	
+	@Override
 	public void hide() {}
 	
+	@Override
 	public void paused() {}
 	
+	@Override
 	public void resumed() {}
 	
+	@Override
 	public void resized(int width, int height) {}
 	
 	/**
 	 * Throws an exception.
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public void update(long deltaTime) {
 		throw new UnsupportedOperationException("THIS METHOD SHOULDN'T BE CALLED!!!");
 	}
@@ -148,6 +156,7 @@ public class Menus implements Screen {
 	 * Throws an exception.
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public void draw(Graphics2D g) {
 		throw new UnsupportedOperationException("THIS METHOD SHOULDN'T BE CALLED!!!");
 	}

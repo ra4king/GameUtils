@@ -15,6 +15,7 @@ public abstract class Cell implements Element {
 		bounds = new Rectangle();
 	}
 	
+	@Override
 	public void init(Screen parent) {
 		this.parent = (TiledMap)parent;
 		if(getWidth() == 0)
@@ -23,6 +24,7 @@ public abstract class Cell implements Element {
 			setHeight(this.parent.CELL_HEIGHT);
 	}
 	
+	@Override
 	public TiledMap getParent() {
 		return parent;
 	}
@@ -107,15 +109,21 @@ public abstract class Cell implements Element {
 		setHeight(height);
 	}
 	
+	@Override
 	public void show() {}
 	
+	@Override
 	public void hide() {}
 	
+	@Override
 	public void paused() {}
 	
+	@Override
 	public void resumed() {}
 	
+	@Override
 	public abstract void update(long deltaTime);
 	
+	@Override
 	public abstract void draw(Graphics2D g);
 }

@@ -64,6 +64,7 @@ public class SocketPacketIO implements PacketIO {
 		isClosed = false;
 	}
 	
+	@Override
 	public Packet read() throws IOException {
 		final ByteBuffer in = this.in;
 		
@@ -114,6 +115,7 @@ public class SocketPacketIO implements PacketIO {
 		return packet;
 	}
 	
+	@Override
 	public boolean write(Packet packet) throws IOException {
 		final ByteBuffer out = this.out;
 		
@@ -141,10 +143,12 @@ public class SocketPacketIO implements PacketIO {
 		out = ByteBuffer.allocateDirect(bufferSize);
 	}
 	
+	@Override
 	public boolean isBlocking() {
 		return channel.isBlocking();
 	}
 	
+	@Override
 	public void setBlocking(boolean isBlocking) throws IOException {
 		channel.configureBlocking(isBlocking);
 	}
@@ -157,14 +161,17 @@ public class SocketPacketIO implements PacketIO {
 		}
 	}
 	
+	@Override
 	public InetSocketAddress getSocketAddress() {
 		return (InetSocketAddress)channel.socket().getRemoteSocketAddress();
 	}
 	
+	@Override
 	public boolean isConnected() {
 		return !channel.socket().isClosed() && !isClosed;
 	}
 	
+	@Override
 	public void close() throws IOException {
 		try{
 			channel.socket().shutdownInput();

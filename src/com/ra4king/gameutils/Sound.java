@@ -18,6 +18,7 @@ public class Sound extends Assets<Clip> {
 	
 	Sound() {}
 	
+	@Override
 	public Clip extract(URL url) throws IOException {
 		try{
 			Clip clip;

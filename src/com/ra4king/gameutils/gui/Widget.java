@@ -34,35 +34,42 @@ public abstract class Widget extends Entity {
 		super(x,y,w,h);
 	}
 	
+	@Override
 	public void init(Screen screen) {
 		super.init(screen);
 		
 		input = new InputListener() {
+			@Override
 			public void keyPressed(KeyEvent key, Screen screen) {
 				if(!isFocusable || hasFocus)
 					Widget.this.keyPressed(key);
 			}
 			
+			@Override
 			public void keyReleased(KeyEvent key, Screen screen) {
 				if(!isFocusable || hasFocus)
 					Widget.this.keyReleased(key);
 			}
 			
+			@Override
 			public void keyTyped(KeyEvent key, Screen screen) {
 				if(!isFocusable || hasFocus)
 					Widget.this.keyTyped(key);
 			}
 			
+			@Override
 			public void mouseEntered(MouseEvent me, Screen screen) {
 				if(!isFocusable || getBounds().contains(me.getPoint()))
 					Widget.this.mouseEntered(me);
 			}
 			
+			@Override
 			public void mouseExited(MouseEvent me, Screen screen) {
 				if(!isFocusable || getBounds().contains(me.getPoint()))
 					Widget.this.mouseExited(me);
 			}
 			
+			@Override
 			public void mousePressed(MouseEvent me, Screen screen) {
 				if(!isFocusable || getBounds().contains(me.getPoint())) {
 					if(!hasFocus)
@@ -74,26 +81,31 @@ public abstract class Widget extends Entity {
 					loseFocus();
 			}
 			
+			@Override
 			public void mouseReleased(MouseEvent me, Screen screen) {
 				if(!isFocusable || hasFocus)
 					Widget.this.mouseReleased(me);
 			}
 			
+			@Override
 			public void mouseClicked(MouseEvent me, Screen screen) {
 				if(!isFocusable || getBounds().contains(me.getPoint()))
 					Widget.this.mouseClicked(me);
 			}
 			
+			@Override
 			public void mouseDragged(MouseEvent me, Screen screen) {
 				if(!isFocusable || hasFocus)
 					Widget.this.mouseDragged(me);
 			}
 			
+			@Override
 			public void mouseMoved(MouseEvent me, Screen screen) {
 				if(!isFocusable || getBounds().contains(me.getPoint()))
 					Widget.this.mouseMoved(me);
 			}
 			
+			@Override
 			public void mouseWheelMoved(MouseWheelEvent mwe, Screen screen) {
 				if(!isFocusable || getBounds().contains(mwe.getPoint()))
 					Widget.this.mouseWheelMoved(mwe);

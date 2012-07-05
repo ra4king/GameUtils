@@ -21,6 +21,7 @@ public class Art extends Assets<Image> {
 		return super.add(name,createCompatibleImage(i));
 	}
 	
+	@Override
 	public Image extract(URL url) throws IOException {
 		return ImageIO.read(url);
 	}

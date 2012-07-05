@@ -10,26 +10,31 @@ public class Bag<T> extends ArrayList<T> {
 	
 	private volatile int iteratorCount;
 	
+	@Override
 	public boolean add(T t) {
 		checkIfNull(t);
 		modCount--;
 		return super.add(t);
 	}
 	
+	@Override
 	public void add(int idx, T t) {
 		checkIfNull(t);
 		super.add(idx,t);
 	}
 	
+	@Override
 	public T set(int idx, T t) {
 		checkIfNull(t);
 		return super.set(idx,t);
 	}
 	
+	@Override
 	public T remove(int idx) {
 		return super.set(idx,null);
 	}
 	
+	@Override
 	public boolean remove(Object o) {
 		if(o == null) {
 			int idx = indexOf(o);
@@ -51,6 +56,7 @@ public class Bag<T> extends ArrayList<T> {
 		return found;
 	}
 	
+	@Override
 	public Iterator<T> iterator() {
 		return new Iterator<T>() {
 			private int pos, knownMod = modCount;
@@ -59,6 +65,7 @@ public class Bag<T> extends ArrayList<T> {
 				iteratorCount++;
 			}
 			
+			@Override
 			public boolean hasNext() {
 				boolean hn = false;
 				
@@ -90,6 +97,7 @@ public class Bag<T> extends ArrayList<T> {
 				return t;
 			}
 			
+			@Override
 			public T next() {
 				T t = nextItem();
 				if(t == null)
@@ -97,6 +105,7 @@ public class Bag<T> extends ArrayList<T> {
 				return t;
 			}
 			
+			@Override
 			public void remove() {
 				checkForCoMod();
 				

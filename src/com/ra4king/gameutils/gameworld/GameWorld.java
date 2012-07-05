@@ -39,6 +39,7 @@ public class GameWorld extends BasicScreen {
 		setBackground(Color.lightGray);
 	}
 	
+	@Override
 	public void init(Game game) {
 		super.init(game);
 		
@@ -61,6 +62,7 @@ public class GameWorld extends BasicScreen {
 	/**
 	 * Calls each Entity's <code>show()</code> method in z-index order.
 	 */
+	@Override
 	public void show() {
 		hasShown = true;
 		
@@ -81,6 +83,7 @@ public class GameWorld extends BasicScreen {
 	/**
 	 * Calls each Entity's <code>hide()</code> method in z-index order.
 	 */
+	@Override
 	public void hide() {
 		hasShown = false;
 		
@@ -98,6 +101,7 @@ public class GameWorld extends BasicScreen {
 		}
 	}
 	
+	@Override
 	public void paused() {
 		//for(Entity e : getEntities())
 		
@@ -113,6 +117,7 @@ public class GameWorld extends BasicScreen {
 		}
 	}
 	
+	@Override
 	public void resumed() {
 		preLoop();
 		
@@ -126,12 +131,14 @@ public class GameWorld extends BasicScreen {
 		}
 	}
 	
+	@Override
 	public void resized(int width, int height) {}
 	
 	/**
 	 * Calls each Entity's <code>update(long)</code> method in z-index order.
 	 * @param deltaTime The time passed since the last call to it.
 	 */
+	@Override
 	public void update(long deltaTime) {
 		//for(Entity e : getEntities())
 		
@@ -167,6 +174,7 @@ public class GameWorld extends BasicScreen {
 	 * Draws the background then all the Entities in z-index order.
 	 * @param g The Graphics context to draw to the screen.
 	 */
+	@Override
 	public void draw(Graphics2D g) {
 		g = (Graphics2D)g.create();
 		

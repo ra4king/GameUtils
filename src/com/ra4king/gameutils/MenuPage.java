@@ -37,6 +37,7 @@ public class MenuPage extends BasicScreen {
 		setBackground(Color.lightGray);
 	}
 	
+	@Override
 	public void init(Game game) {
 		super.init(game);
 		
@@ -49,6 +50,7 @@ public class MenuPage extends BasicScreen {
 	/**
 	 * Calls all added Widget's show() method.
 	 */
+	@Override
 	public void show() {
 		for(Widget w : widgets)
 			w.show();
@@ -57,26 +59,31 @@ public class MenuPage extends BasicScreen {
 	/**
 	 * Calls all added Widget's hide() method.
 	 */
+	@Override
 	public void hide() {
 		for(Widget w : widgets)
 			w.hide();
 	}
 	
+	@Override
 	public void paused() {
 		for(Widget w : widgets)
 			w.paused();
 	}
 	
+	@Override
 	public void resumed() {
 		for(Widget w : widgets)
 			w.resumed();
 	}
 	
+	@Override
 	public void resized(int width, int height) {}
 	
 	/**
 	 * Calls all added Widget's update(long) method.
 	 */
+	@Override
 	public void update(long deltaTime) {
 		for(Widget w : widgets)
 			w.update(deltaTime);
@@ -85,6 +92,7 @@ public class MenuPage extends BasicScreen {
 	/**
 	 * Draws the background then calls all added Widget's draw(Graphics2D) method in the order they were added in.
 	 */
+	@Override
 	public void draw(Graphics2D g) {
 		Image bg = (this.bg == null ? getGame().getArt().get(bgImage) : this.bg);
 		

@@ -162,6 +162,7 @@ public class Label extends Widget {
 	/**
 	 * Calls MenuItem's setX method and recalculates all the coordinates.
 	 */
+	@Override
 	public void setX(double x) {
 		if(isCentered)
 			centerX = x;
@@ -173,6 +174,7 @@ public class Label extends Widget {
 	/**
 	 * Calls MenuItem's setY method and recalculates all the coordinates.
 	 */
+	@Override
 	public void setY(double y) {
 		if(isCentered)
 			centerY = y;
@@ -242,6 +244,7 @@ public class Label extends Widget {
 	 * Fills the background then draws the text with the specified font and paint.
 	 * @param g The Graphics context to draw to the screen.
 	 */
+	@Override
 	public void draw(Graphics2D g) {
 		g.setPaint(background);
 		g.fill(getBounds());
