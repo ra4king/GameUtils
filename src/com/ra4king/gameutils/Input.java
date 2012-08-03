@@ -72,8 +72,7 @@ public class Input {
 	}
 	
 	void keyPressed(KeyEvent key) {
-		if(isKeyUp(key.getKeyCode()))
-			keys.add(key.getKeyCode());
+		keys.add(key.getKeyCode());
 	}
 	
 	void keyReleased(KeyEvent key) {
