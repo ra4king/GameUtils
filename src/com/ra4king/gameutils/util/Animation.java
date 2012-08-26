@@ -24,6 +24,10 @@ public class Animation {
 		this.looping = looping;
 	}
 	
+	public void restart() {
+		currentTime = frameIndex = 0;
+	}
+	
 	/**
 	 * Adds an image to the animation.
 	 * @param i The image to be added.
