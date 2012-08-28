@@ -570,9 +570,13 @@ public abstract class Game extends Applet {
 			
 			if(!isActive()) {
 				boolean stop = stopGame();
-				if(stop && !isApplet())
-					System.exit(0);
-				else if(!stop)
+				if(stop) {
+					if(!isApplet())
+						throw new RuntimeException("Cannot stop an applet.");
+					else
+						System.exit(0);
+				}
+				else
 					isActive = true;
 			}
 		}
