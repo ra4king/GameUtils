@@ -1,6 +1,6 @@
 # README #
 
-## Licensed under [BSD 3-license](http://opensource.org/licenses/BSD-3-Clause) ##
+## Licensed under [BSD 3-Clause license](http://opensource.org/licenses/BSD-3-Clause) ##
 
 Java2D Game Library.
 
