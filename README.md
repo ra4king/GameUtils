@@ -1,7 +1,7 @@
-# README #
+GameUtils
+=========
 
-## Licensed under [BSD 3-Clause license](http://opensource.org/licenses/BSD-3-Clause) ##
+Java2D Game Library that grew out of JDoodleJump.
 
-Java2D Game Library.
+## [Download the JAR file.](https://github.org/ra4king/GameUtils/src/default/out/artifacts/GameUtils.jar/GameUtils.jar) ##
 
-## [Download the JAR file.](https://bitbucket.org/ra4king/gameutils/src/default/out/artifacts/GameUtils.jar/GameUtils.jar) ##
