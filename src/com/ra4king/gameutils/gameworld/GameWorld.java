@@ -7,8 +7,11 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Transparency;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.ra4king.gameutils.Art;
 import com.ra4king.gameutils.BasicScreen;
@@ -417,14 +420,8 @@ public class GameWorld extends BasicScreen {
 	 * A list of all Entities in this entire world.
 	 * @return A list of all Entities in this world in z-index order.
 	 */
-	public ArrayList<Entity> getEntities() {
-		ArrayList<Entity> allEntities = new ArrayList<Entity>();
-		
-		for(Bag<Entity> bag : entities)
-			for(Entity e : bag)
-				allEntities.add(e);
-		
-		return allEntities;
+	public List<Entity> getEntities() {
+		return entities.stream().flatMap(Collection::stream).filter(entity -> entity != null).collect(Collectors.toList());
 	}
 	
 	/**
