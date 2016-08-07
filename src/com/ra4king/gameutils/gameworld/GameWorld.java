@@ -7,6 +7,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Transparency;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.ra4king.gameutils.Art;
 import com.ra4king.gameutils.BasicScreen;
@@ -20,7 +22,9 @@ import com.ra4king.gameutils.util.Bag;
  */
 public class GameWorld extends BasicScreen {
 	private ArrayList<Bag<Entity>> entities;
-	private ArrayList<Temp> temp;
+	private ArrayList<Temp> temps;
+	private Map<Entity, Map<Class<? extends Entity>, CollisionListener<? extends Entity>>> collisionListeners;
+	
 	private Image bg;
 	private String bgImage;
 	private double xOffset, yOffset;
@@ -31,12 +35,14 @@ public class GameWorld extends BasicScreen {
 	 * Initializes this object.
 	 */
 	public GameWorld() {
-		entities = new ArrayList<Bag<Entity>>();
+		entities = new ArrayList<>();
 		entities.add(new Bag<Entity>());
 		
-		temp = new ArrayList<Temp>();
+		collisionListeners = new HashMap<>();
 		
-		setBackground(Color.lightGray);
+		temps = new ArrayList<>();
+		
+		setBackground(new Color(0, 0.4f, 0.6f));
 	}
 	
 	@Override
@@ -148,13 +154,31 @@ public class GameWorld extends BasicScreen {
 			for(Bag<Entity> b : entities) {
 				Entity lastE = null;
 				try {
-					for(Entity e : b) {
+					for(final Entity e : b) {
+						if(!e.isAlive()) {
+							remove(e);
+							continue;
+						}
+						
+						if(collisionListeners.containsKey(e)) {
+							final Map<Class<? extends Entity>, CollisionListener<? extends Entity>> map = collisionListeners.get(e);
+							getEntities().stream().filter(entity -> map.containsKey(entity.getClass()) && entity.intersects(e)).forEach(entity -> {
+								@SuppressWarnings("unchecked")
+								CollisionListener<Entity> listener = (CollisionListener<Entity>)map.get(entity.getClass());
+								listener.collide(entity);
+							});
+						}
+						
 						lastE = e;
 						try{
 							e.update(deltaTime);
 						}
 						catch(Exception exc) {
 							exc.printStackTrace();
+						}
+						
+						if(!e.isAlive()) {
+							remove(e);
 						}
 					}
 				}
@@ -191,13 +215,19 @@ public class GameWorld extends BasicScreen {
 		
 		try{
 			for(Bag<Entity> b : entities)
-				for(Entity e : b)
-					try{
+				for(Entity e : b) {
+					if(!e.isAlive()) {
+						remove(e);
+						continue;
+					}
+					
+					try {
 						e.draw((Graphics2D)g.create());
 					}
 					catch(Exception exc) {
 						exc.printStackTrace();
 					}
+				}
 		}
 		finally {
 			postLoop();
@@ -221,7 +251,7 @@ public class GameWorld extends BasicScreen {
 	 */
 	public Entity add(int zindex, Entity e) {
 		if(isLooping) {
-			temp.add(new Temp(zindex,e));
+			temps.add(new Temp(zindex,e));
 		}
 		else {
 			while(zindex >= entities.size())
@@ -245,16 +275,31 @@ public class GameWorld extends BasicScreen {
 	 * @return True if this GameWorld contains this Entity, false otherwise.
 	 */
 	public boolean contains(Entity e) {
-		if(isLooping && temp.contains(e))
-			return true;
+		if(isLooping) {
+			for(Temp temp : this.temps) {
+				if(temp.e == e) {
+					return true;
+				}
+			}
+		}
 		return getEntities().contains(e);
+	}
+	
+	public <T extends Entity> void registerCollision(Entity entity, Class<T> clazz, CollisionListener<T> listener) {
+		if(collisionListeners.containsKey(entity)) {
+			collisionListeners.get(entity).put(clazz, listener);
+		} else {
+			Map<Class<? extends Entity>, CollisionListener<? extends Entity>> list = new HashMap<>();
+			list.put(clazz, listener);
+			collisionListeners.put(entity, list);
+		}
 	}
 	
 	public boolean replace(Entity old, Entity e) {
 		if(isLooping) {
-			int i = temp.indexOf(old);
+			int i = temps.indexOf(old);
 			if(i >= 0) {
-				temp.get(i).e = e;
+				temps.get(i).e = e;
 				return true;
 			}
 		}
@@ -300,7 +345,7 @@ public class GameWorld extends BasicScreen {
 	 */
 	public void clear() {
 		entities.clear();
-		temp.clear();
+		temps.clear();
 		
 		System.gc();
 		
@@ -315,9 +360,9 @@ public class GameWorld extends BasicScreen {
 	 */
 	public boolean changeZIndex(Entity e, int newZIndex) {
 		if(isLooping) {
-			int i = temp.indexOf(e);
+			int i = temps.indexOf(e);
 			if(i >= 0) {
-				temp.get(i).zIndex = newZIndex;
+				temps.get(i).zIndex = newZIndex;
 				return true;
 			}
 		}
@@ -339,9 +384,9 @@ public class GameWorld extends BasicScreen {
 	 */
 	public int getZIndex(Entity e) {
 		if(isLooping) {
-			int i = temp.indexOf(e);
+			int i = temps.indexOf(e);
 			if(i >= 0)
-				return temp.get(i).zIndex;
+				return temps.get(i).zIndex;
 		}
 		
 		for(int a = 0; a < entities.size(); a++)
@@ -454,7 +499,7 @@ public class GameWorld extends BasicScreen {
 		if(isLooping)
 			return;
 		
-		temp.clear();
+		temps.clear();
 		isLooping = true;
 	}
 	
@@ -464,10 +509,10 @@ public class GameWorld extends BasicScreen {
 		
 		isLooping = false;
 		
-		for(Temp p : temp)
+		for(Temp p : temps)
 			add(p.zIndex,p.e);
 		
-		temp.clear();
+		temps.clear();
 	}
 	
 	private class Temp {
@@ -478,5 +523,9 @@ public class GameWorld extends BasicScreen {
 			this.zIndex = zIndex;
 			this.e = e;
 		}
+	}
+	
+	public interface CollisionListener<T extends Entity> {
+		void collide(T t);
 	}
 }

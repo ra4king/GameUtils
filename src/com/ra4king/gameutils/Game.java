@@ -691,7 +691,6 @@ public abstract class Game extends Applet {
 					break;
 				case 7:
 					input.mouseReleased((MouseEvent)e.event);
-					
 					for(InputListener l : currentScreen.listeners) {
 						try {
 							l.mouseReleased((MouseEvent)e.event,getScreen());
@@ -915,12 +914,13 @@ public abstract class Game extends Applet {
 		return true;
 	}
 	
+	public final void paint(Graphics g) {}
+	
 	/**
-	 * Called the set FPS times a second. Clears the window using the Graphics2D's background color then draws the current screen.
+	 * Called the set FPS times a second. Draws the current screen.
 	 * @param g The Graphics context to be used to draw to the canvas.
 	 */
 	protected void paint(Graphics2D g) {
-		g.clearRect(0, 0, getWidth(), getHeight());
 		getScreen().draw((Graphics2D)g.create());
 	}
 	

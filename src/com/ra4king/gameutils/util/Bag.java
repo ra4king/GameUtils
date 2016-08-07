@@ -37,7 +37,7 @@ public class Bag<T> extends ArrayList<T> {
 	@Override
 	public boolean remove(Object o) {
 		if(o == null) {
-			int idx = indexOf(o);
+			int idx = indexOf(null);
 			if(idx == -1)
 				return false;
 			super.set(idx, get(size()-1));

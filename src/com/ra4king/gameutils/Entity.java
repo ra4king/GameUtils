@@ -1,10 +1,12 @@
 package com.ra4king.gameutils;
 
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
  * All entities that are added to GameWorld must extend this class.
+ * 
  * @author Roi Atalla
  */
 public abstract class Entity implements Element {
@@ -12,22 +14,25 @@ public abstract class Entity implements Element {
 	private Rectangle2D.Double bounds;
 	private double x, y, width, height;
 	
+	private boolean alive = true;
+	
 	/**
 	 * Sets the X, Y, width, and height to 0.
 	 */
 	public Entity() {
-		this(0,0,0,0);
+		this(0, 0, 0, 0);
 	}
 	
 	/**
 	 * Sets the X, Y, width, and height.
+	 * 
 	 * @param x The X position.
 	 * @param y The Y position.
 	 * @param w The width.
 	 * @param h The height.
 	 */
 	public Entity(double x, double y, double w, double h) {
-		bounds = new Rectangle2D.Double(x,y,w,h);
+		bounds = new Rectangle2D.Double(x, y, w, h);
 		
 		this.x = x;
 		this.y = y;
@@ -48,6 +53,14 @@ public abstract class Entity implements Element {
 		return parent;
 	}
 	
+	public boolean isAlive() {
+		return alive;
+	}
+	
+	public void setAlive(boolean alive) {
+		this.alive = alive;
+	}
+	
 	/**
 	 * @return The leftmost X position.
 	 */
@@ -64,6 +77,7 @@ public abstract class Entity implements Element {
 	
 	/**
 	 * Sets the leftmost X position.
+	 * 
 	 * @param x The new X value.
 	 */
 	public void setX(double x) {
@@ -86,6 +100,7 @@ public abstract class Entity implements Element {
 	
 	/**
 	 * Sets the topmost Y position.
+	 * 
 	 * @param y The new Y value.
 	 */
 	public void setY(double y) {
@@ -105,6 +120,7 @@ public abstract class Entity implements Element {
 	
 	/**
 	 * Sets the width of this game component
+	 * 
 	 * @param width The new width.
 	 */
 	public void setWidth(double width) {
@@ -124,6 +140,7 @@ public abstract class Entity implements Element {
 	
 	/**
 	 * Sets the height of this game component.
+	 * 
 	 * @param height The new height.
 	 */
 	public void setHeight(double height) {
@@ -132,14 +149,16 @@ public abstract class Entity implements Element {
 	
 	/**
 	 * Returns the center X position.
+	 * 
 	 * @return The center X position.
 	 */
 	public double getCenterX() {
-		return getX()+getWidth()/2;
+		return getX() + getWidth() / 2;
 	}
 	
 	/**
 	 * Returns the nearest integer of the center X position.
+	 * 
 	 * @return The nearest integer of the center X position.
 	 */
 	public int getIntCenterX() {
@@ -148,14 +167,16 @@ public abstract class Entity implements Element {
 	
 	/**
 	 * Returns the center Y position.
+	 * 
 	 * @return The center Y position.
 	 */
 	public double getCenterY() {
-		return getY()+getHeight()/2;
+		return getY() + getHeight() / 2;
 	}
 	
 	/**
 	 * Returns the nearest integer of the center Y position.
+	 * 
 	 * @return The nearest integer of the center Y position.
 	 */
 	public int getIntCenterY() {
@@ -166,18 +187,22 @@ public abstract class Entity implements Element {
 	 * @return The bounds of this game component.
 	 */
 	public Rectangle2D.Double getBounds() {
-		bounds.setFrame(x,y,width,height);
+		bounds.setFrame(x, y, width, height);
 		return bounds;
 	}
 	
 	public void setBounds(double x, double y, double width, double height) {
-		setLocation(x,y);
-		setSize(width,height);
+		setLocation(x, y);
+		setSize(width, height);
 	}
 	
 	public void setLocation(double x, double y) {
 		setX(x);
 		setY(y);
+	}
+	
+	public void setLocation(Point2D.Double location) {
+		setLocation(location.getX(), location.getY());
 	}
 	
 	public void setSize(double width, double height) {
@@ -186,12 +211,12 @@ public abstract class Entity implements Element {
 	}
 	
 	public void translate(double x, double y) {
-		setX(getX()+x);
-		setY(getY()+y);
+		setX(getX() + x);
+		setY(getY() + y);
 	}
 	
 	public boolean contains(double x, double y) {
-		return getBounds().contains(x,y);
+		return getBounds().contains(x, y);
 	}
 	
 	public boolean intersects(Entity other) {
@@ -220,6 +245,7 @@ public abstract class Entity implements Element {
 	
 	/**
 	 * Called by the parent a set number of times a second.
+	 * 
 	 * @param deltaTime The time passed since the last call to it.
 	 */
 	@Override
@@ -227,6 +253,7 @@ public abstract class Entity implements Element {
 	
 	/**
 	 * Called by the parent a set number of times a second.
+	 * 
 	 * @param g The Graphics context to draw to the screen.
 	 */
 	@Override

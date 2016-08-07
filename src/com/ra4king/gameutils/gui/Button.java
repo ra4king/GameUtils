@@ -165,7 +165,8 @@ public class Button extends Widget {
 	/**
 	 * Calls MenuItem's setWidth method and recalculates all the coordinates. This also sets useTextWidth to false.
 	 */
-	public void setWidth(int width) {
+	@Override
+	public void setWidth(double width) {
 		super.setWidth(width);
 		useTextWidth(false);
 		recalcCoords();
@@ -174,7 +175,8 @@ public class Button extends Widget {
 	/**
 	 * Calls MenuItem's setHeight method and recalculates all the coordinates. This also sets useTextHeight to false.
 	 */
-	public void setHeight(int height) {
+	@Override
+	public void setHeight(double height) {
 		super.setHeight(height);
 		useTextHeight(false);
 		recalcCoords();
