@@ -408,16 +408,16 @@ public class GameWorld extends BasicScreen {
 	}
 	
 	/**
-	 * A list of all Entities at the specified z-index.
+	 * A list of all Entities at the specified z-index. This is a copy. Modifying this will not affect the internal list
 	 * @param zindex The z-index.
 	 * @return A list of all Entities at the specified z-index.
 	 */
-	public ArrayList<Entity> getEntitiesAt(int zindex) {
-		return entities.get(zindex);
+	public List<Entity> getEntitiesAt(int zindex) {
+		return entities.get(zindex).stream().collect(Collectors.toList());
 	}
 	
 	/**
-	 * A list of all Entities in this entire world.
+	 * A list of all Entities in this entire world. This is a copy. Modifying this will not affect the internal list.
 	 * @return A list of all Entities in this world in z-index order.
 	 */
 	public List<Entity> getEntities() {
